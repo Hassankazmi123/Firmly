@@ -87,7 +87,16 @@ const FeedbackSteps = () => {
   }, [showCompletionModal]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#f5f5f5] rounded-2xl">
+    <div
+      className="relative h-full w-full overflow-hidden rounded-2xl"
+      style={{
+        background: currentStep < 5
+          ? '#378c78'
+          : currentStep >= 5 && currentStep <= 10
+            ? '#4299ca'
+            : currentStep >=10 && currentStep <= 14 ? '#855cc9' : currentStep >=14 && currentStep <=17 ? '#cc66a9': currentStep >=17 && currentStep <=20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
+      }}
+    >
       <img
         src="/assets/images/dashboard/feedbacktop.webp"
         alt="dashboard top background"
@@ -96,15 +105,22 @@ const FeedbackSteps = () => {
       <div className="relative z-20 h-full flex flex-col">
         <div className="relative px-4 lg:px-0 lg:py-6 py-4">
           <div className="flex items-center max-w-5xl mx-auto gap-2 sm:gap-3">
-            <div className="relative flex items-center justify-between bg-[#f2f2f2] shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0">
+            <div
+              className="relative flex items-center justify-between bg-[#f2f2f2] shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0"
+              style={{ background: currentStep < 5 ? '#479583' : currentStep >= 5 && currentStep <= 10 ? '#51a1ce' : currentStep >=10 && currentStep <= 14 ? '#8f69cd' : currentStep >=14 && currentStep <=17 ? '#d072b0': currentStep >=17 && currentStep <=20 ? '#ca7662' : currentStep >= 20 && currentStep <= 25 ? '#51a1ce' : '#8c8c8c' }}
+            >
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${
-                  currentStep === 0
+                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${currentStep === 0
                     ? "bg-[#ebebeb] text-[#3D3D3D]/60 cursor-not-allowed"
                     : "bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
-                }`}
+                  }`}
+                // style={
+                //   currentStep !== 0 && currentStep < 5
+                //     ? { background: '#90bfb4', color: '#FFFFFF' }
+                //     : undefined
+                // }
               >
                 <svg
                   className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0"
@@ -123,7 +139,7 @@ const FeedbackSteps = () => {
                   Previous
                 </span>
               </button>
-              <div className="absolute left-1/2 -translate-x-1/2 text-xs sm:text-sm md:text-base lg:text-lg text-[#3D3D3D]/80 font-inter font-medium whitespace-nowrap px-1">
+              <div className="absolute left-1/2 -translate-x-1/2 text-xs sm:text-sm md:text-base lg:text-lg text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
                 {currentStep + 1} of {questions.length}
               </div>
               <div className="flex items-center flex-shrink-0">
@@ -159,7 +175,7 @@ const FeedbackSteps = () => {
             </div>
             <button
               onClick={handleExit}
-              className="flex-shrink-0 border border-[#e6e6e6] px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-transparent text-[#3D3D3D] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base whitespace-nowrap"
+              className="flex-shrink-0 border border-[#e6e6e6] px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-transparent text-[#FFF] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base whitespace-nowrap"
             >
               Exit
             </button>
@@ -167,11 +183,14 @@ const FeedbackSteps = () => {
         </div>
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 pb-8 sm:pb-12">
           <div className="w-full max-w-5xl">
-            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-cormorant font-bold text-black text-center mb-10 sm:mb-16 md:mb-20 leading-tight px-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-cormorant font-bold text-white text-center mb-10 sm:mb-16 md:mb-20 leading-tight px-4">
               {questions[currentStep]}
             </h2>
             <div className="relative px-4 lg:px-0 overflow-visible">
-              <div className="relative p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.5rem+1.5rem)] pr-[calc(0.5rem+1.5rem)] sm:pl-[calc(0.5rem+2.5rem)] sm:pr-[calc(0.5rem+2.5rem)] md:pl-[calc(0.5rem+3.5rem)] md:pr-[calc(0.5rem+3.5rem)]">
+              <div
+                className="relative p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.5rem+1.5rem)] pr-[calc(0.5rem+1.5rem)] sm:pl-[calc(0.5rem+2.5rem)] sm:pr-[calc(0.5rem+2.5rem)] md:pl-[calc(0.5rem+3.5rem)] md:pr-[calc(0.5rem+3.5rem)]"
+                style={{ background: currentStep < 5 ? '#579e8e' : currentStep >= 5 && currentStep <= 10 ? '#60a9d3' : currentStep >=10 && currentStep <= 14 ? '#9976d2' : currentStep >=14 && currentStep <=17 ? '#d47fb7': currentStep >=17 && currentStep <=20 ? '#ce8270' : currentStep >= 20 && currentStep <= 25 ? '#60a9d3' : '#9c9c9c' }}
+              >
                 <div className="absolute inset-0 flex items-center overflow-visible">
                   {[0, 1, 2, 3, 4, 5, 6].map((point) => {
                     const posPercent = (point / 6) * 100;
@@ -184,7 +203,7 @@ const FeedbackSteps = () => {
                           e.preventDefault();
                           handleSliderChange(point);
                         }}
-                        className="w-1.5 h-1.5 lg:w-2.5 lg:h-2.5 rounded-full bg-[#6664D3] z-50 cursor-pointer hover:scale-125 transition-transform flex items-center justify-center touch-manipulation relative"
+                        className="w-1.5 h-1.5 lg:w-2.5 lg:h-2.5 rounded-full bg-[#FFF] z-50 cursor-pointer hover:scale-125 transition-transform flex items-center justify-center touch-manipulation relative"
                         style={{
                           position: "absolute",
                           left: `${posPercent}%`,
@@ -222,13 +241,13 @@ const FeedbackSteps = () => {
                 />
               </div>
               <div className="flex justify-between mt-8 sm:mt-12 md:mt-16 px-2">
-                <span className="text-[9px] sm:text-sm md:text-base text-[#3D3D3D]/60 font-medium font-inter">
+                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
                   Strongly Disagree
                 </span>
-                <span className="text-[9px] sm:text-sm md:text-base text-[#3D3D3D]/60 font-medium font-inter">
+                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
                   Neutral
                 </span>
-                <span className="text-[9px] sm:text-sm md:text-base text-[#3D3D3D]/60 font-medium font-inter">
+                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
                   Strongly Agree
                 </span>
               </div>
