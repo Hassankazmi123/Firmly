@@ -94,7 +94,7 @@ const FeedbackSteps = () => {
           ? '#378c78'
           : currentStep >= 5 && currentStep <= 10
             ? '#4299ca'
-            : currentStep >=10 && currentStep <= 14 ? '#855cc9' : currentStep >=14 && currentStep <=17 ? '#cc66a9': currentStep >=17 && currentStep <=20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
+            : currentStep >= 10 && currentStep <= 14 ? '#855cc9' : currentStep >= 14 && currentStep <= 17 ? '#cc66a9' : currentStep >= 17 && currentStep <= 20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
       }}
     >
       <img
@@ -107,20 +107,22 @@ const FeedbackSteps = () => {
           <div className="flex items-center max-w-5xl mx-auto gap-2 sm:gap-3">
             <div
               className="relative flex items-center justify-between bg-[#f2f2f2] shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0"
-              style={{ background: currentStep < 5 ? '#479583' : currentStep >= 5 && currentStep <= 10 ? '#51a1ce' : currentStep >=10 && currentStep <= 14 ? '#8f69cd' : currentStep >=14 && currentStep <=17 ? '#d072b0': currentStep >=17 && currentStep <=20 ? '#ca7662' : currentStep >= 20 && currentStep <= 25 ? '#51a1ce' : '#8c8c8c' }}
+              style={{ background: currentStep < 5 ? '#479583' : currentStep >= 5 && currentStep <= 10 ? '#51a1ce' : currentStep >= 10 && currentStep <= 14 ? '#8f69cd' : currentStep >= 14 && currentStep <= 17 ? '#d072b0' : currentStep >= 17 && currentStep <= 20 ? '#ca7662' : currentStep >= 20 && currentStep <= 25 ? '#51a1ce' : '#8c8c8c' }}
             >
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
                 className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${currentStep === 0
-                    ? "bg-[#ebebeb] text-[#3D3D3D]/60 cursor-not-allowed"
-                    : "bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
+                  ? "bg-[#ebebeb] text-[#3D3D3D]/60 cursor-not-allowed"
+                  : "bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
                   }`}
-                // style={
-                //   currentStep !== 0 && currentStep < 5
-                //     ? { background: '#90bfb4', color: '#FFFFFF' }
-                //     : undefined
-                // }
+                style={{
+                  color: currentStep === 0 ? 'rgba(61, 61, 61, 0.6)' : currentStep < 5
+                    ? '#378c78'
+                    : currentStep >= 5 && currentStep <= 10
+                      ? '#4299ca'
+                      : currentStep >= 10 && currentStep <= 14 ? '#855cc9' : currentStep >= 14 && currentStep <= 17 ? '#cc66a9' : currentStep >= 17 && currentStep <= 20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
+                }}
               >
                 <svg
                   className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0"
@@ -154,6 +156,13 @@ const FeedbackSteps = () => {
                   <button
                     onClick={handleNext}
                     className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-white text-[#3D3D3D] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base shadow-sm whitespace-nowrap"
+                    style={{
+                      color: currentStep < 5
+                        ? '#378c78'
+                        : currentStep >= 5 && currentStep <= 10
+                          ? '#4299ca'
+                          : currentStep >= 10 && currentStep <= 14 ? '#855cc9' : currentStep >= 14 && currentStep <= 17 ? '#cc66a9' : currentStep >= 17 && currentStep <= 20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
+                    }}
                   >
                     <span>Next</span>
                     <svg
@@ -189,7 +198,7 @@ const FeedbackSteps = () => {
             <div className="relative px-4 lg:px-0 overflow-visible">
               <div
                 className="relative p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.5rem+1.5rem)] pr-[calc(0.5rem+1.5rem)] sm:pl-[calc(0.5rem+2.5rem)] sm:pr-[calc(0.5rem+2.5rem)] md:pl-[calc(0.5rem+3.5rem)] md:pr-[calc(0.5rem+3.5rem)]"
-                style={{ background: currentStep < 5 ? '#579e8e' : currentStep >= 5 && currentStep <= 10 ? '#60a9d3' : currentStep >=10 && currentStep <= 14 ? '#9976d2' : currentStep >=14 && currentStep <=17 ? '#d47fb7': currentStep >=17 && currentStep <=20 ? '#ce8270' : currentStep >= 20 && currentStep <= 25 ? '#60a9d3' : '#9c9c9c' }}
+                style={{ background: currentStep < 5 ? '#579e8e' : currentStep >= 5 && currentStep <= 10 ? '#60a9d3' : currentStep >= 10 && currentStep <= 14 ? '#9976d2' : currentStep >= 14 && currentStep <= 17 ? '#d47fb7' : currentStep >= 17 && currentStep <= 20 ? '#ce8270' : currentStep >= 20 && currentStep <= 25 ? '#60a9d3' : '#9c9c9c' }}
               >
                 <div className="absolute inset-0 flex items-center overflow-visible">
                   {[0, 1, 2, 3, 4, 5, 6].map((point) => {
