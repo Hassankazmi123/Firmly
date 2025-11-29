@@ -27,7 +27,18 @@ const StarIcon = () => (
 const IntroCard = ({ onNext }) => {
   return (
     <div className="w-full h-full flex items-center justify-center px-6">
-      <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-3xl p-10 text-center drop-shadow-lg max-w-2xl w-full">
+      <div className="relative bg-white/10 backdrop-blur-md border border-white/10 rounded-3xl p-10 text-center drop-shadow-lg max-w-2xl w-full">
+        {/* top-right child decoration */}
+        <img
+          src="/assets/images/onboarding/Child_Div_Topright.webp"
+          alt="decoration top right"
+          className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 pointer-events-none z-20"
+        />
+        <img
+          src="/assets/images/onboarding/Child_Div_Bottomleft.webp"
+          alt="decoration bottom left"
+          className="absolute bottom-0 left-0 w-32 h-32 sm:w-40 sm:h-40 pointer-events-none z-20"
+        />
         <div className="flex flex-col items-center gap-6">
           <StarIcon />
 

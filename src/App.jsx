@@ -6,6 +6,7 @@ import Onboarding from "./pages/Onboarding";
 import NormalChat from "./pages/NormalChat";
 import SafeSpaceChat from "./pages/SafeSpaceChat";
 import Feedback from "./pages/Feedback";
+import DiagnosticModal from "./components/DiagnosticComponents/DiagnosticModal";
 function App() {
   return (
     <Router>
@@ -20,6 +21,8 @@ function App() {
         <Route path="/dashboard/normal-chat" element={<NormalChat />} />
         <Route path="/dashboard/safe-space-chat" element={<SafeSpaceChat />} />
         <Route path="/dashboard/feedback" element={<Feedback />} />
+        <Route path="/diagnostic" element={<DiagnosticModal />} />
+        <Route path="/diagnostic/completed" element={<DiagnosticModal />} />
       </Routes>
     </Router>
   );

@@ -34,7 +34,62 @@ const FeedbackSteps = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState([3, 3, 3, 3]);
-  const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  // Color scheme function based on current step
+  const getColorScheme = (step) => {
+    if (step < 5) {
+      return {
+        background: '#378c78',
+        button: '#479583',
+        slider: '#579e8e',
+        text: '#378c78'
+      };
+    } else if (step >= 5 && step <= 10) {
+      return {
+        background: '#4299ca',
+        button: '#51a1ce',
+        slider: '#60a9d3',
+        text: '#4299ca'
+      };
+    } else if (step >= 11 && step <= 14) {
+      return {
+        background: '#855cc9',
+        button: '#8f69cd',
+        slider: '#9976d2',
+        text: '#855cc9'
+      };
+    } else if (step >= 15 && step <= 17) {
+      return {
+        background: '#cc66a9',
+        button: '#d072b0',
+        slider: '#d47fb7',
+        text: '#cc66a9'
+      };
+    } else if (step >= 18 && step <= 20) {
+      return {
+        background: '#c56a55',
+        button: '#ca7662',
+        slider: '#ce8270',
+        text: '#c56a55'
+      };
+    } else if (step >= 21 && step <= 25) {
+      return {
+        background: '#4299ca',
+        button: '#51a1ce',
+        slider: '#60a9d3',
+        text: '#4299ca'
+      };
+    } else {
+      return {
+        background: '#7a7a7a',
+        button: '#8c8c8c',
+        slider: '#9c9c9c',
+        text: '#7a7a7a'
+      };
+    }
+  };
+
+  const colors = getColorScheme(currentStep);
 
   const handleSliderChange = (value) => {
     const newResponses = [...responses];
@@ -57,7 +112,8 @@ const FeedbackSteps = () => {
   };
 
   const handleFinish = () => {
-    setShowCompletionModal(true);
+    // Navigate to the Diagnostic component in "completed" mode
+    navigate("/diagnostic/completed");
   };
 
   const handleGoToDashboard = () => {
@@ -68,34 +124,12 @@ const FeedbackSteps = () => {
     navigate("/dashboard");
   };
 
-  useEffect(() => {
-    if (showCompletionModal) {
-      const scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      document.body.style.overflow = "hidden";
-
-      return () => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        document.body.style.overflow = "";
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [showCompletionModal]);
+  // No local completion modal — Finish navigates to Diagnostic completed view
 
   return (
     <div
       className="relative h-full w-full overflow-hidden rounded-2xl"
-      style={{
-        background: currentStep < 5
-          ? '#378c78'
-          : currentStep >= 5 && currentStep <= 10
-            ? '#4299ca'
-            : currentStep >= 10 && currentStep <= 14 ? '#855cc9' : currentStep >= 14 && currentStep <= 17 ? '#cc66a9' : currentStep >= 17 && currentStep <= 20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
-      }}
+      style={{ background: colors.background }}
     >
       <img
         src="/assets/images/dashboard/feedbacktop.webp"
@@ -106,22 +140,28 @@ const FeedbackSteps = () => {
         <div className="relative px-4 lg:px-0 lg:py-6 py-4">
           <div className="flex items-center max-w-5xl mx-auto gap-2 sm:gap-3">
             <div
-              className="relative flex items-center justify-between bg-[#f2f2f2] shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0"
-              style={{ background: currentStep < 5 ? '#479583' : currentStep >= 5 && currentStep <= 10 ? '#51a1ce' : currentStep >= 10 && currentStep <= 14 ? '#8f69cd' : currentStep >= 14 && currentStep <= 17 ? '#d072b0' : currentStep >= 17 && currentStep <= 20 ? '#ca7662' : currentStep >= 20 && currentStep <= 25 ? '#51a1ce' : '#8c8c8c' }}
+              className="relative flex items-center justify-between shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0 overflow-hidden"
+              style={{ background: colors.button }}
             >
+              {/* Background Progress Bar */}
+              <div className="absolute inset-0 bg-white/10 rounded-xl sm:rounded-2xl">
+                <div 
+                  className="h-full bg-white/20 transition-all duration-300 ease-out"
+                  style={{ 
+                    width: `${((currentStep + 1) / questions.length) * 100}%`
+                  }}
+                />
+              </div>
+
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${currentStep === 0
+                className={`relative z-10 flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${currentStep === 0
                   ? "bg-[#ebebeb] text-[#3D3D3D]/60 cursor-not-allowed"
                   : "bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
                   }`}
                 style={{
-                  color: currentStep === 0 ? 'rgba(61, 61, 61, 0.6)' : currentStep < 5
-                    ? '#378c78'
-                    : currentStep >= 5 && currentStep <= 10
-                      ? '#4299ca'
-                      : currentStep >= 10 && currentStep <= 14 ? '#855cc9' : currentStep >= 14 && currentStep <= 17 ? '#cc66a9' : currentStep >= 17 && currentStep <= 20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
+                  color: currentStep === 0 ? 'rgba(61, 61, 61, 0.6)' : colors.text
                 }}
               >
                 <svg
@@ -141,10 +181,12 @@ const FeedbackSteps = () => {
                   Previous
                 </span>
               </button>
-              <div className="absolute left-1/2 -translate-x-1/2 text-xs sm:text-sm md:text-base lg:text-lg text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
+              
+              <div className="relative z-10 text-xs sm:text-sm md:text-base lg:text-lg text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
                 {currentStep + 1} of {questions.length}
               </div>
-              <div className="flex items-center flex-shrink-0">
+              
+              <div className="relative z-10 flex items-center flex-shrink-0">
                 {currentStep === questions.length - 1 ? (
                   <button
                     onClick={handleFinish}
@@ -156,13 +198,7 @@ const FeedbackSteps = () => {
                   <button
                     onClick={handleNext}
                     className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-white text-[#3D3D3D] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base shadow-sm whitespace-nowrap"
-                    style={{
-                      color: currentStep < 5
-                        ? '#378c78'
-                        : currentStep >= 5 && currentStep <= 10
-                          ? '#4299ca'
-                          : currentStep >= 10 && currentStep <= 14 ? '#855cc9' : currentStep >= 14 && currentStep <= 17 ? '#cc66a9' : currentStep >= 17 && currentStep <= 20 ? '#c56a55' : currentStep >= 20 && currentStep <= 25 ? '#4299ca' : '#7a7a7a'
-                    }}
+                    style={{ color: colors.text }}
                   >
                     <span>Next</span>
                     <svg
@@ -182,12 +218,6 @@ const FeedbackSteps = () => {
                 )}
               </div>
             </div>
-            <button
-              onClick={handleExit}
-              className="flex-shrink-0 border border-[#e6e6e6] px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-transparent text-[#FFF] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base whitespace-nowrap"
-            >
-              Exit
-            </button>
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 pb-8 sm:pb-12">
@@ -198,7 +228,7 @@ const FeedbackSteps = () => {
             <div className="relative px-4 lg:px-0 overflow-visible">
               <div
                 className="relative p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.5rem+1.5rem)] pr-[calc(0.5rem+1.5rem)] sm:pl-[calc(0.5rem+2.5rem)] sm:pr-[calc(0.5rem+2.5rem)] md:pl-[calc(0.5rem+3.5rem)] md:pr-[calc(0.5rem+3.5rem)]"
-                style={{ background: currentStep < 5 ? '#579e8e' : currentStep >= 5 && currentStep <= 10 ? '#60a9d3' : currentStep >= 10 && currentStep <= 14 ? '#9976d2' : currentStep >= 14 && currentStep <= 17 ? '#d47fb7' : currentStep >= 17 && currentStep <= 20 ? '#ce8270' : currentStep >= 20 && currentStep <= 25 ? '#60a9d3' : '#9c9c9c' }}
+                style={{ background: colors.slider }}
               >
                 <div className="absolute inset-0 flex items-center overflow-visible">
                   {[0, 1, 2, 3, 4, 5, 6].map((point) => {
@@ -269,39 +299,6 @@ const FeedbackSteps = () => {
         alt="dashboard bottom background"
         className="absolute bottom-0 right-0 lg:w-[613px] w-[350px] z-0 lg:h-[515px] h-[250px] object-cover object-bottom pointer-events-none"
       />
-      {showCompletionModal && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-[299] backdrop-blur-sm"></div>
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-6 sm:p-8 md:p-10 relative">
-              <div className="flex justify-center mb-4 sm:mb-6">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#6664D3] rounded-full flex items-center justify-center">
-                  <img
-                    src="/assets/images/dashboard/helpbtn.webp"
-                    alt="action icon"
-                    className="h-8 w-8 sm:h-12 sm:w-12 transition-transform duration-300 group-hover:scale-110"
-                  />
-                </div>
-              </div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-cormorant font-bold text-black text-center mb-4 sm:mb-6">
-                Great work today!
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg text-black/50 text-center mb-6 sm:mb-8 md:mb-10 font-inter leading-relaxed">
-                Our session is now concluded. Remember, I'm here whenever you
-                need support on your leadership journey.
-              </p>
-              <div className="flex justify-center">
-                <button
-                  onClick={handleGoToDashboard}
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3  bg-[#3D3D3D]  text-[#F5F5F5] rounded-2xl font-inter font-medium text-sm sm:text-base md:text-lg transition-colors active:scale-95"
-                >
-                  Go to Dashboard
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

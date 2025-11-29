@@ -1,6 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const AccountCreatedModal = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+
+  const handleContinue = () => {
+    onClose();
+    navigate("/diagnostic");
+  };
   if (!isOpen) return null;
 
   return (
@@ -39,7 +46,7 @@ const AccountCreatedModal = ({ isOpen, onClose }) => {
 
         {/* Button */}
         <button
-          onClick={onClose}
+          onClick={handleContinue}
           className="bg-[#374151] text-white px-8 py-3 rounded-full font-medium hover:bg-[#4B5563] transition-colors font-inter"
         >
           Continue
