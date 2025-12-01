@@ -2,17 +2,94 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const questions = [
-  "I now understand better what empathy is as a leadership skill",
-  "I now have resources, tools, and frameworks to develop my empathy as a leadership skill",
-  "I now feel more confident about developing an empathetic leadership style",
-  "I now plan to develop empathy as a skill in my career",
+  "I tend to think about what I'll be doing a year from now.",
+  "I frequently plan for the future.",
+  "I frequently think about my job or career goals.",
+  "When I have an important goal, I develop a plan to achieve it.",
+  "I take the time to make a plan to help me reach my goals.",
+  "I struggle to move on from setbacks at works.",
+  "I generally figure out a way to manage challenges at work.",
+  "I can handle tough times at work because I've dealt with challenges in the past.",
+  "I usually bounce back quickly from difficult situations at work.",
+  "I usually manage tough times at work without much difficulty.",
+  "I tend to take a while to recover from setbacks at work.",
+  "Before criticizing someone at work, I make an effort to consider how I would experience the situation from their perspective.",
+  "I don't spend much time listening to opposing views as work if I am confident that I'm right about somethings. (reverse scoring)",
+  "I believe there are always multiple perspectives to consider at work and strive to see every side of an issue",
+  "I make an effort o understand everyone's point of view in a disagreement at work before making a decision.",
+  " I sometimes feel like I fit in at work, and other times I don't.",
+  "When something negative occurs at work, I question if I truly belong.",
+  "When something positive happens at work, I feel a strong sense of belonging. (reverse scoring)",
+  "There is alignment between my works and my personal values, beliefs, and behaviors.",
+  "I derive a sense of meaning or purpose from my work.",
+  "My work contributes to my sense of personal mission in life.",
+  "I know I can achieve most of the work goals I set for myself.",
+  "I think I can achieve outcomes that are important to me.",
+  "I believe I can succeed in anything I set my mind to.",
+  "I am confident in my ability to perform task at work effectively.",
+  "I am capable of doing most tasks very well compared to others.",
 ];
 
-const FeedbackSteps = () => {
+const DiagnosticSteps = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState([3, 3, 3, 3]);
-  const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  // Color scheme function based on current step
+  const getColorScheme = (step) => {
+    if (step < 5) {
+      return {
+        background: "#378c78",
+        button: "#479583",
+        slider: "#579e8e",
+        text: "#378c78",
+      };
+    } else if (step >= 5 && step <= 10) {
+      return {
+        background: "#4299ca",
+        button: "#51a1ce",
+        slider: "#60a9d3",
+        text: "#4299ca",
+      };
+    } else if (step >= 11 && step <= 14) {
+      return {
+        background: "#855cc9",
+        button: "#8f69cd",
+        slider: "#9976d2",
+        text: "#855cc9",
+      };
+    } else if (step >= 15 && step <= 17) {
+      return {
+        background: "#cc66a9",
+        button: "#d072b0",
+        slider: "#d47fb7",
+        text: "#cc66a9",
+      };
+    } else if (step >= 18 && step <= 20) {
+      return {
+        background: "#c56a55",
+        button: "#ca7662",
+        slider: "#ce8270",
+        text: "#c56a55",
+      };
+    } else if (step >= 21 && step <= 25) {
+      return {
+        background: "#4299ca",
+        button: "#51a1ce",
+        slider: "#60a9d3",
+        text: "#4299ca",
+      };
+    } else {
+      return {
+        background: "#7a7a7a",
+        button: "#8c8c8c",
+        slider: "#9c9c9c",
+        text: "#7a7a7a",
+      };
+    }
+  };
+
+  const colors = getColorScheme(currentStep);
 
   const handleSliderChange = (value) => {
     const newResponses = [...responses];
@@ -35,7 +112,8 @@ const FeedbackSteps = () => {
   };
 
   const handleFinish = () => {
-    setShowCompletionModal(true);
+    // Navigate to the Diagnostic component in "completed" mode
+    navigate("/diagnostic/completed");
   };
 
   const handleGoToDashboard = () => {
@@ -46,26 +124,13 @@ const FeedbackSteps = () => {
     navigate("/dashboard");
   };
 
-  useEffect(() => {
-    if (showCompletionModal) {
-      const scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      document.body.style.overflow = "hidden";
-
-      return () => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        document.body.style.overflow = "";
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [showCompletionModal]);
+  // No local completion modal — Finish navigates to Diagnostic completed view
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#f5f5f5] rounded-2xl">
+    <div
+      className="relative h-full w-full overflow-hidden"
+      style={{ background: colors.background }}
+    >
       <img
         src="/assets/images/dashboard/feedbacktop.webp"
         alt="dashboard top background"
@@ -74,15 +139,32 @@ const FeedbackSteps = () => {
       <div className="relative z-20 h-full flex flex-col">
         <div className="relative px-4 lg:px-0 lg:py-6 py-4">
           <div className="flex items-center max-w-5xl mx-auto gap-2 sm:gap-3">
-            <div className="relative flex items-center justify-between bg-[#f2f2f2] shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0">
+            <div
+              className="relative flex items-center justify-between shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0 overflow-hidden"
+              style={{ background: colors.button }}
+            >
+              {/* Background Progress Bar */}
+              <div className="absolute inset-0 bg-white/10 rounded-xl sm:rounded-2xl">
+                <div
+                  className="h-full bg-white/20 transition-all duration-300 ease-out"
+                  style={{
+                    width: `${((currentStep + 1) / questions.length) * 100}%`,
+                  }}
+                />
+              </div>
+
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${
+                className={`relative z-10 flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${
                   currentStep === 0
                     ? "bg-[#ebebeb] text-[#3D3D3D]/60 cursor-not-allowed"
                     : "bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
                 }`}
+                style={{
+                  color:
+                    currentStep === 0 ? "rgba(61, 61, 61, 0.6)" : colors.text,
+                }}
               >
                 <svg
                   className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0"
@@ -101,10 +183,12 @@ const FeedbackSteps = () => {
                   Previous
                 </span>
               </button>
-              <div className="absolute left-1/2 -translate-x-1/2 text-xs sm:text-sm md:text-base lg:text-lg text-[#3D3D3D]/80 font-inter font-medium whitespace-nowrap px-1">
+
+              <div className="relative z-10 text-xs sm:text-sm md:text-base lg:text-lg text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
                 {currentStep + 1} of {questions.length}
               </div>
-              <div className="flex items-center flex-shrink-0">
+
+              <div className="relative z-10 flex items-center flex-shrink-0">
                 {currentStep === questions.length - 1 ? (
                   <button
                     onClick={handleFinish}
@@ -116,6 +200,7 @@ const FeedbackSteps = () => {
                   <button
                     onClick={handleNext}
                     className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-white text-[#3D3D3D] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base shadow-sm whitespace-nowrap"
+                    style={{ color: colors.text }}
                   >
                     <span>Next</span>
                     <svg
@@ -135,21 +220,18 @@ const FeedbackSteps = () => {
                 )}
               </div>
             </div>
-            <button
-              onClick={handleExit}
-              className="flex-shrink-0 border border-[#e6e6e6] px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-transparent text-[#3D3D3D] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base whitespace-nowrap"
-            >
-              Exit
-            </button>
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 pb-8 sm:pb-12">
           <div className="w-full max-w-5xl">
-            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-cormorant font-bold text-black text-center mb-10 sm:mb-16 md:mb-20 leading-tight px-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-cormorant font-bold text-white text-center mb-10 sm:mb-16 md:mb-20 leading-tight px-4">
               {questions[currentStep]}
             </h2>
             <div className="relative px-4 lg:px-0 overflow-visible">
-              <div className="relative p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.5rem+1.5rem)] pr-[calc(0.5rem+1.5rem)] sm:pl-[calc(0.5rem+2.5rem)] sm:pr-[calc(0.5rem+2.5rem)] md:pl-[calc(0.5rem+3.5rem)] md:pr-[calc(0.5rem+3.5rem)]">
+              <div
+                className="relative p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.5rem+1.5rem)] pr-[calc(0.5rem+1.5rem)] sm:pl-[calc(0.5rem+2.5rem)] sm:pr-[calc(0.5rem+2.5rem)] md:pl-[calc(0.5rem+3.5rem)] md:pr-[calc(0.5rem+3.5rem)]"
+                style={{ background: colors.slider }}
+              >
                 <div className="absolute inset-0 flex items-center overflow-visible">
                   {[0, 1, 2, 3, 4, 5, 6].map((point) => {
                     const posPercent = (point / 6) * 100;
@@ -162,7 +244,7 @@ const FeedbackSteps = () => {
                           e.preventDefault();
                           handleSliderChange(point);
                         }}
-                        className="w-1.5 h-1.5 lg:w-2.5 lg:h-2.5 rounded-full bg-[#6664D3] z-50 cursor-pointer hover:scale-125 transition-transform flex items-center justify-center touch-manipulation relative"
+                        className="w-1.5 h-1.5 lg:w-2.5 lg:h-2.5 rounded-full bg-[#FFF] z-50 cursor-pointer hover:scale-125 transition-transform flex items-center justify-center touch-manipulation relative"
                         style={{
                           position: "absolute",
                           left: `${posPercent}%`,
@@ -200,13 +282,13 @@ const FeedbackSteps = () => {
                 />
               </div>
               <div className="flex justify-between mt-8 sm:mt-12 md:mt-16 px-2">
-                <span className="text-[9px] sm:text-sm md:text-base text-[#3D3D3D]/60 font-medium font-inter">
+                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
                   Strongly Disagree
                 </span>
-                <span className="text-[9px] sm:text-sm md:text-base text-[#3D3D3D]/60 font-medium font-inter">
+                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
                   Neutral
                 </span>
-                <span className="text-[9px] sm:text-sm md:text-base text-[#3D3D3D]/60 font-medium font-inter">
+                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
                   Strongly Agree
                 </span>
               </div>
@@ -219,41 +301,8 @@ const FeedbackSteps = () => {
         alt="dashboard bottom background"
         className="absolute bottom-0 right-0 lg:w-[613px] w-[350px] z-0 lg:h-[515px] h-[250px] object-cover object-bottom pointer-events-none"
       />
-      {showCompletionModal && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-[299] backdrop-blur-sm"></div>
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-6 sm:p-8 md:p-10 relative">
-              <div className="flex justify-center mb-4 sm:mb-6">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#6664D3] rounded-full flex items-center justify-center">
-                  <img
-                    src="/assets/images/dashboard/helpbtn.webp"
-                    alt="action icon"
-                    className="h-8 w-8 sm:h-12 sm:w-12 transition-transform duration-300 group-hover:scale-110"
-                  />
-                </div>
-              </div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-cormorant font-bold text-black text-center mb-4 sm:mb-6">
-                Great work today!
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg text-black/50 text-center mb-6 sm:mb-8 md:mb-10 font-inter leading-relaxed">
-                Our session is now concluded. Remember, I'm here whenever you
-                need support on your leadership journey.
-              </p>
-              <div className="flex justify-center">
-                <button
-                  onClick={handleGoToDashboard}
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3  bg-[#3D3D3D]  text-[#F5F5F5] rounded-2xl font-inter font-medium text-sm sm:text-base md:text-lg transition-colors active:scale-95"
-                >
-                  Go to Dashboard
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };
 
-export default FeedbackSteps;
+export default DiagnosticSteps;
