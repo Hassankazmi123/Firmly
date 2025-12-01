@@ -2,7 +2,15 @@ import React from "react";
 
 const OnboardingLayout = ({ children }) => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-[#6b4bff] to-[#7a5bff] relative overflow-hidden flex flex-col items-center justify-start pb-12">
+     <div className="min-h-screen w-full relative overflow-hidden flex flex-col items-center justify-start pb-12 border-[16px] border-[#6664d3]" style={{ backgroundColor: '#7472d6' }}>
+      {/* Background image layered over the gradient but behind corners/content */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <img
+          src="/assets/images/onboarding/background_Onboarding.webp"
+          alt="onboarding background"
+          className="w-full h-full object-cover opacity-60"
+        />
+      </div>
       <div className="absolute top-0 left-0 pointer-events-none z-10">
         <img
           src="/assets/images/onboarding/Top_Left_Corner.webp"
