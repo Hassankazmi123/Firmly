@@ -516,6 +516,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
       top: top + "px",
       left: left + "px",
       width: modalWidth + "px",
+      height: modalHeight + "px",
       maxHeight: modalHeight + "px",
       zIndex: 9999,
     };
@@ -583,55 +584,57 @@ const GuidedWalkthrough = ({ onComplete }) => {
 
       <div
         style={modalStyle}
-        className="bg-white  shadow-2xl p-4 sm:p-5 lg:p-6 z-[9999] overflow-y-auto"
+        className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl z-[9999] overflow-hidden flex flex-col"
       >
-        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 font-cormorant leading-tight">
-          {currentStepData.title}
-        </h2>
-        <div className="space-y-2 sm:space-y-2.5 lg:space-y-3 mb-4 sm:mb-5 lg:mb-6">
-          {currentStepData.content.map((paragraph, index) => (
-            <p
-              key={index}
-              className="text-xs sm:text-sm lg:text-base text-black/40 leading-relaxed font-inter"
-            >
-              {currentStep === 0 ? (
-                <>
-                  <span className="inline-block w-1 h-1 sm:w-1.5 sm:h-1.5 bg-gray-700 rounded-full mr-2 align-middle"></span>
-                  {paragraph}
-                </>
-              ) : (
-                paragraph
-              )}
-            </p>
-          ))}
-        </div>
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-          <span className="text-xs sm:text-sm text-[#4299CA] font-inter font-medium">
-            {currentStep + 1}/{steps.length}
-          </span>
-          <button
-            onClick={handleNext}
-            className="bg-[#3D3D3D] hover:bg-[#2D2D2D] active:bg-[#1D1D1D] text-white px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base font-medium transition-all duration-200 font-inter flex items-center space-x-1 sm:space-x-1.5 lg:space-x-2 shadow-md hover:shadow-lg"
-          >
-            <span>
-              {currentStep === steps.length - 1 ? "Let's go" : "Next"}
-            </span>
-            {currentStep < steps.length - 1 && (
-              <svg
-                className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        <div className="p-4 sm:p-5 lg:p-6 overflow-y-auto flex-1">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 font-cormorant leading-tight">
+            {currentStepData.title}
+          </h2>
+          <div className="space-y-2 sm:space-y-2.5 lg:space-y-3 mb-4 sm:mb-5 lg:mb-6">
+            {currentStepData.content.map((paragraph, index) => (
+              <p
+                key={index}
+                className="text-xs sm:text-sm lg:text-base text-black/40 leading-relaxed font-inter"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            )}
-          </button>
+                {currentStep === 0 ? (
+                  <>
+                    <span className="inline-block w-1 h-1 sm:w-1.5 sm:h-1.5 bg-gray-700 rounded-full mr-2 align-middle"></span>
+                    {paragraph}
+                  </>
+                ) : (
+                  paragraph
+                )}
+              </p>
+            ))}
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+            <span className="text-xs sm:text-sm text-[#4299CA] font-inter font-medium">
+              {currentStep + 1}/{steps.length}
+            </span>
+            <button
+              onClick={handleNext}
+              className="bg-[#3D3D3D] hover:bg-[#2D2D2D] active:bg-[#1D1D1D] text-white px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base font-medium transition-all duration-200 font-inter flex items-center space-x-1 sm:space-x-1.5 lg:space-x-2 shadow-md hover:shadow-lg"
+            >
+              <span>
+                {currentStep === steps.length - 1 ? "Let's go" : "Next"}
+              </span>
+              {currentStep < steps.length - 1 && (
+                <svg
+                  className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </div>
       <DiagnosticDebriefModal
