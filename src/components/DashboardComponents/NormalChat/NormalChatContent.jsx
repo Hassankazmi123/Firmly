@@ -81,7 +81,7 @@ const NormalChatContent = ({ messages = [], isTyping = false }) => {
             Ask about
           </button>
         </div>
-        <div className="flex flex-col gap-2 md:gap-3 max-w-2xl mx-auto">
+        <div className="flex flex-col gap-2 md:gap-3 max-w-2xl mx-auto pb-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
             {suggestedTopics.slice(0, 4).map((topic, index) => (
               <button

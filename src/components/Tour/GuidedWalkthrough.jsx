@@ -99,7 +99,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
       return;
     }
 
-    const delay = Math.random() * 2000 + 3000;
+    const delay = 1000;
     const timer = setTimeout(() => {
       // Mark as seen immediately when walkthrough starts
       // This prevents it from showing again on refresh or tab switch
