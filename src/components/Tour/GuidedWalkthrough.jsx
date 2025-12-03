@@ -583,7 +583,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
 
       <div
         style={modalStyle}
-        className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl p-4 sm:p-5 lg:p-6 z-[9999] overflow-y-auto"
+        className="bg-white  shadow-2xl p-4 sm:p-5 lg:p-6 z-[9999] overflow-y-auto"
       >
         <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 font-cormorant leading-tight">
           {currentStepData.title}
