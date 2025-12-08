@@ -131,7 +131,7 @@ const NotificationPopup = ({ isOpen, onClose }) => {
               </div>
             </div>
           </div>
-          <div className="lg:max-h-[380px] md:max-h-[450px] 2xl:max-h-[600px] xl:max-h-[500px]  overflow-y-auto bg-white">
+          <div className="lg:max-h-[380px] md:max-h-[450px] 2xl:max-h-[600px] xl:max-h-[500px] max-h-[400px]  overflow-y-auto bg-white">
             {notifications.map((notification, index) => (
               <div key={notification.id}>
                 <div className="px-4 py-4 hover:bg-gray-50 transition-colors">
