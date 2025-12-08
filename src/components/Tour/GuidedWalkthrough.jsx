@@ -99,8 +99,24 @@ const GuidedWalkthrough = ({ onComplete }) => {
       return;
     }
 
+    // Check if screen is mobile (width < 640px) - hide walkthrough on mobile
+    const checkMobile = () => {
+      return window.innerWidth < 640;
+    };
+
+    // If mobile, mark as completed and don't show walkthrough
+    if (checkMobile()) {
+      markWalkthroughCompleted();
+      return;
+    }
+
     const delay = 1000;
     const timer = setTimeout(() => {
+      // Double-check mobile before activating (in case of resize)
+      if (checkMobile()) {
+        markWalkthroughCompleted();
+        return;
+      }
       // Mark as seen immediately when walkthrough starts
       // This prevents it from showing again on refresh or tab switch
       markWalkthroughCompleted();
@@ -212,8 +228,9 @@ const GuidedWalkthrough = ({ onComplete }) => {
   };
 
   // Always render modal, even when walkthrough is not active
-  // Don't render walkthrough if not active
-  if (!isActive || currentStep === -1) {
+  // Don't render walkthrough if not active or on mobile screen
+  const isMobileScreen = windowSize.width < 640;
+  if (!isActive || currentStep === -1 || isMobileScreen) {
     return (
       <>
         <DiagnosticDebriefModal
