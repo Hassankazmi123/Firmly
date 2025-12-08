@@ -9,7 +9,7 @@ const OnboardingLayout = ({ children }) => {
       {/* Background image layered over the gradient but behind corners/content */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <img
-          src="/assets/images/onboarding/background_Onboarding.webp"
+          src="/assets/images/onboarding/Background_Onboarding.webp"
           alt="onboarding background"
           className="w-full h-full object-cover opacity-60"
         />
