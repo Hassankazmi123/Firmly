@@ -82,20 +82,20 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50">
       <OnboardingLayout>
-        <div className="w-full h-full flex items-center justify-center px-6">
+        <div className="w-full h-full flex items-center justify-center px-4 sm:px-6">
           {/* Card */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 w-full max-w-md relative">
-            <h2 className="text-white text-2xl font-semibold font-cormorant mb-3 text-left">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl sm:rounded-3xl p-6 sm:p-8 w-full max-w-md relative">
+            <h2 className="text-white text-xl sm:text-2xl font-semibold font-cormorant mb-2 sm:mb-3 text-left">
               Welcome Back
             </h2>
 
-            <p className="text-white/80 text-sm font-inter mb-6 leading-relaxed text-left">
+            <p className="text-white/80 text-xs sm:text-sm font-inter mb-4 sm:mb-6 leading-relaxed text-left">
               Let's update your password
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <div className="text-left">
-                <label className="block text-white/80 text-sm font-inter mb-2">
+                <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
                   Password
                 </label>
                 <div className="relative">
@@ -104,13 +104,13 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Insert password"
-                    className="w-full px-4 py-3 pr-12 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm"
+                    className="w-full px-4 py-3 pr-12 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 active:scale-95 transition-all p-2"
                   >
                     {showPassword ? (
                       <svg
@@ -152,7 +152,7 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
               </div>
 
               <div className="text-left">
-                <label className="block text-white/80 text-sm font-inter mb-2">
+                <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -161,13 +161,13 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Insert password"
-                    className="w-full px-4 py-3 pr-12 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm"
+                    className="w-full px-4 py-3 pr-12 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 active:scale-95 transition-all p-2"
                   >
                     {showConfirmPassword ? (
                       <svg
@@ -209,20 +209,20 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
               </div>
 
               {error && (
-                <div className="w-full px-4 py-3 rounded-2xl bg-[#F26767] text-white text-sm font-inter text-left flex items-center gap-3">
+                <div className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl bg-[#F26767] text-white text-xs sm:text-sm font-inter text-left flex items-center gap-2 sm:gap-3">
                   <img
                     src="/assets/images/onboarding/error_icon.webp"
                     alt=""
-                    className="w-5 h-5"
+                    className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
                   />
-                  <span>{error}</span>
+                  <span className="leading-relaxed">{error}</span>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 transition-colors font-inter text-sm disabled:opacity-70 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 active:scale-95 transition-all font-inter text-sm disabled:opacity-70 flex items-center justify-center gap-2 min-h-[48px]"
               >
                 {isLoading && (
                   <span className="inline-block w-4 h-4 border-2 border-[#7C3AED]/60 border-t-transparent rounded-full animate-spin" />

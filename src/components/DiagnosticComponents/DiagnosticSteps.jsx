@@ -134,10 +134,10 @@ const DiagnosticSteps = () => {
       <img
         src="/assets/images/dashboard/feedbacktop.webp"
         alt="dashboard top background"
-        className="absolute top-0 left-0 lg:w-[613px] w-[350px] z-0 lg:h-[515px] h-[250px] object-cover object-top pointer-events-none"
+        className="absolute top-0 left-0 w-[250px] sm:w-[350px] lg:w-[613px] z-0 h-[180px] sm:h-[250px] lg:h-[515px] object-cover object-top pointer-events-none"
       />
       <div className="relative z-20 h-full flex flex-col">
-        <div className="relative px-4 lg:px-0 lg:py-6 py-4">
+        <div className="relative px-3 sm:px-4 lg:px-0 py-3 sm:py-4 lg:py-6">
           <div className="flex items-center max-w-5xl mx-auto gap-2 sm:gap-3">
             <div
               className="relative flex items-center justify-between shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0 overflow-hidden"
@@ -222,14 +222,14 @@ const DiagnosticSteps = () => {
             </div>
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 pb-8 sm:pb-12">
+        <div className="flex-1 flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-12 pb-6 sm:pb-8 md:pb-12">
           <div className="w-full max-w-5xl">
-            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-cormorant font-bold text-white text-center mb-10 sm:mb-16 md:mb-20 leading-tight px-4">
+            <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-cormorant font-bold text-white text-center mb-6 sm:mb-10 md:mb-16 lg:mb-20 leading-tight px-2 sm:px-4">
               {questions[currentStep]}
             </h2>
-            <div className="relative px-4 lg:px-0 overflow-visible">
+            <div className="relative px-2 sm:px-4 lg:px-0 overflow-visible">
               <div
-                className="relative p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.5rem+1.5rem)] pr-[calc(0.5rem+1.5rem)] sm:pl-[calc(0.5rem+2.5rem)] sm:pr-[calc(0.5rem+2.5rem)] md:pl-[calc(0.5rem+3.5rem)] md:pr-[calc(0.5rem+3.5rem)]"
+                className="relative p-1.5 sm:p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.25rem+1rem)] pr-[calc(0.25rem+1rem)] sm:pl-[calc(0.5rem+1.5rem)] sm:pr-[calc(0.5rem+1.5rem)] md:pl-[calc(0.5rem+2.5rem)] md:pr-[calc(0.5rem+2.5rem)] lg:pl-[calc(0.5rem+3.5rem)] lg:pr-[calc(0.5rem+3.5rem)]"
                 style={{ background: colors.slider }}
               >
                 <div className="absolute inset-0 flex items-center overflow-visible">
@@ -244,7 +244,7 @@ const DiagnosticSteps = () => {
                           e.preventDefault();
                           handleSliderChange(point);
                         }}
-                        className="w-1.5 h-1.5 lg:w-2.5 lg:h-2.5 rounded-full bg-[#FFF] z-50 cursor-pointer hover:scale-125 transition-transform flex items-center justify-center touch-manipulation relative"
+                        className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 rounded-full bg-[#FFF] z-50 cursor-pointer hover:scale-125 active:scale-150 transition-transform flex items-center justify-center touch-manipulation relative"
                         style={{
                           position: "absolute",
                           left: `${posPercent}%`,
@@ -267,7 +267,7 @@ const DiagnosticSteps = () => {
                   <img
                     src="/assets/images/dashboard/Subtract.webp"
                     alt="slider handle"
-                    className="w-12 h-12 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain"
+                    className="w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-28 lg:h-28 object-contain"
                     style={{ display: "block" }}
                   />
                 </div>
@@ -281,14 +281,14 @@ const DiagnosticSteps = () => {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                 />
               </div>
-              <div className="flex justify-between mt-8 sm:mt-12 md:mt-16 px-2">
-                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
+              <div className="flex justify-between mt-4 sm:mt-6 md:mt-10 lg:mt-16 px-1 sm:px-2">
+                <span className="text-[8px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/60 font-medium font-inter leading-tight text-center max-w-[80px] sm:max-w-none">
                   Strongly Disagree
                 </span>
-                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
+                <span className="text-[8px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/60 font-medium font-inter">
                   Neutral
                 </span>
-                <span className="text-[9px] sm:text-sm md:text-base text-[#FFF]/60 font-medium font-inter">
+                <span className="text-[8px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/60 font-medium font-inter leading-tight text-center max-w-[80px] sm:max-w-none">
                   Strongly Agree
                 </span>
               </div>
@@ -299,7 +299,7 @@ const DiagnosticSteps = () => {
       <img
         src="/assets/images/dashboard/feedbackbottom.webp"
         alt="dashboard bottom background"
-        className="absolute bottom-0 right-0 lg:w-[613px] w-[350px] z-0 lg:h-[515px] h-[250px] object-cover object-bottom pointer-events-none"
+        className="absolute bottom-0 right-0 w-[250px] sm:w-[350px] lg:w-[613px] z-0 h-[180px] sm:h-[250px] lg:h-[515px] object-cover object-bottom pointer-events-none"
       />
     </div>
   );
