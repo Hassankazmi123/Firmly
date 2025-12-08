@@ -23,9 +23,9 @@ export default function PersonalInformationSection({
         onImageUpload={onImageUpload}
         onImageDelete={onImageDelete}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:gap-6 gap-4 lg:mb-8 mb-5">
         <div>
-          <label className="block  font-medium font-inter text-[#3D3D3D]/60 mb-2">
+          <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             First name
           </label>
           <input
@@ -33,11 +33,11 @@ export default function PersonalInformationSection({
             name="firstName"
             value={personalInfo.firstName}
             onChange={onPersonalInfoChange}
-            className="w-full px-4 py-3 bg-[#f7f7f7] border border-[#e8e8e8] rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
+            className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
           />
         </div>
         <div>
-          <label className="block  font-medium font-inter text-[#3D3D3D]/60 mb-2">
+          <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             Last name
           </label>
           <input
@@ -45,11 +45,11 @@ export default function PersonalInformationSection({
             name="lastName"
             value={personalInfo.lastName}
             onChange={onPersonalInfoChange}
-            className="w-full px-4 py-3 bg-[#f7f7f7] border border-[#e8e8e8] rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
+            className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
           />
         </div>
         <div>
-          <label className="block  font-medium font-inter text-[#3D3D3D]/60 mb-2">
+          <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             Age
           </label>
           <input
@@ -57,11 +57,11 @@ export default function PersonalInformationSection({
             name="age"
             value={personalInfo.age}
             onChange={onPersonalInfoChange}
-            className="w-full px-4 py-3 bg-[#f7f7f7] border border-[#e8e8e8] rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
+            className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
           />
         </div>
         <div>
-          <label className="block  font-medium font-inter text-[#3D3D3D]/60 mb-2">
+          <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             Email
           </label>
           <input
@@ -69,18 +69,18 @@ export default function PersonalInformationSection({
             name="email"
             value={personalInfo.email}
             onChange={onPersonalInfoChange}
-            className="w-full px-4 py-3 bg-[#f7f7f7] border border-[#e8e8e8] rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
+            className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
           />
         </div>
         <div>
-          <label className="block  font-medium font-inter text-[#3D3D3D]/60 mb-2">
+          <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             Current job role
           </label>
           <select
             name="currentJobRole"
             value={personalInfo.currentJobRole}
             onChange={onPersonalInfoChange}
-            className="w-full px-4 py-3 bg-[#f7f7f7] border border-[#e8e8e8] rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
+            className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
           >
             <option value="Computing">Computing</option>
             <option value="Engineering">Engineering</option>
@@ -90,14 +90,14 @@ export default function PersonalInformationSection({
           </select>
         </div>
         <div>
-          <label className="block  font-medium font-inter text-[#3D3D3D]/60 mb-2">
+          <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             Years of experience
           </label>
           <select
             name="yearsOfExperience"
             value={personalInfo.yearsOfExperience}
             onChange={onPersonalInfoChange}
-            className="w-full px-4 py-3 bg-[#f7f7f7] border border-[#e8e8e8] rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
+            className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
           >
             <option value="0-1 years">0-1 years</option>
             <option value="2-5 years">2-5 years</option>
@@ -108,7 +108,7 @@ export default function PersonalInformationSection({
       </div>
       <button
         onClick={onSaveChanges}
-        className="px-6 py-3 bg-[#b0b0b0] text-[#F5F5F5] rounded-2xl transition-colors font-medium text-sm sm:text-base"
+        className="lg:px-6 px-4 lg:py-3 py-2 bg-[#b0b0b0] text-[#F5F5F5] lg:rounded-2xl rounded-md transition-colors font-medium text-sm sm:text-base"
         type="button"
       >
         Save changes
