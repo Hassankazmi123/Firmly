@@ -65,10 +65,8 @@ const DiagnosticModal = () => {
     navigate("/diagnostic/steps");
   };
 
-  // detect completed variant: either path or query ?status=completed
-  const isCompleted =
-    location.pathname.endsWith("/completed") ||
-    new URLSearchParams(location.search).get("status") === "completed";
+  // This modal renders the non-completed diagnostic landing; completed
+  // UI is moved to a separate `DiagnosticComplete` component/route.
 
   return (
     <div className="min-h-screen w-full flex flex-col">
@@ -265,195 +263,89 @@ const DiagnosticModal = () => {
           <img
             src="/assets/images/onboarding/Diagnostic_Topleft.webp"
             alt="top left"
-            className="w-24 h-16 sm:w-32 sm:h-24 md:w-50 md:h-40 object-contain"
+            className="w-50 h-50 "
           />
         </div>
         <div className="absolute top-0 right-0 pointer-events-none">
           <img
             src="/assets/images/onboarding/Diagnostic_Topright.webp"
             alt="top right"
-            className="w-24 h-16 sm:w-32 sm:h-24 md:w-50 md:h-45 object-contain"
+            className="w-50 h-50 "
           />
         </div>
         <div className="absolute bottom-0 right-0 pointer-events-none">
           <img
             src="/assets/images/onboarding/Diagnostic_Bottomright.webp"
             alt="bottom right"
-            className="w-24 h-16 sm:w-32 sm:h-24 md:w-50 md:h-40 object-contain"
+            className="w-50 h-50"
           />
         </div>
         <div className="max-w-6xl w-full relative z-10 px-4 sm:px-6 md:px-8">
           {/* Content State */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
             {/* Left Side - Description */}
-            <div
-              className={`lg:col-span-7 ${
-                isCompleted
-                  ? "pt-4 sm:pt-6 lg:pt-0"
-                  : "pt-6 sm:pt-8 md:pt-12 lg:pt-16"
-              }`}
-            >
-              {isCompleted ? (
-                <>
-                  <div className="mb-4 sm:mb-6 lg:-mt-12">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-white flex items-center justify-center shadow-lg">
-                      <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 font-inter">
-                        100%
-                      </span>
-                    </div>
+            <div className="lg:col-span-7 pt-6 sm:pt-8 md:pt-12 lg:pt-16">
+              <>
+                {/* Circular Progress Indicator */}
+                <div className="mb-4 sm:mb-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-[#a3a3a3] flex items-center justify-center bg-[#ebebeb] shadow-sm">
+                    <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-700 font-inter">0%</span>
                   </div>
+                </div>
 
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">
-                    Firmly Diagnostic
-                  </h1>
-                  <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-6 font-inter max-w-3xl">
-                    Excellent work! Your diagnostic assessment is now complete.
-                    <br className="hidden sm:block" />
-                    We will now share your self-reported scores across six key
-                    metrics that influence workplace wellbeing and leadership
-                    development. These insights will form the foundation of your
-                    personalized coaching plan with Amalia.
-                  </p>
-                </>
-              ) : (
-                <>
-                  {/* Circular Progress Indicator */}
-                  <div className="mb-4 sm:mb-6">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-[#a3a3a3] flex items-center justify-center bg-[#ebebeb] shadow-sm">
-                      <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-700 font-inter">
-                        0%
-                      </span>
-                    </div>
-                  </div>
-
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">
-                    Firmly Diagnostic
-                  </h1>
-                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6 font-inter">
-                    This diagnostic assessment evaluates your work preferences
-                    and leadership tendencies using validated organizational
-                    psychology measures. The items target key factors that
-                    research shows significantly impact women's workplace
-                    effectiveness and advancement. Your results will inform a
-                    personalized development plan focused on accelerating your
-                    leadership growth. Ready to get started?
-                  </p>
-                  <button
-                    onClick={handleStartDiagnostic}
-                    className="bg-gray-800 text-white px-6 py-2.5 sm:py-3 rounded-full font-medium hover:bg-gray-900 active:scale-95 transition-all font-inter text-sm min-h-[44px]"
-                  >
-                    Start Diagnostic
-                  </button>
-                </>
-              )}
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">Firmly Diagnostic</h1>
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6 font-inter">
+                  This diagnostic assessment evaluates your work preferences and leadership tendencies using validated organizational psychology measures. The items target key factors that research shows significantly impact women's workplace effectiveness and advancement. Your results will inform a personalized development plan focused on accelerating your leadership growth. Ready to get started?
+                </p>
+                <button
+                  onClick={handleStartDiagnostic}
+                  className="bg-gray-800 text-white px-6 py-2.5 sm:py-3 rounded-full font-medium hover:bg-gray-900 active:scale-95 transition-all font-inter text-sm min-h-[44px]"
+                >
+                  Start Diagnostic
+                </button>
+              </>
             </div>
 
             {/* Right Side - Instructions */}
             <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-md w-full lg:w-auto max-w-[500px] mx-auto lg:mx-0 relative pt-10 sm:pt-12">
-              <div
-                className={`absolute top-0 left-0 right-0 pointer-events-none overflow-hidden rounded-t-xl sm:rounded-t-2xl ${
-                  isCompleted ? "bg-[#d46fa8]" : "bg-[#855cc9]"
-                }`}
-              >
+              <div className="absolute top-0 left-0 right-0 pointer-events-none overflow-hidden rounded-t-xl sm:rounded-t-2xl bg-[#855cc9]">
                 <img
                   src="/assets/images/onboarding/DiagLeft.webp"
                   alt="card top decoration"
                   className="w-full h-10 sm:h-12 object-cover"
                 />
               </div>
-              {isCompleted ? (
-                <>
-                  <h3 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold text-gray-800 mb-2 font-cormorant">
-                    You're set to a great start!
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-700 mb-4 sm:mb-6 font-inter leading-relaxed">
-                    Remember, these scores aren't meant to discourage you —
-                    they're here to set a benchmark for your growth and
-                    celebrate the capabilities you already have.
-                  </p>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => navigate("/dashboard")}
-                      className="px-4 sm:px-5 py-2 sm:py-2.5 bg-[#222] text-white rounded-full text-xs sm:text-sm font-medium hover:bg-[#333] active:scale-95 transition-all min-h-[44px]"
-                    >
-                      Go to Dashboard
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-2 text-gray-700 mb-2 mt-2 sm:mt-4">
-                    <svg
-                      className="w-4 h-4 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-xs sm:text-sm font-inter">
-                      15 min
-                    </span>
-                  </div>
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">
-                    How to complete your assessment:
-                  </h2>
-                  <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-gray-700 font-inter">
-                    <li className="flex gap-3">
-                      <span className="text-purple-600 font-bold min-w-fit">
-                        •
-                      </span>
-                      <span>
-                        Read each statement and think about it in the context of
-                        your current work and workplace
-                      </span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-purple-600 font-bold min-w-fit">
-                        •
-                      </span>
-                      <span>
-                        Drag the slider along the scale: far left to strongly
-                        disagree, far right to strongly agree, or anywhere in
-                        between to match your level of agreement
-                      </span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-purple-600 font-bold min-w-fit">
-                        •
-                      </span>
-                      <span>
-                        Trust your instincts and respond honestly based on your
-                        current workplace experience
-                      </span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-purple-600 font-bold min-w-fit">
-                        •
-                      </span>
-                      <span>
-                        Click "Next" in the top right corner to move to the next
-                        question
-                      </span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-purple-600 font-bold min-w-fit">
-                        •
-                      </span>
-                      <span>
-                        Remember, your authentic responses will give us the
-                        clearest picture of your leadership development
-                        opportunities
-                      </span>
-                    </li>
-                  </ul>
-                </>
-              )}
+              <>
+                <div className="flex items-center gap-2 text-gray-700 mb-2 mt-2 sm:mt-4">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-xs sm:text-sm font-inter">15 min</span>
+                </div>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">How to complete your assessment:</h2>
+                <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-gray-700 font-inter">
+                  <li className="flex gap-3">
+                    <span className="text-purple-600 font-bold min-w-fit">•</span>
+                    <span>Read each statement and think about it in the context of your current work and workplace</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-purple-600 font-bold min-w-fit">•</span>
+                    <span>Drag the slider along the scale: far left to strongly disagree, far right to strongly agree, or anywhere in between to match your level of agreement</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-purple-600 font-bold min-w-fit">•</span>
+                    <span>Trust your instincts and respond honestly based on your current workplace experience</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-purple-600 font-bold min-w-fit">•</span>
+                    <span>Click "Next" in the top right corner to move to the next question</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-purple-600 font-bold min-w-fit">•</span>
+                    <span>Remember, your authentic responses will give us the clearest picture of your leadership development opportunities</span>
+                  </li>
+                </ul>
+              </>
             </div>
           </div>
         </div>
