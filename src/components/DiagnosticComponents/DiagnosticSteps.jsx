@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const questions = [
@@ -116,14 +116,6 @@ const DiagnosticSteps = () => {
     navigate("/diagnostic/completed");
   };
 
-  const handleGoToDashboard = () => {
-    navigate("/dashboard");
-  };
-
-  const handleExit = () => {
-    navigate("/dashboard");
-  };
-
   // No local completion modal — Finish navigates to Diagnostic completed view
 
   return (
@@ -134,11 +126,11 @@ const DiagnosticSteps = () => {
       <img
         src="/assets/images/dashboard/feedbacktop.webp"
         alt="dashboard top background"
-        className="absolute top-0 left-0 w-[250px] sm:w-[350px] lg:w-[613px] z-0 h-[180px] sm:h-[250px] lg:h-[515px] object-cover object-top pointer-events-none"
+        className="absolute top-0 left-0 w-[200px] sm:w-[280px] lg:w-[490px] z-0 h-[144px] sm:h-[200px] lg:h-[412px] object-cover object-top pointer-events-none"
       />
       <div className="relative z-20 h-full flex flex-col">
-        <div className="relative px-3 sm:px-4 lg:px-0 py-3 sm:py-4 lg:py-6">
-          <div className="flex items-center max-w-5xl mx-auto gap-2 sm:gap-3">
+        <div className="relative px-3 sm:px-4 lg:px-0 py-2 sm:py-3 lg:py-4">
+          <div className="flex items-center max-w-4xl mx-auto gap-2 sm:gap-3">
             <div
               className="relative flex items-center justify-between shadow-sm border border-[#ebebeb] rounded-xl sm:rounded-2xl px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 flex-1 min-w-0 overflow-hidden"
               style={{ background: colors.button }}
@@ -156,7 +148,7 @@ const DiagnosticSteps = () => {
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`relative z-10 flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${
+                className={`relative z-10 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${
                   currentStep === 0
                     ? "bg-[#ebebeb] text-[#3D3D3D]/60 cursor-not-allowed"
                     : "bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
@@ -167,7 +159,7 @@ const DiagnosticSteps = () => {
                 }}
               >
                 <svg
-                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0"
+                  className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -179,12 +171,12 @@ const DiagnosticSteps = () => {
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                <span className="text-xs sm:text-sm md:text-base font-inter font-medium whitespace-nowrap hidden sm:inline">
+                <span className="text-[10px] sm:text-xs md:text-sm font-inter font-medium whitespace-nowrap hidden sm:inline">
                   Previous
                 </span>
               </button>
 
-              <div className="relative z-10 text-xs sm:text-sm md:text-base lg:text-lg text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
+              <div className="relative z-10 text-[10px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
                 {currentStep + 1} of {questions.length}
               </div>
 
@@ -192,19 +184,19 @@ const DiagnosticSteps = () => {
                 {currentStep === questions.length - 1 ? (
                   <button
                     onClick={handleFinish}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-white text-gray-700 hover:bg-gray-50 active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base shadow-sm whitespace-nowrap"
+                    className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl bg-white text-gray-700 hover:bg-gray-50 active:scale-95 transition-all font-inter font-medium text-[10px] sm:text-xs md:text-sm shadow-sm whitespace-nowrap"
                   >
                     <span>Finish</span>
                   </button>
                 ) : (
                   <button
                     onClick={handleNext}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl bg-white text-[#3D3D3D] active:scale-95 transition-all font-inter font-medium text-xs sm:text-sm md:text-base shadow-sm whitespace-nowrap"
+                    className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl bg-white text-[#3D3D3D] active:scale-95 transition-all font-inter font-medium text-[10px] sm:text-xs md:text-sm shadow-sm whitespace-nowrap"
                     style={{ color: colors.text }}
                   >
                     <span>Next</span>
                     <svg
-                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0"
+                      className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -222,14 +214,14 @@ const DiagnosticSteps = () => {
             </div>
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-12 pb-6 sm:pb-8 md:pb-12">
-          <div className="w-full max-w-5xl">
-            <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-cormorant font-bold text-white text-center mb-6 sm:mb-10 md:mb-16 lg:mb-20 leading-tight px-2 sm:px-4">
+        <div className="flex-1 flex items-center justify-center px-3 sm:px-4 md:px-5 lg:px-10 pb-4 sm:pb-6 md:pb-10">
+          <div className="w-full max-w-4xl">
+            <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-cormorant font-bold text-white text-center mb-4 sm:mb-6 md:mb-10 lg:mb-14 leading-tight px-2 sm:px-4">
               {questions[currentStep]}
             </h2>
             <div className="relative px-2 sm:px-4 lg:px-0 overflow-visible">
               <div
-                className="relative p-1.5 sm:p-2 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.25rem+1rem)] pr-[calc(0.25rem+1rem)] sm:pl-[calc(0.5rem+1.5rem)] sm:pr-[calc(0.5rem+1.5rem)] md:pl-[calc(0.5rem+2.5rem)] md:pr-[calc(0.5rem+2.5rem)] lg:pl-[calc(0.5rem+3.5rem)] lg:pr-[calc(0.5rem+3.5rem)]"
+                className="relative p-1 sm:p-1.5 bg-[#e3e3e3] rounded-full overflow-visible pl-[calc(0.25rem+0.8rem)] pr-[calc(0.25rem+0.8rem)] sm:pl-[calc(0.5rem+1.2rem)] sm:pr-[calc(0.5rem+1.2rem)] md:pl-[calc(0.5rem+2rem)] md:pr-[calc(0.5rem+2rem)] lg:pl-[calc(0.5rem+2.8rem)] lg:pr-[calc(0.5rem+2.8rem)]"
                 style={{ background: colors.slider }}
               >
                 <div className="absolute inset-0 flex items-center overflow-visible">
@@ -244,7 +236,7 @@ const DiagnosticSteps = () => {
                           e.preventDefault();
                           handleSliderChange(point);
                         }}
-                        className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 rounded-full bg-[#FFF] z-50 cursor-pointer hover:scale-125 active:scale-150 transition-transform flex items-center justify-center touch-manipulation relative"
+                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-2.5 lg:h-2.5 rounded-full bg-[#FFF] z-50 cursor-pointer hover:scale-125 active:scale-150 transition-transform flex items-center justify-center touch-manipulation relative"
                         style={{
                           position: "absolute",
                           left: `${posPercent}%`,
@@ -267,7 +259,7 @@ const DiagnosticSteps = () => {
                   <img
                     src="/assets/images/dashboard/Subtract.webp"
                     alt="slider handle"
-                    className="w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-28 lg:h-28 object-contain"
+                    className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
                     style={{ display: "block" }}
                   />
                 </div>
@@ -281,14 +273,14 @@ const DiagnosticSteps = () => {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                 />
               </div>
-              <div className="flex justify-between mt-4 sm:mt-6 md:mt-10 lg:mt-16 px-1 sm:px-2">
-                <span className="text-[8px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/60 font-medium font-inter leading-tight text-center max-w-[80px] sm:max-w-none">
+              <div className="flex justify-between mt-3 sm:mt-4 md:mt-6 lg:mt-10 px-1 sm:px-2">
+                <span className="text-[7px] sm:text-[10px] md:text-xs lg:text-sm text-[#FFF]/60 font-medium font-inter leading-tight text-center max-w-[80px] sm:max-w-none">
                   Strongly Disagree
                 </span>
-                <span className="text-[8px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/60 font-medium font-inter">
+                <span className="text-[7px] sm:text-[10px] md:text-xs lg:text-sm text-[#FFF]/60 font-medium font-inter">
                   Neutral
                 </span>
-                <span className="text-[8px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/60 font-medium font-inter leading-tight text-center max-w-[80px] sm:max-w-none">
+                <span className="text-[7px] sm:text-[10px] md:text-xs lg:text-sm text-[#FFF]/60 font-medium font-inter leading-tight text-center max-w-[80px] sm:max-w-none">
                   Strongly Agree
                 </span>
               </div>
@@ -299,7 +291,7 @@ const DiagnosticSteps = () => {
       <img
         src="/assets/images/dashboard/feedbackbottom.webp"
         alt="dashboard bottom background"
-        className="absolute bottom-0 right-0 w-[250px] sm:w-[350px] lg:w-[613px] z-0 h-[180px] sm:h-[250px] lg:h-[515px] object-cover object-bottom pointer-events-none"
+        className="absolute bottom-0 right-0 w-[200px] sm:w-[280px] lg:w-[490px] z-0 h-[144px] sm:h-[200px] lg:h-[412px] object-cover object-bottom pointer-events-none"
       />
     </div>
   );
