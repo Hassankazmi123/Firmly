@@ -237,8 +237,8 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Terms and Conditions */}
-              <div className="flex items-start gap-2 sm:gap-3 text-left">
-                <div className="relative flex-shrink-0 mt-0.5">
+              <div className="flex items-center gap-2 sm:gap-3 text-left">
+                <div className="relative flex-shrink-0">
                   <input
                     type="checkbox"
                     id="agreeToTerms"
@@ -267,14 +267,14 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                   I agree to the{" "}
                   <button
                     type="button"
-                    className="text-white underline hover:text-white/80 active:scale-95 transition-all min-h-[44px] inline-flex items-center"
+                    className="text-white underline hover:text-white/80 active:scale-95 transition-all inline"
                   >
                     Terms & Conditions
                   </button>{" "}
                   and{" "}
                   <button
                     type="button"
-                    className="text-white underline hover:text-white/80 active:scale-95 transition-all min-h-[44px] inline-flex items-center"
+                    className="text-white underline hover:text-white/80 active:scale-95 transition-all inline"
                   >
                     Privacy Policy
                   </button>

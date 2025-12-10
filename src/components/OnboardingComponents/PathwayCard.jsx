@@ -19,19 +19,21 @@ const PathwayCard = ({ onPrevious, onNext }) => {
             <p className="text-white/90 text-sm sm:text-base w-full font-inter leading-relaxed">
               Amalia creates a tailored leadership journey just for you—complete
               with reading assignments, conversation tactics, skill-building
-              exercises, and voice coaching sessions.
+              exercises, and voice coaching sessions. Every recommendation is
+              based on your diagnostic results and proven strategies for women
+              in leadership.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full mt-2 sm:mt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full px-2 mt-2 sm:mt-4">
             <button
               onClick={onPrevious}
-              className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-transparent border border-white/30 text-white font-medium rounded-full hover:bg-white/10 active:scale-95 transition-all font-inter text-sm min-h-[44px]"
+              className="w-full sm:flex-1 px-6 sm:px-8 py-2.5 sm:py-3 bg-transparent border border-white/30 text-white font-medium rounded-2xl hover:bg-white/10 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px] flex items-center justify-center"
             >
               Previous
             </button>
             <button
               onClick={onNext}
-              className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-white text-[#6b4bff] font-medium rounded-full shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm min-h-[44px]"
+              className="w-full sm:flex-1 px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-[#6b4bff] font-medium rounded-2xl shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px] flex items-center justify-center"
             >
               Next
             </button>

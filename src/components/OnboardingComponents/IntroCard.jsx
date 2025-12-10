@@ -54,7 +54,7 @@ const IntroCard = ({ onNext }) => {
 
           <button
             onClick={onNext}
-            className="mt-2 px-6 sm:px-8 py-2.5 sm:py-3 mx-auto bg-white text-[#6b4bff] font-medium rounded-full shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px]"
+            className="mt-2 px-24 sm:px-32 py-2.5 sm:py-3 mx-auto bg-white text-[#6b4bff] font-medium rounded-2xl shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px] flex items-center justify-center"
           >
             Next
           </button>

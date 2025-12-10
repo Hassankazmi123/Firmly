@@ -52,16 +52,16 @@ const Screen3Card = ({ onPrevious, onNext, onLogin }) => {
               (Incognito Mode) when you're ready to open up and reflect.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full mt-2 sm:mt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full px-2 mt-2 sm:mt-4">
             <button
               onClick={handleExistingAccount}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 bg-transparent border border-white/30 text-white font-medium rounded-full hover:bg-white/10 active:scale-95 transition-all font-inter text-xs sm:text-sm min-h-[44px] whitespace-nowrap"
+              className="w-full sm:flex-1 px-6 sm:px-8 py-2.5 sm:py-3 bg-transparent border border-white/30 text-white font-medium rounded-2xl hover:bg-white/10 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px] flex items-center justify-center"
             >
               I already have an Account
             </button>
             <button
               onClick={handleCreateAccount}
-              className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-white text-[#6b4bff] font-medium rounded-full shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm min-h-[44px]"
+              className="w-full sm:flex-1 px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-[#6b4bff] font-medium rounded-2xl shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px] flex items-center justify-center"
             >
               Create Account
             </button>

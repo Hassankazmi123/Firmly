@@ -7,7 +7,7 @@ const OnboardingLayout = ({ children }) => {
       style={{ backgroundColor: "#7472d6" }}
     >
       {/* Background image layered over the gradient but behind corners/content */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none rounded-2xl sm:rounded-3xl md:rounded-[32px] overflow-hidden">
         <img
           src="/assets/images/onboarding/Background_Onboarding.webp"
           alt="onboarding background"
