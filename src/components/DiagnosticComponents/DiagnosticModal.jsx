@@ -280,7 +280,8 @@ const DiagnosticModal = () => {
             className="w-50 h-50"
           />
         </div>
-        <div className="max-w-6xl w-full relative z-10 px-4 sm:px-6 md:px-8">
+        {/* Make inner content full-width so left and right sections hug the edges */}
+        <div className="w-full relative z-10 px-4 sm:px-6">
           {/* Content State */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
             {/* Left Side - Description */}
@@ -289,13 +290,23 @@ const DiagnosticModal = () => {
                 {/* Circular Progress Indicator */}
                 <div className="mb-4 sm:mb-6">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-[#a3a3a3] flex items-center justify-center bg-[#ebebeb] shadow-sm">
-                    <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-700 font-inter">0%</span>
+                    <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-700 font-inter">
+                      0%
+                    </span>
                   </div>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">Firmly Diagnostic</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">
+                  Firmly Diagnostic
+                </h1>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6 font-inter">
-                  This diagnostic assessment evaluates your work preferences and leadership tendencies using validated organizational psychology measures. The items target key factors that research shows significantly impact women's workplace effectiveness and advancement. Your results will inform a personalized development plan focused on accelerating your leadership growth. Ready to get started?
+                  This diagnostic assessment evaluates your work preferences and
+                  leadership tendencies using validated organizational
+                  psychology measures. The items target key factors that
+                  research shows significantly impact women's workplace
+                  effectiveness and advancement. Your results will inform a
+                  personalized development plan focused on accelerating your
+                  leadership growth. Ready to get started?
                 </p>
                 <button
                   onClick={handleStartDiagnostic}
@@ -317,32 +328,71 @@ const DiagnosticModal = () => {
               </div>
               <>
                 <div className="flex items-center gap-2 text-gray-700 mb-2 mt-2 sm:mt-4">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-4 h-4 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <span className="text-xs sm:text-sm font-inter">15 min</span>
                 </div>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">How to complete your assessment:</h2>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">
+                  How to complete your assessment:
+                </h2>
                 <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-gray-700 font-inter">
                   <li className="flex gap-3">
-                    <span className="text-purple-600 font-bold min-w-fit">•</span>
-                    <span>Read each statement and think about it in the context of your current work and workplace</span>
+                    <span className="text-purple-600 font-bold min-w-fit">
+                      •
+                    </span>
+                    <span>
+                      Read each statement and think about it in the context of
+                      your current work and workplace
+                    </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-purple-600 font-bold min-w-fit">•</span>
-                    <span>Drag the slider along the scale: far left to strongly disagree, far right to strongly agree, or anywhere in between to match your level of agreement</span>
+                    <span className="text-purple-600 font-bold min-w-fit">
+                      •
+                    </span>
+                    <span>
+                      Drag the slider along the scale: far left to strongly
+                      disagree, far right to strongly agree, or anywhere in
+                      between to match your level of agreement
+                    </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-purple-600 font-bold min-w-fit">•</span>
-                    <span>Trust your instincts and respond honestly based on your current workplace experience</span>
+                    <span className="text-purple-600 font-bold min-w-fit">
+                      •
+                    </span>
+                    <span>
+                      Trust your instincts and respond honestly based on your
+                      current workplace experience
+                    </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-purple-600 font-bold min-w-fit">•</span>
-                    <span>Click "Next" in the top right corner to move to the next question</span>
+                    <span className="text-purple-600 font-bold min-w-fit">
+                      •
+                    </span>
+                    <span>
+                      Click "Next" in the top right corner to move to the next
+                      question
+                    </span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-purple-600 font-bold min-w-fit">•</span>
-                    <span>Remember, your authentic responses will give us the clearest picture of your leadership development opportunities</span>
+                    <span className="text-purple-600 font-bold min-w-fit">
+                      •
+                    </span>
+                    <span>
+                      Remember, your authentic responses will give us the
+                      clearest picture of your leadership development
+                      opportunities
+                    </span>
                   </li>
                 </ul>
               </>

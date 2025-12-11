@@ -30,7 +30,9 @@ const DiagnosticComplete = () => {
                   alt="user icon"
                   className="h-5 w-5 sm:h-6 sm:w-6"
                 />
-                <span className="text-white/70 text-sm sm:text-base">Amalia</span>
+                <span className="text-white/70 text-sm sm:text-base">
+                  Amalia
+                </span>
                 <span className="text-sm flex items-center justify-center bg-[#ababab] border border-white/20 text-white/70 px-2 py-0.5 rounded-full">
                   • online
                 </span>
@@ -77,33 +79,36 @@ const DiagnosticComplete = () => {
             className="w-full h-full object-cover opacity-10"
           />
         </div>
-          <div className="absolute top-0 left-0 pointer-events-none">
+        <div className="absolute top-0 left-0 pointer-events-none">
           <img
             src="/assets/images/onboarding/topleft-diag.webp"
             alt="top left"
             className="w-50 h-50 "
           />
         </div>
-           <div className="absolute top-0 right-0 pointer-events-none">
+        <div className="absolute top-0 right-0 pointer-events-none">
           <img
             src="/assets/images/onboarding/Diagnostic_Topright.webp"
             alt="top right"
             className="w-50 h-50 "
           />
         </div>
-          <div className="absolute bottom-0 right-0 pointer-events-none">
+        <div className="absolute bottom-0 right-0 pointer-events-none">
           <img
             src="/assets/images/onboarding/Diagnostic_Bottomright.webp"
             alt="bottom right"
             className="w-50 h-60"
           />
         </div>
-        <div className="max-w-6xl w-full relative z-10 px-4 sm:px-6 md:px-8">
+        {/* Make inner content full-width so left and right sections hug the edges */}
+        <div className="w-full relative z-10 px-4 sm:px-6 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-7 pt-4 sm:pt-6 lg:pt-0">
               <div className="mb-4 sm:mb-6 lg:-mt-12">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-white flex items-center justify-center shadow-lg">
-                  <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 font-inter">100%</span>
+                  <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 font-inter">
+                    100%
+                  </span>
                 </div>
               </div>
 
@@ -113,19 +118,28 @@ const DiagnosticComplete = () => {
               <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-6 font-inter max-w-3xl">
                 Excellent work! Your diagnostic assessment is now complete.
                 <br className="hidden sm:block" />
-                We will now share your self-reported scores across six key metrics that influence workplace wellbeing and leadership development. These insights will form the foundation of your personalized coaching plan with Amalia.
+                We will now share your self-reported scores across six key
+                metrics that influence workplace wellbeing and leadership
+                development. These insights will form the foundation of your
+                personalized coaching plan with Amalia.
               </p>
             </div>
 
             <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-md w-full lg:w-auto max-w-[500px] mx-auto lg:mx-0 relative pt-10 sm:pt-12">
               <div className="absolute top-0 left-0 right-0 pointer-events-none overflow-hidden rounded-t-xl sm:rounded-t-2xl bg-[#d46fa8]">
-                <img src="/assets/images/onboarding/DiagLeft.webp" alt="card top decoration" className="w-full h-10 sm:h-12 object-cover" />
+                <img
+                  src="/assets/images/onboarding/DiagLeft.webp"
+                  alt="card top decoration"
+                  className="w-full h-10 sm:h-12 object-cover"
+                />
               </div>
               <h3 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold text-gray-800 mb-2 font-cormorant">
                 You're set to a great start!
               </h3>
               <p className="text-xs sm:text-sm text-gray-700 mb-4 sm:mb-6 font-inter leading-relaxed">
-                Remember, these scores aren't meant to discourage you — they're here to set a benchmark for your growth and celebrate the capabilities you already have.
+                Remember, these scores aren't meant to discourage you — they're
+                here to set a benchmark for your growth and celebrate the
+                capabilities you already have.
               </p>
               <div className="flex justify-end">
                 <button
