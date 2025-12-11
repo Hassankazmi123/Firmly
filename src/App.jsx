@@ -13,6 +13,7 @@ import SafeSpaceChat from "./pages/SafeSpaceChat";
 import Feedback from "./pages/Feedback";
 import Diagnostic from "./pages/Diagnostic";
 import DiagnosticModal from "./components/DiagnosticComponents/DiagnosticModal";
+import DiagnosticComplete from "./components/DiagnosticComponents/DiagnosticComplete";
 function App() {
   return (
     <Router>
@@ -30,7 +31,7 @@ function App() {
         <Route path="/dashboard/feedback" element={<Feedback />} />
         <Route path="/diagnostic" element={<DiagnosticModal />} />
         <Route path="/diagnostic/steps" element={<Diagnostic />} />
-        <Route path="/diagnostic/completed" element={<DiagnosticModal />} />
+        <Route path="/diagnostic/completed" element={<DiagnosticComplete />} />
       </Routes>
     </Router>
   );
