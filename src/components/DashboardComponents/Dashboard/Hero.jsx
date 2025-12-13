@@ -74,10 +74,10 @@ const Hero = () => {
                   Balanced
                 </h2>
                 <div className="flex items-baseline">
-                  <span className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white font-times-new-roman ">
+                  <span className="text-3xl sm:text-6xl lg:text-7xl font-bold text-white font-times-new-roman ">
                     65
                   </span>
-                  <span className="text-2xl sm:text-3xl text-white/40 ml-2 font-times-new-roman">
+                  <span className="text-xl sm:text-3xl text-white/40 ml-2 font-times-new-roman">
                     /100
                   </span>
                 </div>
