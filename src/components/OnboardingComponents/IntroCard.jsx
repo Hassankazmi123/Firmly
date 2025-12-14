@@ -24,7 +24,7 @@ const StarIcon = () => (
 const IntroCard = ({ onNext }) => {
   return (
     <div className="w-full h-full flex items-center justify-center px-4 sm:px-6">
-      <div className="relative bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 text-center drop-shadow-lg max-w-2xl w-full">
+      <div className="relative bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 text-center drop-shadow-lg max-w-2xl w-full overflow-hidden">
         {/* top-right child decoration */}
         <img
           src="/assets/images/onboarding/Child_Div_Topright.webp"
@@ -36,7 +36,7 @@ const IntroCard = ({ onNext }) => {
           alt="decoration bottom left"
           className="absolute bottom-0 left-0 w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 pointer-events-none z-20"
         />
-        <div className="flex flex-col items-center gap-4 sm:gap-5 md:gap-6">
+        <div className="flex flex-col items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 pb-2">
           <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
             <StarIcon />
           </div>
@@ -54,7 +54,7 @@ const IntroCard = ({ onNext }) => {
 
           <button
             onClick={onNext}
-            className="mt-2 px-24 sm:px-32 py-2.5 sm:py-3 mx-auto bg-white text-[#6b4bff] font-medium rounded-2xl shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px] flex items-center justify-center"
+            className="mt-2 px-12 sm:px-24 md:px-32 py-2.5 sm:py-3 mx-auto bg-white text-[#6b4bff] font-medium rounded-2xl shadow-sm hover:bg-white/90 active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[44px] flex items-center justify-center w-full max-w-[280px] sm:max-w-none"
           >
             Next
           </button>

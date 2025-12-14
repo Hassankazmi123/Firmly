@@ -158,7 +158,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3 sm:gap-4">
                   <div className="text-left">
                     <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
                       First name
@@ -188,7 +188,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Age and Experience */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3 sm:gap-4">
                   <div className="text-left">
                     <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
                       Age

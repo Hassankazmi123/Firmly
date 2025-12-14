@@ -79,21 +79,21 @@ const DiagnosticComplete = () => {
             className="w-full h-full object-cover opacity-10"
           />
         </div>
-        <div className="absolute top-0 left-0 pointer-events-none">
+        <div className="absolute top-0 left-0 pointer-events-none hidden md:block">
           <img
             src="/assets/images/onboarding/topleft-diag.webp"
             alt="top left"
             className="w-50 h-50 "
           />
         </div>
-        <div className="absolute top-0 right-0 pointer-events-none">
+        <div className="absolute top-0 right-0 pointer-events-none hidden md:block">
           <img
             src="/assets/images/onboarding/Diagnostic_Topright.webp"
             alt="top right"
             className="w-50 h-50 "
           />
         </div>
-        <div className="absolute bottom-0 right-0 pointer-events-none">
+        <div className="absolute bottom-0 right-0 pointer-events-none hidden md:block">
           <img
             src="/assets/images/onboarding/Diagnostic_Bottomright.webp"
             alt="bottom right"
@@ -105,7 +105,7 @@ const DiagnosticComplete = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-7 pt-4 sm:pt-6 lg:pt-0">
               <div className="mb-4 sm:mb-6 lg:-mt-12">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-white flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 md:border-3 lg:border-4 border-white flex items-center justify-center shadow-lg">
                   <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 font-inter">
                     100%
                   </span>
@@ -125,7 +125,7 @@ const DiagnosticComplete = () => {
               </p>
             </div>
 
-            <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-md w-full lg:w-auto max-w-[500px] mx-auto lg:mx-0 relative pt-10 sm:pt-12">
+            <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-md w-full lg:w-auto max-w-[500px] mx-auto lg:mx-0 relative pt-10 sm:pt-12 mb-6 sm:mb-8 lg:mb-0">
               <div className="absolute top-0 left-0 right-0 pointer-events-none overflow-hidden rounded-t-xl sm:rounded-t-2xl bg-[#d46fa8]">
                 <img
                   src="/assets/images/onboarding/DiagLeft.webp"

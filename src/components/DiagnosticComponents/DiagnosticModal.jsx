@@ -259,21 +259,21 @@ const DiagnosticModal = () => {
             className="w-full h-full object-cover opacity-10"
           />
         </div>
-        <div className="absolute top-0 left-0 pointer-events-none">
+        <div className="absolute top-0 left-0 pointer-events-none hidden md:block">
           <img
             src="/assets/images/onboarding/Diagnostic_Topleft.webp"
             alt="top left"
             className="w-50 h-50 "
           />
         </div>
-        <div className="absolute top-0 right-0 pointer-events-none">
+        <div className="absolute top-0 right-0 pointer-events-none hidden md:block">
           <img
             src="/assets/images/onboarding/Diagnostic_Topright.webp"
             alt="top right"
             className="w-50 h-50 "
           />
         </div>
-        <div className="absolute bottom-0 right-0 pointer-events-none">
+        <div className="absolute bottom-0 right-0 pointer-events-none hidden md:block">
           <img
             src="/assets/images/onboarding/Diagnostic_Bottomright.webp"
             alt="bottom right"
@@ -289,7 +289,7 @@ const DiagnosticModal = () => {
               <>
                 {/* Circular Progress Indicator */}
                 <div className="mb-4 sm:mb-6">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-[#a3a3a3] flex items-center justify-center bg-[#ebebeb] shadow-sm">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 sm:border-4 border-[#a3a3a3] flex items-center justify-center bg-[#ebebeb] shadow-sm">
                     <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-700 font-inter">
                       0%
                     </span>
@@ -318,7 +318,7 @@ const DiagnosticModal = () => {
             </div>
 
             {/* Right Side - Instructions */}
-            <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-md w-full lg:w-auto max-w-[500px] mx-auto lg:mx-0 relative pt-10 sm:pt-12">
+            <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-md w-full lg:w-auto max-w-[500px] mx-auto lg:mx-0 relative pt-10 sm:pt-12 mb-6 sm:mb-8 md:mb-0">
               <div className="absolute top-0 left-0 right-0 pointer-events-none overflow-hidden rounded-t-xl sm:rounded-t-2xl bg-[#855cc9]">
                 <img
                   src="/assets/images/onboarding/DiagLeft.webp"

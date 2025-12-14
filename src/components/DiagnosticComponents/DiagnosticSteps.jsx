@@ -145,36 +145,32 @@ const DiagnosticSteps = () => {
                 />
               </div>
 
-              <button
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className={`relative z-10 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${
-                  currentStep === 0
-                    ? "bg-[#ebebeb] text-[#3D3D3D]/60 cursor-not-allowed"
-                    : "bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
-                }`}
-                style={{
-                  color:
-                    currentStep === 0 ? "rgba(61, 61, 61, 0.6)" : colors.text,
-                }}
-              >
-                <svg
-                  className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {currentStep > 0 ? (
+                <button
+                  onClick={handlePrevious}
+                  className="relative z-10 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl transition-all flex-shrink-0 bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
+                  style={{ color: colors.text }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                <span className="text-[10px] sm:text-xs md:text-sm font-inter font-medium whitespace-nowrap hidden sm:inline">
-                  Previous
-                </span>
-              </button>
+                  <svg
+                    className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-inter font-medium whitespace-nowrap hidden sm:inline">
+                    Previous
+                  </span>
+                </button>
+              ) : (
+                <div className="flex-shrink-0"></div>
+              )}
 
               <div className="relative z-10 text-[10px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
                 {currentStep + 1} of {questions.length}
