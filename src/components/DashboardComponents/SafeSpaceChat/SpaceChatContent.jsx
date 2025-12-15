@@ -86,7 +86,7 @@ const SpaceChatContent = ({ messages = [], isTyping = false }) => {
             {suggestedTopics.slice(0, 4).map((topic, index) => (
               <button
                 key={index}
-                className="px-3 md:px-4.5 py-2 md:py-3.5 bg-[#f5f5f5] text-[#3D3D3D]/60 rounded-xl font-inter font-medium  transition-colors"
+                className="px-3 lg:text-md text-xs md:px-4.5 py-2 md:py-3.5 bg-[#f5f5f5] text-[#3D3D3D]/60 lg:rounded-xl rounded-md font-inter font-medium  transition-colors"
               >
                 {topic}
               </button>
@@ -96,7 +96,7 @@ const SpaceChatContent = ({ messages = [], isTyping = false }) => {
             {suggestedTopics.slice(4, 7).map((topic, index) => (
               <button
                 key={index + 4}
-                className="px-3 md:px-4.5 py-2 md:py-3.5 bg-[#F5F5F5] text-[#3D3D3D]/60 rounded-xl font-inter font-medium  transition-colors"
+                className="px-3 lg:text-md text-xs md:px-4.5 py-2 md:py-3.5 bg-[#f5f5f5] text-[#3D3D3D]/60 lg:rounded-xl rounded-md font-inter font-medium  transition-colors"
               >
                 {topic}
               </button>
