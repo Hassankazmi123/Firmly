@@ -106,9 +106,7 @@ const StartConversationModal = ({ isOpen, onClose, onStartChat }) => {
                 <div className="mt-14">
                   <div className="flex flex-row gap-2 items-start justify-between">
                     <div>
-                      <h3 className="text-xl font-bold font-cormorant text-black mb-2">
-                        Normal Chat
-                      </h3>
+                      <h3 className="text-xl font-bold font-cormorant text-black mb-2"></h3>
                       <p className="text-sm text-[#3D3D3D]/60 mb-3 font-inter font-regular leading-relaxed">
                         Standard coaching conversation. Messages persist so you
                         can revisit insights anytime.
