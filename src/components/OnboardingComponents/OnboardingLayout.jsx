@@ -50,4 +50,4 @@ const OnboardingLayout = ({ children }) => {
 
 export default OnboardingLayout;
 
-// fixed
+// fixed on small resolution as well
