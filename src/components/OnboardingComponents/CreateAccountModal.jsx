@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import OnboardingLayout from "./OnboardingLayout";
 import CompleteProfileModal from "./CompleteProfileModal";
 
+// API Configuration
+const API_BASE_URL = "http://16.16.141.229:8501";
+const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
+
 const CreateAccountModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,11 +16,13 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+  const [authTokens, setAuthTokens] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    // Client-side validations
     if (!email || !password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
@@ -46,11 +52,107 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Try without trailing slash first
+      const registerResponse = await fetch(`${API_AUTH_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          password_confirm: confirmPassword,
+        }),
+      });
+
+      const registerData = await registerResponse.json();
+
+      if (!registerResponse.ok) {
+        // Handle various error response formats
+        if (registerData.email) {
+          setError(Array.isArray(registerData.email) ? registerData.email[0] : registerData.email);
+        } else if (registerData.password) {
+          setError(Array.isArray(registerData.password) ? registerData.password[0] : registerData.password);
+        } else if (registerData.error) {
+          setError(registerData.error);
+        } else if (registerData.detail) {
+          setError(registerData.detail);
+        } else if (registerData.message) {
+          setError(registerData.message);
+        } else {
+          setError("Registration failed. Please try again");
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // After successful registration, automatically log in the user
+      const loginResponse = await fetch(`${API_AUTH_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      const loginData = await loginResponse.json();
+
+      if (!loginResponse.ok) {
+        setError("Account created but login failed. Please try logging in manually");
+        setIsLoading(false);
+        return;
+      }
+
+      // Store tokens
+      const tokens = {
+        access: loginData.access,
+        refresh: loginData.refresh,
+      };
+      
+      setAuthTokens(tokens);
+      
+      // Get user profile to check if profile is complete
+      const profileResponse = await fetch(`${API_AUTH_URL}/profile`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${loginData.access}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      });
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        
+        // Check if profile needs to be completed
+        const needsProfileCompletion = !profileData.first_name || 
+                                       !profileData.last_name || 
+                                       !profileData.age || 
+                                       !profileData.job_role;
+        
+        if (needsProfileCompletion) {
+          setShowCompleteProfile(true);
+        } else {
+          // Profile already complete, close modal
+          onClose();
+        }
+      } else {
+        // Assume profile needs completion if we can't fetch it
+        setShowCompleteProfile(true);
+      }
+
       setIsLoading(false);
-      setShowCompleteProfile(true);
-    }, 1000);
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("Network error. Please check your connection and try again");
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -60,6 +162,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
     return (
       <CompleteProfileModal
         isOpen={true}
+        authTokens={authTokens}
         onClose={() => {
           setShowCompleteProfile(false);
           onClose();
@@ -119,6 +222,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                   placeholder="Insert email address"
                   className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -134,11 +238,13 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                     placeholder="Insert password"
                     className="w-full px-4 py-3 pr-12 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 active:scale-95 transition-all p-2"
+                    disabled={isLoading}
                   >
                     {showPassword ? (
                       <svg
@@ -191,11 +297,13 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                     placeholder="Insert password"
                     className="w-full px-4 py-3 pr-12 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 active:scale-95 transition-all p-2"
+                    disabled={isLoading}
                   >
                     {showConfirmPassword ? (
                       <svg
@@ -245,6 +353,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                     checked={agreeToTerms}
                     onChange={(e) => setAgreeToTerms(e.target.checked)}
                     className="appearance-none w-5 h-5 sm:w-4 sm:h-4 border border-white/25 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-white/50"
+                    disabled={isLoading}
                   />
                   {agreeToTerms && (
                     <svg
@@ -268,6 +377,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     className="text-white underline hover:text-white/80 active:scale-95 transition-all inline"
+                    disabled={isLoading}
                   >
                     Terms & Conditions
                   </button>{" "}
@@ -275,6 +385,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     className="text-white underline hover:text-white/80 active:scale-95 transition-all inline"
+                    disabled={isLoading}
                   >
                     Privacy Policy
                   </button>
@@ -283,11 +394,17 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
               {error && (
                 <div className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl bg-[#F26767] text-white text-xs sm:text-sm font-inter text-left flex items-center gap-2 sm:gap-3">
-                  <img
-                    src="/assets/images/onboarding/error_icon.webp"
-                    alt=""
+                  <svg
                     className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
-                  />
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                   <span className="leading-relaxed">{error}</span>
                 </div>
               )}
@@ -295,12 +412,12 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 active:scale-95 transition-all font-inter text-sm disabled:opacity-70 flex items-center justify-center gap-2 min-h-[48px]"
+                className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 active:scale-95 transition-all font-inter text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px]"
               >
                 {isLoading && (
                   <span className="inline-block w-4 h-4 border-2 border-[#7C3AED]/60 border-t-transparent rounded-full animate-spin" />
                 )}
-                <span>Next</span>
+                <span>{isLoading ? "Creating Account..." : "Next"}</span>
               </button>
             </form>
           </div>

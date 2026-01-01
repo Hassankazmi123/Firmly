@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import OnboardingLayout from "./OnboardingLayout";
 import AccountCreatedModal from "./AccountCreatedModal";
 
-const CompleteProfileModal = ({ isOpen, onClose }) => {
+// API Configuration
+const API_BASE_URL = "http://16.16.141.229:8501";
+const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
+
+const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -29,6 +33,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     setError("");
 
+    // Client-side validations
     if (
       !firstName ||
       !lastName ||
@@ -51,13 +56,69 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
       return;
     }
 
+    // Check if we have auth tokens
+    if (!authTokens || !authTokens.access) {
+      setError("Authentication required. Please log in again.");
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${API_AUTH_URL}/complete-profile/`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${authTokens.access}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          age: parseInt(age),
+          years_of_experience: parseInt(experience),
+          job_role: jobRole,
+          organization: organization,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle error responses
+        if (data.first_name) {
+          setError(Array.isArray(data.first_name) ? data.first_name[0] : data.first_name);
+        } else if (data.last_name) {
+          setError(Array.isArray(data.last_name) ? data.last_name[0] : data.last_name);
+        } else if (data.age) {
+          setError(Array.isArray(data.age) ? data.age[0] : data.age);
+        } else if (data.years_of_experience) {
+          setError(Array.isArray(data.years_of_experience) ? data.years_of_experience[0] : data.years_of_experience);
+        } else if (data.job_role) {
+          setError(Array.isArray(data.job_role) ? data.job_role[0] : data.job_role);
+        } else if (data.organization) {
+          setError(Array.isArray(data.organization) ? data.organization[0] : data.organization);
+        } else if (data.error) {
+          setError(data.error);
+        } else if (data.detail) {
+          setError(data.detail);
+        } else if (data.message) {
+          setError(data.message);
+        } else {
+          setError("Failed to complete profile. Please try again.");
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Success - show account created modal
       setIsLoading(false);
       setShowAccountCreated(true);
-    }, 1000);
+    } catch (err) {
+      console.error("Profile completion error:", err);
+      setError("Network error. Please check your connection and try again.");
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -102,7 +163,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                 Let us know a little about yourself.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 {/* Profile Image Upload */}
                 <div className="text-left">
                   <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2 sm:mb-3">
@@ -152,6 +213,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                         accept="image/*"
                         onChange={handleImageUpload}
                         className="hidden"
+                        disabled={isLoading}
                       />
                     </label>
                   </div>
@@ -170,6 +232,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                       placeholder="First name"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="text-left">
@@ -183,6 +246,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                       placeholder="Last name"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -202,6 +266,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                       max="100"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="text-left">
@@ -217,6 +282,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                       max="50"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -233,6 +299,7 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                     placeholder="Enter your organization"
                     className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                     required
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -248,31 +315,39 @@ const CompleteProfileModal = ({ isOpen, onClose }) => {
                     placeholder="Enter job role"
                     className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                     required
+                    disabled={isLoading}
                   />
                 </div>
 
                 {error && (
                   <div className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl bg-[#F26767] text-white text-xs sm:text-sm font-inter text-left flex items-center gap-2 sm:gap-3">
-                    <img
-                      src="/assets/images/onboarding/error_icon.webp"
-                      alt=""
+                    <svg
                       className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
-                    />
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                     <span className="leading-relaxed">{error}</span>
                   </div>
                 )}
 
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   disabled={isLoading}
-                  className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 active:scale-95 transition-all font-inter text-sm disabled:opacity-70 flex items-center justify-center gap-2 min-h-[48px]"
+                  className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 active:scale-95 transition-all font-inter text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px]"
                 >
                   {isLoading && (
                     <span className="inline-block w-4 h-4 border-2 border-[#7C3AED]/60 border-t-transparent rounded-full animate-spin" />
                   )}
-                  <span>Complete Profile</span>
+                  <span>{isLoading ? "Completing Profile..." : "Complete Profile"}</span>
                 </button>
-              </form>
+              </div>
             </div>
           </div>
         </OnboardingLayout>
