@@ -3,7 +3,7 @@ import OnboardingLayout from "./OnboardingLayout";
 import CompleteProfileModal from "./CompleteProfileModal";
 
 // API Configuration
-const API_BASE_URL = "http://16.16.141.229:8501";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
 const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
 
 const CreateAccountModal = ({ isOpen, onClose }) => {
@@ -53,8 +53,8 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      // Try without trailing slash first
-      const registerResponse = await fetch(`${API_AUTH_URL}/register`, {
+      // Try with trailing slash which is standard for Django/DRF
+      const registerResponse = await fetch(`${API_AUTH_URL}/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +89,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
       }
 
       // After successful registration, automatically log in the user
-      const loginResponse = await fetch(`${API_AUTH_URL}/login`, {
+      const loginResponse = await fetch(`${API_AUTH_URL}/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,19 +109,38 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         return;
       }
 
-      // Store tokens
+      // Store tokens - handle different response formats
+      let accessToken = null;
+      let refreshToken = null;
+
+      if (loginData.tokens) {
+        accessToken = loginData.tokens.access || loginData.tokens.access_token;
+        refreshToken = loginData.tokens.refresh || loginData.tokens.refresh_token;
+      } else {
+        accessToken = loginData.access || loginData.access_token || loginData.token || loginData.key;
+        refreshToken = loginData.refresh || loginData.refresh_token;
+      }
+
+      if (!accessToken) {
+        console.error("Login response missing access token. Response keys:", Object.keys(loginData));
+        if (loginData.tokens) console.error("Tokens object keys:", Object.keys(loginData.tokens));
+        setError("Login failed: Invalid server response structure");
+        setIsLoading(false);
+        return;
+      }
+
       const tokens = {
-        access: loginData.access,
-        refresh: loginData.refresh,
+        access: accessToken,
+        refresh: refreshToken,
       };
-      
+
       setAuthTokens(tokens);
-      
+
       // Get user profile to check if profile is complete
-      const profileResponse = await fetch(`${API_AUTH_URL}/profile`, {
+      const profileResponse = await fetch(`${API_AUTH_URL}/profile/`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${loginData.access}`,
+          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
@@ -129,13 +148,13 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();
-        
+
         // Check if profile needs to be completed
-        const needsProfileCompletion = !profileData.first_name || 
-                                       !profileData.last_name || 
-                                       !profileData.age || 
-                                       !profileData.job_role;
-        
+        const needsProfileCompletion = !profileData.first_name ||
+          !profileData.last_name ||
+          !profileData.age ||
+          !profileData.job_role;
+
         if (needsProfileCompletion) {
           setShowCompleteProfile(true);
         } else {

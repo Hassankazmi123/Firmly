@@ -3,7 +3,7 @@ import OnboardingLayout from "./OnboardingLayout";
 import Swal from "sweetalert2";
 
 // API Configuration
-const API_BASE_URL = "http://16.16.141.229:8501";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
 const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
 
 const ResetPasswordModal = ({ isOpen, onClose }) => {
@@ -21,7 +21,7 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
       // Get token from URL query parameters
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
-      
+
       if (token) {
         setResetToken(token);
       } else {
@@ -102,7 +102,7 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
 
       // Success - show success modal
       setIsLoading(false);
-      
+
       Swal.fire({
         html: `
           <div style="text-align: center; padding: 20px;">
@@ -134,7 +134,7 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
           const url = new URL(window.location.href);
           url.searchParams.delete('token');
           window.history.replaceState({}, document.title, url.pathname);
-          
+
           // Navigate to login or close modal
           onClose();
         }

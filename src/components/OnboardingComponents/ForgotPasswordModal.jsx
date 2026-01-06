@@ -3,7 +3,7 @@ import OnboardingLayout from "./OnboardingLayout";
 import EmailSentModal from "./EmailSentModal";
 
 // API Configuration
-const API_BASE_URL = "http://16.16.141.229:8501";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
 const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
 
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
