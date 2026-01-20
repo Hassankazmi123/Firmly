@@ -1,122 +1,330 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
-const questions = [
-  "I tend to think about what I'll be doing a year from now.",
-  "I frequently plan for the future.",
-  "I frequently think about my job or career goals.",
-  "When I have an important goal, I develop a plan to achieve it.",
-  "I take the time to make a plan to help me reach my goals.",
-  "I struggle to move on from setbacks at works.",
-  "I generally figure out a way to manage challenges at work.",
-  "I can handle tough times at work because I've dealt with challenges in the past.",
-  "I usually bounce back quickly from difficult situations at work.",
-  "I usually manage tough times at work without much difficulty.",
-  "I tend to take a while to recover from setbacks at work.",
-  "Before criticizing someone at work, I make an effort to consider how I would experience the situation from their perspective.",
-  "I don't spend much time listening to opposing views as work if I am confident that I'm right about somethings. (reverse scoring)",
-  "I believe there are always multiple perspectives to consider at work and strive to see every side of an issue",
-  "I make an effort o understand everyone's point of view in a disagreement at work before making a decision.",
-  " I sometimes feel like I fit in at work, and other times I don't.",
-  "When something negative occurs at work, I question if I truly belong.",
-  "When something positive happens at work, I feel a strong sense of belonging. (reverse scoring)",
-  "There is alignment between my works and my personal values, beliefs, and behaviors.",
-  "I derive a sense of meaning or purpose from my work.",
-  "My work contributes to my sense of personal mission in life.",
-  "I know I can achieve most of the work goals I set for myself.",
-  "I think I can achieve outcomes that are important to me.",
-  "I believe I can succeed in anything I set my mind to.",
-  "I am confident in my ability to perform task at work effectively.",
-  "I am capable of doing most tasks very well compared to others.",
-];
+import { assessmentService } from "../../services/assessment";
 
 const DiagnosticSteps = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [responses, setResponses] = useState([3, 3, 3, 3]);
+  // State for assessment flow
+  const [runId, setRunId] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalQuestions, setTotalQuestions] = useState(0); // If available
+  const [currentStepIndex, setCurrentStepIndex] = useState(0); // For progress bar/counter
 
-  // Color scheme function based on current step
+  // User response for the current question
+  const [currentResponse, setCurrentResponse] = useState(3); // Default neutral
+
+  // History to support "Previous" button functionality (caching visited questions)
+  // Each item: { question, response, stepIndex }
+  const [history, setHistory] = useState([]);
+
+  // To prevent double-fetching on mount if React.StrictMode is on
+  const highlightRun = useRef(false);
+
+  useEffect(() => {
+    const initAssessment = async () => {
+      if (highlightRun.current) return;
+      highlightRun.current = true;
+
+      try {
+        setIsLoading(true);
+        // 1. Start or resume assessment
+        const startData = await assessmentService.startAssessment("v1");
+        // startData should contain { id: 'run_id', questions: [...] } based on user hints
+        const rId = startData.id;
+        setRunId(rId);
+
+        // Try to determine total questions count
+        if (startData.questions && Array.isArray(startData.questions)) {
+          setTotalQuestions(startData.questions.length);
+        }
+
+        // 2. Fetch the next unanswered question
+        const nextQ = await assessmentService.getNextQuestion(rId);
+
+        console.log("Next Question Received:", nextQ); // Debug log
+
+        if (nextQ) {
+          setCurrentQuestion(nextQ);
+          // If the API returns which index this question is, use it. Otherwise, assume 0 for start.
+          try {
+            const progressData = await assessmentService.getProgress(rId);
+            if (progressData && typeof progressData.answered_count === 'number') {
+              setCurrentStepIndex(progressData.answered_count);
+            }
+          } catch (ignore) {
+            console.warn("Could not fetch progress", ignore);
+          }
+        } else {
+          // No next question? Maybe already finished?
+          navigate("/diagnostic/completed", { state: { runId: rId } });
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Failed to initialize assessment:", err);
+        setError(err.message || "Failed to load assessment. Please try again.");
+        setIsLoading(false);
+      }
+    };
+
+    initAssessment();
+  }, [navigate]);
+
+  if (error) {
+    const isAuthError = error.toLowerCase().includes("unauthorized") || error.toLowerCase().includes("log in");
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-[#ebebeb]">
+        <div className="text-center px-6 py-8 bg-white rounded-2xl shadow-lg max-w-sm mx-4">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-gray-800 mb-2 font-cormorant">Error Occurred</h3>
+          <p className="text-gray-600 mb-6 font-inter text-sm">{error}</p>
+          {isAuthError ? (
+            <button
+              onClick={() => navigate("/onboarding")} // Or wherever login is
+              className="bg-[#222] text-white px-6 py-2.5 rounded-full font-medium active:scale-95 transition-all w-full"
+            >
+              Log In
+            </button>
+          ) : (
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-[#222] text-white px-6 py-2.5 rounded-full font-medium active:scale-95 transition-all w-full"
+            >
+              Retry
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Color scheme function based on current step index 
   const getColorScheme = (step) => {
+    // We have 26 questions (indices 0-25).
+    // Mapping ranges directly to ensure Q26 (index 25) hits the final blue block.
+
     if (step < 5) {
       return {
-        background: "#378c78",
+        background: "#378c78", // Green
         button: "#479583",
         slider: "#579e8e",
         text: "#378c78",
       };
     } else if (step >= 5 && step <= 10) {
       return {
-        background: "#4299ca",
+        background: "#4299ca", // Blue
         button: "#51a1ce",
         slider: "#60a9d3",
         text: "#4299ca",
       };
     } else if (step >= 11 && step <= 14) {
       return {
-        background: "#855cc9",
+        background: "#855cc9", // Purple
         button: "#8f69cd",
         slider: "#9976d2",
         text: "#855cc9",
       };
     } else if (step >= 15 && step <= 17) {
       return {
-        background: "#cc66a9",
+        background: "#cc66a9", // Pink
         button: "#d072b0",
         slider: "#d47fb7",
         text: "#cc66a9",
       };
     } else if (step >= 18 && step <= 20) {
       return {
-        background: "#c56a55",
+        background: "#c56a55", // Orange
         button: "#ca7662",
         slider: "#ce8270",
         text: "#c56a55",
       };
-    } else if (step >= 21 && step <= 25) {
+    } else {
+      // Remaining questions (21-25), including Q26
+      // Explicitly using the requested Blue schemes
       return {
         background: "#4299ca",
         button: "#51a1ce",
         slider: "#60a9d3",
         text: "#4299ca",
       };
-    } else {
-      return {
-        background: "#7a7a7a",
-        button: "#8c8c8c",
-        slider: "#9c9c9c",
-        text: "#7a7a7a",
-      };
     }
   };
 
-  const colors = getColorScheme(currentStep);
+  const colors = getColorScheme(currentStepIndex);
 
   const handleSliderChange = (value) => {
-    const newResponses = [...responses];
-    newResponses[currentStep] = value;
-    setResponses(newResponses);
+    setCurrentResponse(value);
   };
 
   const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+    // Check if we have history to go back to
+    if (history.length > 0) {
+      const prev = history[history.length - 1];
+      const newHistory = history.slice(0, -1);
+
+      setHistory(newHistory);
+      setCurrentQuestion(prev.question);
+      setCurrentResponse(prev.response);
+      setCurrentStepIndex(prev.stepIndex);
     }
   };
 
-  const handleNext = () => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleFinish();
+  const handleNext = async () => {
+    if (!currentQuestion) return;
+
+    // Save to history before moving on
+    const historyItem = {
+      question: currentQuestion,
+      response: currentResponse,
+      stepIndex: currentStepIndex
+    };
+
+    try {
+      setIsLoading(true);
+
+      const qId = currentQuestion.id || currentQuestion.question_id || currentQuestion.pk;
+      if (!qId) {
+        throw new Error("Invalid question data: Missing ID");
+      }
+
+      // Submit answer (backend expects 1-7 range, UI is 0-6)
+      const rawVal = currentResponse;
+      const safeVal = (typeof rawVal === 'number' && !isNaN(rawVal)) ? rawVal : 3;
+      const finalChoice = safeVal + 1;
+
+      console.log("Processing Answer:", { rawVal, safeVal, finalChoice });
+
+      await assessmentService.submitAnswer(runId, qId, finalChoice);
+
+      // Add to history now that it's submitted (or optimistically)
+      setHistory([...history, historyItem]);
+
+      // Fetch next
+      let nextQ = null;
+      try {
+        nextQ = await assessmentService.getNextQuestion(runId);
+        console.log("Next Question Received:", nextQ);
+      } catch (fetchErr) {
+        console.warn("Failed to fetch next question. Assuming assessment complete.", fetchErr);
+        nextQ = null;
+      }
+
+      if (nextQ) {
+        setCurrentQuestion(nextQ);
+        setCurrentResponse(3); // Reset to neutral for new question
+        setCurrentStepIndex(prev => prev + 1);
+      } else {
+        // Finished
+        navigate("/diagnostic/completed", { state: { runId } });
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Error submitting answer:", err);
+      // Detailed logging for debugging
+      console.log("Failed Payload:", { runId, questionId: currentQuestion?.id, response: currentResponse });
+
+      setError(err.message || "Failed to submit answer. Please try again.");
+      setIsLoading(false);
     }
   };
 
-  const handleFinish = () => {
-    // Navigate to the Diagnostic component in "completed" mode
-    navigate("/diagnostic/completed");
+  const handleFinish = async () => {
+    // Force completion flow: Submit answer -> Navigate. Do not fetch next.
+    try {
+      setIsLoading(true);
+
+      const qId = currentQuestion.id || currentQuestion.question_id || currentQuestion.pk;
+      if (!qId) throw new Error("Invalid question data: Missing ID");
+
+      const rawVal = currentResponse;
+      const safeVal = (typeof rawVal === 'number' && !isNaN(rawVal)) ? rawVal : 3;
+      const finalChoice = safeVal + 1;
+
+      console.log("Submitting Final Answer:", { qId, finalChoice });
+      await assessmentService.submitAnswer(runId, qId, finalChoice);
+
+      // Navigate immediately to completion
+      navigate("/diagnostic/completed", { state: { runId } });
+    } catch (err) {
+      console.error("Error submitting final answer:", err);
+      setError(err.message || "Failed to submit assessment.");
+      setIsLoading(false);
+    }
   };
 
-  // No local completion modal — Finish navigates to Diagnostic completed view
+  if (isLoading && !currentQuestion) {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-500 font-inter">Loading assessment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-gray-100">
+        <div className="text-center px-4">
+          <p className="text-red-500 mb-4 font-inter">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-purple-600 text-white px-6 py-2 rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Hardcoded corrected questions to override API text
+  const CORRECTED_QUESTIONS = [
+    "I tend to think about what I'll be doing a year from now.",
+    "I frequently plan for the future.",
+    "I frequently think about my job or career goals.",
+    "When I have an important goal, I develop a plan to achieve it.",
+    "I take the time to make a plan to help me reach my goals.",
+    "I struggle to move on from setbacks at work.",
+    "I generally figure out a way to manage challenges at work.",
+    "I can handle tough times at work because I've dealt with challenges in the past.",
+    "I usually bounce back quickly from difficult situations at work.",
+    "I usually manage tough times at work without much difficulty.",
+    "I tend to take a while to recover from setbacks at work.",
+    "Before criticizing someone at work, I make an effort to consider how I would experience the situation from their perspective.",
+    "I don't spend much time listening to opposing views at work if I am confident that I'm right about something.",
+    "I believe there are always multiple perspectives to consider at work and strive to see every side of an issue.",
+    "I make an effort to understand everyone's point of view in a disagreement at work before making a decision.",
+    "I sometimes feel like I fit in at work, and other times I don't.",
+    "When something negative occurs at work, I question if I truly belong.",
+    "When something positive happens at work, I feel a strong sense of belonging.",
+    "There is alignment between my work and my personal values, beliefs, and behaviors.",
+    "I derive a sense of meaning or purpose from my work.",
+    "My work contributes to my sense of personal mission in life.",
+    "I know I can achieve most of the work goals I set for myself.",
+    "I think I can achieve outcomes that are important to me.",
+    "I believe I can succeed in anything I set my mind to.",
+    "I am confident in my ability to perform tasks at work effectively.",
+    "I am capable of doing most tasks very well compared to others."
+  ];
+
+  // Fallback if no question yet
+  if (!currentQuestion) return null;
+
+  // Use local corrected text if available, otherwise fallback to API text
+  const questionText = CORRECTED_QUESTIONS[currentStepIndex] || currentQuestion.text || currentQuestion.content || currentQuestion.question || "Question text missing";
+
+  // Calculate progress %
+  // If totalQuestions is known (e.g. 26), use it. Else estimate or show just step count.
+  const totalSteps = totalQuestions || 26;
+  const progressPercent = Math.min(((currentStepIndex + 1) / totalSteps) * 100, 100);
 
   return (
     <div
@@ -140,12 +348,12 @@ const DiagnosticSteps = () => {
                 <div
                   className="h-full bg-white/20 transition-all duration-300 ease-out"
                   style={{
-                    width: `${((currentStep + 1) / questions.length) * 100}%`,
+                    width: `${progressPercent}%`,
                   }}
                 />
               </div>
 
-              {currentStep > 0 ? (
+              {history.length > 0 ? (
                 <button
                   onClick={handlePrevious}
                   className="relative z-10 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl transition-all flex-shrink-0 bg-[#ebebeb] text-[#3D3D3D]/60 active:scale-95"
@@ -173,16 +381,19 @@ const DiagnosticSteps = () => {
               )}
 
               <div className="relative z-10 text-[10px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
-                {currentStep + 1} of {questions.length}
+                {currentStepIndex + 1} of {Math.max(totalQuestions, currentStepIndex + 1)}
               </div>
 
               <div className="relative z-10 flex items-center flex-shrink-0">
-                {currentStep === questions.length - 1 ? (
+                {/* We don't know exact end unless totalQuestions is accurate. 
+                    If we are at last step, button might say Finish. 
+                    Optimistically show Next unless we are sure. */}
+                {(currentStepIndex >= totalSteps - 1) ? (
                   <button
                     onClick={handleFinish}
                     className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl bg-white text-gray-700 hover:bg-gray-50 active:scale-95 transition-all font-inter font-medium text-[10px] sm:text-xs md:text-sm shadow-sm whitespace-nowrap"
                   >
-                    <span>Finish</span>
+                    <span>Submit</span>
                   </button>
                 ) : (
                   <button
@@ -213,7 +424,7 @@ const DiagnosticSteps = () => {
         <div className="flex-1 flex items-center justify-center px-3 sm:px-4 md:px-5 lg:px-10 pb-4 sm:pb-6 md:pb-10">
           <div className="w-full max-w-4xl">
             <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-cormorant font-bold text-white text-center mb-4 sm:mb-6 md:mb-10 lg:mb-14 leading-tight px-2 sm:px-4">
-              {questions[currentStep]}
+              {questionText}
             </h2>
             <div className="relative px-2 sm:px-4 lg:px-0 overflow-visible">
               <div
@@ -247,7 +458,7 @@ const DiagnosticSteps = () => {
                 <div
                   className="absolute top-1/2 z-30 pointer-events-none transition-all duration-200"
                   style={{
-                    left: `${(responses[currentStep] / 6) * 100}%`,
+                    left: `${(currentResponse / 6) * 100}%`,
                     transform: "translate(-50%, -50%)",
                     minWidth: "max-content",
                   }}
@@ -264,7 +475,7 @@ const DiagnosticSteps = () => {
                   min="0"
                   max="6"
                   step="1"
-                  value={responses[currentStep]}
+                  value={currentResponse}
                   onChange={(e) => handleSliderChange(parseInt(e.target.value))}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                 />

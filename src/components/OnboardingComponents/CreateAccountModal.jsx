@@ -134,6 +134,9 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         refresh: refreshToken,
       };
 
+      localStorage.setItem("accessToken", accessToken);
+      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+
       setAuthTokens(tokens);
 
       // Get user profile to check if profile is complete
