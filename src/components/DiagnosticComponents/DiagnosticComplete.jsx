@@ -220,13 +220,12 @@ const DiagnosticComplete = () => {
                     These scores are a benchmark for your growth and a celebration of your capabilities. Your coach Amalia will help you build on this foundation.
                   </p>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Next Step</span>
+                  <div className="flex items-center justify-end pt-4 border-t border-gray-100">
                     <button
                       onClick={() => navigate("/dashboard")}
                       className="inline-flex items-center justify-center px-6 py-3 bg-[#222] text-white rounded-full text-sm font-semibold hover:bg-black hover:scale-105 active:scale-95 transition-all shadow-lg"
                     >
-                      Go to Dashboard →
+                      Go to Dashboard
                     </button>
                   </div>
                 </div>
