@@ -1,46 +1,10 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NotificationPopup from "../DashboardComponents/notification/Notification";
-import { assessmentService } from "../../services/assessment";
 
 const DiagnosticComplete = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
-  const [results, setResults] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-
-  // runId passed from DiagnosticSteps
-  const runId = location.state?.runId;
-
-  React.useEffect(() => {
-    const fetchResults = async () => {
-      if (!runId) {
-        // If no runId, maybe just show the page as is (demo mode) or error
-        // console.warn("No runId provided");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // First trigger brief generation (background task usually, but we call it)
-        await assessmentService.generateBrief(runId).catch(err => console.error("Brief generation failed", err));
-
-        // Then fetch results
-        const data = await assessmentService.getResults(runId);
-        setResults(data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch results", err);
-        console.error("Failed to fetch results", err);
-        setError(err.message || "Could not load results. Please try refreshing.");
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
-  }, [runId]);
 
   return (
     <div className="min-h-screen w-full flex flex-col">
@@ -107,8 +71,7 @@ const DiagnosticComplete = () => {
         />
       </header>
 
-      <div className="flex-1 border-[8px] sm:border-[12px] md:border-[16px] border-[#f5f5f5] relative overflow-hidden bg-[#ebebeb] rounded-2xl sm:rounded-3xl m-2 sm:m-4 flex flex-col">
-        {/* Background elements */}
+      <div className="flex-1 flex items-center justify-center border-[8px] sm:border-[12px] md:border-[16px] border-[#f5f5f5] relative overflow-hidden bg-[#ebebeb] rounded-2xl sm:rounded-3xl">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img
             src="/assets/images/onboarding/Diagnostic_bg.webp"
@@ -116,121 +79,76 @@ const DiagnosticComplete = () => {
             className="w-full h-full object-cover opacity-10"
           />
         </div>
-
-        {/* Decorative corners - hidden on mobile to save space/reduce clutter */}
-        <div className="absolute top-0 left-0 pointer-events-none hidden md:block">
-          <img src="/assets/images/onboarding/topleft-diag.webp" alt="" className="w-32 h-32 lg:w-48 lg:h-48 opacity-80" />
+        <div className="absolute top-0 left-0 pointer-events-none">
+          <img
+            src="/assets/images/onboarding/topleft-diag.webp"
+            alt="top left"
+            className="w-50 h-50 "
+          />
         </div>
-        <div className="absolute top-0 right-0 pointer-events-none hidden md:block">
-          <img src="/assets/images/onboarding/Diagnostic_Topright.webp" alt="" className="w-32 h-32 lg:w-48 lg:h-48 opacity-80" />
+        <div className="absolute top-0 right-0 pointer-events-none">
+          <img
+            src="/assets/images/onboarding/Diagnostic_Topright.webp"
+            alt="top right"
+            className="w-50 h-50 "
+          />
         </div>
-        <div className="absolute bottom-0 right-0 pointer-events-none hidden md:block">
-          <img src="/assets/images/onboarding/Diagnostic_Bottomright.webp" alt="" className="w-32 h-40 lg:w-48 lg:h-60 opacity-80" />
+        <div className="absolute bottom-0 right-0 pointer-events-none">
+          <img
+            src="/assets/images/onboarding/Diagnostic_Bottomright.webp"
+            alt="bottom right"
+            className="w-50 h-60"
+          />
         </div>
-
-        {/* Scrollable Content Container */}
-        <div className="w-full h-full relative z-10 overflow-y-auto custom-scrollbar">
-          <div className="px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12 max-w-[1400px] mx-auto">
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-
-              {/* Left Column: Text & Results */}
-              <div className="lg:col-span-7 flex flex-col order-2 lg:order-1">
-
-                {/* Circle Badge - Mobile: Inline/Top, Desktop: Negative margin pull-up */}
-                <div className="mb-6 lg:-mt-20 lg:mb-8 self-start">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full border-4 border-white bg-[#ebebeb] flex items-center justify-center shadow-xl">
-                    <span className="text-base sm:text-lg lg:text-xl font-bold text-gray-800 font-inter">
-                      100%
-                    </span>
-                  </div>
-                </div>
-
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4 sm:mb-6 font-cormorant leading-tight">
-                  Firmly Diagnostic
-                </h1>
-
-                <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-8 font-inter max-w-2xl">
-                  Excellent work! Your diagnostic assessment is now complete.
-                  We will now share your self-reported scores across key metrics that influence workplace wellbeing and leadership development.
-                </p>
-
-                {/* Results Grid */}
-                <div className="bg-white/40 rounded-2xl p-4 sm:p-6 backdrop-blur-md shadow-sm border border-white/50">
-                  <h3 className="text-xl font-bold text-gray-800 mb-4 font-cormorant flex items-center">
-                    <span className="w-1.5 h-6 bg-purple-500 mr-3 rounded-full"></span>
-                    Your Performance Profile
-                  </h3>
-
-                  {loading ? (
-                    <div className="py-8 text-center text-gray-500 animate-pulse font-inter">Processing your results...</div>
-                  ) : error ? (
-                    <div className="py-8 text-center text-red-500 font-inter bg-red-50/50 rounded-lg border border-red-100 px-4">
-                      {error}
-                      <button
-                        onClick={() => window.location.reload()}
-                        className="block mx-auto mt-4 text-sm text-gray-700 underline"
-                      >
-                        Try Refreshing
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {results && results.details && Array.isArray(results.details) ? (
-                        results.details.map((item, index) => (
-                          <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                              {item.domain ? item.domain.replace(/_/g, ' ') : "Metric"}
-                            </div>
-                            <div className="flex items-baseline space-x-2">
-                              <span className="text-2xl sm:text-3xl font-bold text-purple-600">
-                                {typeof item.percent_0_100 === 'number'
-                                  ? `${Math.round(item.percent_0_100)}%`
-                                  : (typeof item.raw_mean_1_7 === 'number' ? item.raw_mean_1_7.toFixed(1) : '—')}
-                              </span>
-                              {/* Optional visual indicator bar could go here */}
-                            </div>
-                          </div>
-                        ))
-                      ) : results && results.scores ? (
-                        Object.entries(results.scores).map(([key, value]) => (
-                          <div key={key} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">{key.replace(/_/g, ' ')}</div>
-                            <div className="text-xl font-bold text-gray-800">{typeof value === 'number' ? value.toFixed(1) : value}</div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-sm text-gray-500 col-span-full">No detailed results available.</div>
-                      )}
-                    </div>
-                  )}
+        {/* Make inner content full-width so left and right sections hug the edges */}
+        <div className="w-full relative z-10 px-4 sm:px-6 md:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
+            <div className="lg:col-span-7 pt-4 sm:pt-6 lg:pt-0">
+              <div className="mb-4 sm:mb-6 lg:-mt-12">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-3 sm:border-4 border-white flex items-center justify-center shadow-lg">
+                  <span className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 font-inter">
+                    100%
+                  </span>
                 </div>
               </div>
 
-              {/* Right Column: CTA Card */}
-              <div className="lg:col-span-5 w-full lg:max-w-md ml-auto order-1 lg:order-2 mb-8 lg:mb-0">
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden transform lg:translate-y-12">
-                  <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-purple-400 to-pink-500"></div>
-                  <div className="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 bg-purple-50 rounded-full blur-2xl"></div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant">
+                Firmly Diagnostic
+              </h1>
+              <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-6 font-inter max-w-3xl">
+                Excellent work! Your diagnostic assessment is now complete.
+                <br className="hidden sm:block" />
+                We will now share your self-reported scores across six key
+                metrics that influence workplace wellbeing and leadership
+                development. These insights will form the foundation of your
+                personalized coaching plan with Amalia.
+              </p>
+            </div>
 
-                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 font-cormorant relative z-10">
-                    You're off to a great start!
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-600 mb-8 font-inter leading-relaxed relative z-10">
-                    These scores are a benchmark for your growth and a celebration of your capabilities. Your coach Amalia will help you build on this foundation.
-                  </p>
-
-                  <div className="flex items-center justify-end pt-4 border-t border-gray-100">
-                    <button
-                      onClick={() => navigate("/dashboard")}
-                      className="inline-flex items-center justify-center px-6 py-3 bg-[#222] text-white rounded-full text-sm font-semibold hover:bg-black hover:scale-105 active:scale-95 transition-all shadow-lg"
-                    >
-                      Go to Dashboard
-                    </button>
-                  </div>
-                </div>
+            <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-md w-full lg:w-auto max-w-[500px] mx-auto lg:mx-0 relative pt-10 sm:pt-12">
+              <div className="absolute top-0 left-0 right-0 pointer-events-none overflow-hidden rounded-t-xl sm:rounded-t-2xl bg-[#d46fa8]">
+                <img
+                  src="/assets/images/onboarding/DiagLeft.webp"
+                  alt="card top decoration"
+                  className="w-full h-10 sm:h-12 object-cover"
+                />
               </div>
-
+              <h3 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold text-gray-800 mb-2 font-cormorant">
+                You're set to a great start!
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-700 mb-4 sm:mb-6 font-inter leading-relaxed">
+                Remember, these scores aren't meant to discourage you — they're
+                here to set a benchmark for your growth and celebrate the
+                capabilities you already have.
+              </p>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 bg-[#222] text-white rounded-full text-xs sm:text-sm font-medium hover:bg-[#333] active:scale-95 transition-all min-h-[44px]"
+                >
+                  Go to Dashboard
+                </button>
+              </div>
             </div>
           </div>
         </div>
