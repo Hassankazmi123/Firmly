@@ -1,6 +1,6 @@
 import React from "react";
 
-const NormalChatContent = ({ messages = [], isTyping = false }) => {
+const NormalChatContent = ({ messages = [], isTyping = false, error = null }) => {
   const suggestedTopics = Array(7).fill("sensitive topics");
   if (messages.length > 0) {
     return (
@@ -24,6 +24,15 @@ const NormalChatContent = ({ messages = [], isTyping = false }) => {
               </div>
             );
           })}
+          {error && (
+            <div className="flex justify-center">
+              <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 max-w-[80%] md:max-w-[70%]">
+                <p className="text-sm md:text-base text-red-600 font-inter leading-relaxed">
+                  {error}
+                </p>
+              </div>
+            </div>
+          )}
           {isTyping && (
             <div className="flex items-center gap-2 px-4">
               <img

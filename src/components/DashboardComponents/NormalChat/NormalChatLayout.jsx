@@ -3,11 +3,259 @@ import NormalChatSidebar from "./NormalChatSidebar";
 import NormalChatHeader from "./NormalChatHeader";
 import NormalChatContent from "./NormalChatContent";
 import NormalChatInput from "./NormalChatInput";
+import { chatService } from "../../../services/chat";
 
 const NormalChatLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [threads, setThreads] = useState([]);
+  const [currentThread, setCurrentThread] = useState(null);
+  const [isLoadingThreads, setIsLoadingThreads] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch threads on mount
+  useEffect(() => {
+    fetchThreads();
+  }, []);
+
+  // Fetch chat history when thread changes
+  useEffect(() => {
+    if (currentThread && (currentThread.id || currentThread.thread_id)) {
+      const threadId = currentThread.id || currentThread.thread_id;
+      fetchChatHistory(threadId);
+    } else {
+      setMessages([]);
+    }
+  }, [currentThread]);
+
+  const fetchThreads = async () => {
+    try {
+      setIsLoadingThreads(true);
+      setError(null);
+      const response = await chatService.listThreads();
+      console.log("List threads response:", response);
+
+      const threadsList = response.threads || response.data || response || [];
+      const threadsArray = Array.isArray(threadsList) ? threadsList : [];
+
+      // Normalize thread IDs - ensure all threads have 'id' field
+      const normalizedThreads = threadsArray.map(thread => {
+        const normalized = { ...thread };
+        if (normalized.thread_id && !normalized.id) {
+          normalized.id = normalized.thread_id;
+        }
+        return normalized;
+      });
+
+      // Sort threads by updated_at or created_at descending (most recent first)
+      normalizedThreads.sort((a, b) => {
+        const dateA = new Date(a.updated_at || a.created_at || 0);
+        const dateB = new Date(b.updated_at || b.created_at || 0);
+        return dateB - dateA;
+      });
+
+      setThreads(normalizedThreads);
+    } catch (err) {
+      console.error("Failed to fetch threads:", err);
+      setError("Failed to load chat threads");
+    } finally {
+      setIsLoadingThreads(false);
+    }
+  };
+
+  const fetchChatHistory = async (threadId) => {
+    // Validate threadId before making API call
+    if (!threadId || threadId === 'undefined') {
+      console.error("Invalid threadId provided to fetchChatHistory:", threadId);
+      setMessages([]);
+      return;
+    }
+
+    try {
+      setError(null);
+      const response = await chatService.getChatHistory(threadId);
+      console.log("Chat history response:", response);
+
+      const history = response.history || response.messages || response.data || [];
+
+      // Ensure history is an array
+      const historyArray = Array.isArray(history) ? history : [];
+
+      // Transform history to match component format
+      const transformedMessages = historyArray.map(msg => ({
+        type: msg.role === "user" ? "user" : "ai",
+        text: msg.content || msg.text || msg.message || "",
+      }));
+
+      setMessages(transformedMessages);
+    } catch (err) {
+      console.error("Failed to fetch chat history:", err);
+      setError("Failed to load chat history");
+      setMessages([]);
+    }
+  };
+
+  const handleCreateNewThread = async (title = "New Chat") => {
+    try {
+      setError(null);
+      const response = await chatService.createNewThread(false, title);
+
+      // Log the response to debug
+      console.log("Create thread response:", response);
+
+      // Try different response structures
+      let newThread = response.thread || response.data || response;
+
+      // Validate that we have an ID
+      if (!newThread.id && !newThread.thread_id) {
+        console.error("Thread response missing ID:", newThread);
+        throw new Error("Invalid thread response: missing ID");
+      }
+
+      // Normalize the ID field if needed
+      if (newThread.thread_id && !newThread.id) {
+        newThread.id = newThread.thread_id;
+      }
+
+      // Add new thread to list and set as current
+      setThreads(prev => [newThread, ...prev]);
+      setCurrentThread(newThread);
+      setMessages([]);
+
+      return newThread;
+    } catch (err) {
+      console.error("Failed to create thread:", err);
+      setError("Failed to create new chat");
+      throw err;
+    }
+  };
+
+  const handleSendMessage = async (messageText) => {
+    try {
+      setError(null);
+
+      // If no current thread, create one
+      let threadToUse = currentThread;
+      if (!threadToUse) {
+        try {
+          // Use first 50 chars of message as title
+          const title = messageText.length > 50 ? messageText.substring(0, 50) + "..." : messageText;
+          threadToUse = await handleCreateNewThread(title);
+        } catch (createErr) {
+          console.error("Failed to create thread for message:", createErr);
+          setError("Failed to create chat thread. Please try again.");
+          return; // Exit early if thread creation fails
+        }
+      }
+
+      // Validate that we have a thread with an ID
+      if (!threadToUse || !threadToUse.id) {
+        console.error("Invalid thread object:", threadToUse);
+        setError("Invalid chat thread. Please refresh and try again.");
+        return;
+      }
+
+      // Add user message immediately
+      const userMessage = { type: "user", text: messageText };
+      setMessages(prev => [...prev, userMessage]);
+      setIsTyping(true);
+
+      // Send message to API
+      const response = await chatService.sendMessage(threadToUse.id, messageText);
+      console.log("SendMessage Response:", response); // Debugging log
+
+      // Instead of guessing the field, immediately fetch the authoritative history
+      // This ensures we show exactly what is saved on the server, fixing the mismatch
+      await fetchChatHistory(threadToUse.id);
+
+      // Manually update the thread's timestamp locally and move to top
+      // This fixes the issue where the backend doesn't update 'updated_at' automatically
+      setThreads(prevThreads => {
+        const updatedThreads = prevThreads.map(t => {
+          if (t.id === threadToUse.id) {
+            // Update title to be the latest message text
+            const newTitle = messageText.length > 30 ? messageText.substring(0, 30) + "..." : messageText;
+            return {
+              ...t,
+              updated_at: new Date().toISOString(),
+              title: newTitle
+            };
+          }
+          return t;
+        });
+
+        // Re-sort to ensure this thread hits the top
+        updatedThreads.sort((a, b) => {
+          const dateA = new Date(a.updated_at || a.created_at || 0);
+          const dateB = new Date(b.updated_at || b.created_at || 0);
+          return dateB - dateA;
+        });
+
+        return updatedThreads;
+      });
+    } catch (err) {
+      console.error("Failed to send message:", err);
+
+      const errorMessage = err.message || "";
+      if (errorMessage.includes("Session expired") || errorMessage.includes("Authentication failed")) {
+        setError("Session expired. Please log in again to continue.");
+      } else {
+        setError("Failed to send message. Please try again.");
+      }
+
+      // Remove the user message if send failed
+      setMessages(prev => prev.slice(0, -1));
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleSelectThread = (thread) => {
+    if (!thread) {
+      console.error("Invalid thread provided to handleSelectThread");
+      return;
+    }
+
+    // Normalize the ID field if needed
+    const normalizedThread = { ...thread };
+    if (normalizedThread.thread_id && !normalizedThread.id) {
+      normalizedThread.id = normalizedThread.thread_id;
+    }
+
+    // Validate thread has an ID
+    if (!normalizedThread.id) {
+      console.error("Thread missing ID:", thread);
+      setError("Invalid thread selected");
+      return;
+    }
+
+    console.log("Selecting thread:", normalizedThread);
+    setCurrentThread(normalizedThread);
+  };
+
+  const handleResetChat = () => {
+    setCurrentThread(null);
+    setMessages([]);
+  };
+
+  const handleCloseThread = async (threadId) => {
+    try {
+      await chatService.closeThread(threadId);
+
+      // Remove thread from list
+      setThreads(prev => prev.filter(t => t.id !== threadId));
+
+      // If current thread was closed, clear it
+      if (currentThread?.id === threadId) {
+        setCurrentThread(null);
+        setMessages([]);
+      }
+    } catch (err) {
+      console.error("Failed to close thread:", err);
+      setError("Failed to close chat");
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -45,6 +293,13 @@ const NormalChatLayout = () => {
       <NormalChatSidebar
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        threads={threads}
+        currentThread={currentThread}
+        onSelectThread={handleSelectThread}
+        onResetChat={handleResetChat}
+        onCreateNewThread={handleCreateNewThread}
+        onCloseThread={handleCloseThread}
+        isLoading={isLoadingThreads}
       />
       <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-2xl border border-[#ECECEC] relative h-full">
         <img
@@ -54,26 +309,19 @@ const NormalChatLayout = () => {
         />
         <NormalChatHeader
           onMenuClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          currentThread={currentThread}
         />
         <div className="flex-1 overflow-hidden">
-          <NormalChatContent messages={messages} isTyping={isTyping} />
+          <NormalChatContent
+            messages={messages}
+            isTyping={isTyping}
+            error={error}
+          />
         </div>
         <div className="flex-shrink-0">
           <NormalChatInput
-            onSendMessage={(message) => {
-              setMessages([...messages, { type: "user", text: message }]);
-              setIsTyping(true);
-              setTimeout(() => {
-                setIsTyping(false);
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    type: "ai",
-                    text: "Welcome to our final session! Before we dive in, I want to thank you for your engagement throughout this program. Developing empathy is an ongoing journey, and the awareness and commitment you've shown are significant steps. How are you feeling about our work together so far?",
-                  },
-                ]);
-              }, 2000);
-            }}
+            onSendMessage={handleSendMessage}
+            disabled={isTyping}
           />
         </div>
         <img

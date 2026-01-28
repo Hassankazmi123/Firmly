@@ -205,6 +205,15 @@ const DiagnosticSteps = () => {
       // Add to history now that it's submitted (or optimistically)
       setHistory([...history, historyItem]);
 
+      // Optimize: If we know this is the last question, skip validation fetch to avoid 410 errors
+      // currentStepIndex is 0-based. If we are at 25 (26th Q) and total is 26, we are done.
+      const maxQuestions = totalQuestions || 26;
+      if (currentStepIndex >= maxQuestions - 1) {
+        navigate("/diagnostic/completed", { state: { runId } });
+        setIsLoading(false);
+        return;
+      }
+
       // Fetch next
       let nextQ = null;
       try {
@@ -215,12 +224,14 @@ const DiagnosticSteps = () => {
         nextQ = null;
       }
 
-      if (nextQ) {
+      // Validating nextQ structure to ensure it's a real question
+      // Sometimes backend might return a success message object 
+      if (nextQ && (nextQ.id || nextQ.question_id || nextQ.pk)) {
         setCurrentQuestion(nextQ);
         setCurrentResponse(3); // Reset to neutral for new question
         setCurrentStepIndex(prev => prev + 1);
       } else {
-        // Finished
+        // Finished if nextQ is null OR if it doesn't look like a question
         navigate("/diagnostic/completed", { state: { runId } });
       }
       setIsLoading(false);
@@ -234,29 +245,7 @@ const DiagnosticSteps = () => {
     }
   };
 
-  const handleFinish = async () => {
-    // Force completion flow: Submit answer -> Navigate. Do not fetch next.
-    try {
-      setIsLoading(true);
 
-      const qId = currentQuestion.id || currentQuestion.question_id || currentQuestion.pk;
-      if (!qId) throw new Error("Invalid question data: Missing ID");
-
-      const rawVal = currentResponse;
-      const safeVal = (typeof rawVal === 'number' && !isNaN(rawVal)) ? rawVal : 3;
-      const finalChoice = safeVal + 1;
-
-      console.log("Submitting Final Answer:", { qId, finalChoice });
-      await assessmentService.submitAnswer(runId, qId, finalChoice);
-
-      // Navigate immediately to completion
-      navigate("/diagnostic/completed", { state: { runId } });
-    } catch (err) {
-      console.error("Error submitting final answer:", err);
-      setError(err.message || "Failed to submit assessment.");
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading && !currentQuestion) {
     return (
@@ -390,7 +379,7 @@ const DiagnosticSteps = () => {
                     Optimistically show Next unless we are sure. */}
                 {(currentStepIndex >= totalSteps - 1) ? (
                   <button
-                    onClick={handleFinish}
+                    onClick={handleNext}
                     className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl bg-white text-gray-700 hover:bg-gray-50 active:scale-95 transition-all font-inter font-medium text-[10px] sm:text-xs md:text-sm shadow-sm whitespace-nowrap"
                   >
                     <span>Submit</span>

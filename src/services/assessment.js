@@ -22,8 +22,6 @@ export const assessmentService = {
             });
 
             if (response.status === 409) {
-                // Assessment already exists/in-progress. 
-                // Typically returns the existing run info.
                 const data = await response.json();
                 console.warn("Assessment already started (409), resuming:", data);
                 return data;
@@ -50,9 +48,13 @@ export const assessmentService = {
             method: "GET",
             headers: getAuthHeaders(),
         });
+
+        if (response.status === 204) {
+            return null;
+        }
+
         if (!response.ok) {
-            // If 404 or similar, it might mean no more questions
-            if (response.status === 404) return null;
+            if (response.status === 404 || response.status === 410) return null;
             throw new Error("Failed to fetch next question");
         }
         return response.json();
@@ -61,7 +63,7 @@ export const assessmentService = {
     // Submit answer
     submitAnswer: async (runId, questionId, choice) => {
         const payload = { question_id: questionId, choice };
-        console.log("Submitting Answer Payload:", payload); // Debug log
+        console.log("Submitting Answer Payload:", payload);
 
         const response = await fetch(`${API_URL}/api/auth/assessment/${runId}/answer/`, {
             method: "POST",

@@ -1,20 +1,49 @@
 import React, { useState } from "react";
 
-const NormalChatSidebar = ({ isCollapsed, onToggleCollapse }) => {
+const NormalChatSidebar = ({
+  isCollapsed,
+  onToggleCollapse,
+  threads = [],
+  currentThread,
+  onSelectThread,
+  onResetChat,
+  onCloseThread,
+  onCreateNewThread, // Added prop
+  isLoading = false,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const conversations = [
-    {
-      date: "JUN 09, 2025 - 11:18 am",
-      title: "Cultivating Empathy",
-      isActive: true,
-    },
-    {
-      date: "JUN 08, 2025 - 03:52 pm",
-      title: "Diagnostic Debrief",
-      isActive: false,
-    },
-  ];
+  // Filter threads based on search query
+  const filteredThreads = threads.filter(thread => {
+    const title = thread.title || "";
+    return title.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  const handleNewChat = () => {
+    if (onCreateNewThread) {
+      onCreateNewThread("My Chat Thread-1");
+    } else if (onResetChat) {
+      onResetChat();
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      const options = {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      };
+      return date.toLocaleString('en-US', options).toUpperCase();
+    } catch (err) {
+      return dateString;
+    }
+  };
 
   return (
     <>
@@ -47,11 +76,10 @@ const NormalChatSidebar = ({ isCollapsed, onToggleCollapse }) => {
         </button>
       )}
       <div
-        className={`bg-white rounded-2xl transition-all duration-300 ${
-          isCollapsed
-            ? "w-0 overflow-hidden -translate-x-full md:translate-x-0"
-            : "w-3/4 md:w-1/4 lg:w-1/5 translate-x-0 mr-4"
-        } fixed md:relative z-50 md:z-auto flex flex-col h-full`}
+        className={`bg-white rounded-2xl transition-all duration-300 ${isCollapsed
+          ? "w-0 overflow-hidden -translate-x-full md:translate-x-0"
+          : "w-3/4 md:w-1/4 lg:w-1/5 translate-x-0 mr-4"
+          } fixed md:relative z-50 md:z-auto flex flex-col h-full`}
         style={{ maxHeight: "100%" }}
       >
         <div className="px-5 py-3 flex items-center justify-between  mt-4">
@@ -90,6 +118,7 @@ const NormalChatSidebar = ({ isCollapsed, onToggleCollapse }) => {
             <button
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9E9CAE] hover:text-gray-600 transition-colors"
               aria-label="New conversation"
+              onClick={handleNewChat}
             >
               <svg
                 className="w-5 h-5"
@@ -113,19 +142,33 @@ const NormalChatSidebar = ({ isCollapsed, onToggleCollapse }) => {
           </h3>
         </div>
         <div className="flex-1 overflow-y-auto px-3 pb-4">
-          {conversations.map((conv, index) => (
-            <div
-              key={index}
-              className={`rounded-xl border border-[#ECECEC] p-3 mb-2 cursor-pointer transition-colors ${
-                conv.isActive ? "bg-[#F5F5F5]" : "bg-white hover:bg-gray-50"
-              }`}
-            >
-              <p className="text-xs text-[#3D3D3D]/60 mb-1">{conv.date}</p>
-              <p className="text-sm md:text-base font-medium text-[#3D3D3D] font-inter">
-                {conv.title}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-[#6664D3] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : filteredThreads.length === 0 ? (
+            <div className="text-center py-8 px-4">
+              <p className="text-sm text-[#3D3D3D]/60 font-inter">
+                {searchQuery ? "No conversations found" : "No conversations yet. Start a new chat!"}
               </p>
             </div>
-          ))}
+          ) : (
+            filteredThreads.map((thread) => (
+              <div
+                key={thread.id}
+                className={`rounded-xl border border-[#ECECEC] p-3 mb-2 cursor-pointer transition-colors ${currentThread?.id === thread.id ? "bg-[#F5F5F5]" : "bg-white hover:bg-gray-50"
+                  }`}
+                onClick={() => onSelectThread(thread)}
+              >
+                <p className="text-xs text-[#3D3D3D]/60 mb-1">
+                  {formatDate(thread.created_at || thread.updated_at)}
+                </p>
+                <p className="text-sm md:text-base font-medium text-[#3D3D3D] font-inter">
+                  {thread.title || "Untitled Chat"}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </>

@@ -1,10 +1,30 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPopup from "../DashboardComponents/notification/Notification";
+import { assessmentService } from "../../services/assessment";
 
 const DiagnosticComplete = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { runId } = location.state || {};
   const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
+
+  useEffect(() => {
+    const completeAssessment = async () => {
+      if (runId) {
+        try {
+          // 2. Get assessment results
+          await assessmentService.getResults(runId);
+          // 3. Generate diagnostic brief
+          await assessmentService.generateBrief(runId);
+        } catch (error) {
+          console.error("Error completing assessment flow:", error);
+        }
+      }
+    };
+
+    completeAssessment();
+  }, [runId]);
 
   return (
     <div className="min-h-screen w-full flex flex-col">

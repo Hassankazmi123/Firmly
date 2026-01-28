@@ -1,6 +1,6 @@
 import React from "react";
 
-const NormalChatHeader = ({ onMenuClick }) => {
+const NormalChatHeader = ({ onMenuClick, currentThread = null }) => {
   return (
     <div className="p-4 md:p-6 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-4">
@@ -24,7 +24,7 @@ const NormalChatHeader = ({ onMenuClick }) => {
           </svg>
         </button>
         <h1 className="text-xl md:text-2xl font-semibold text-black font-cormorant">
-          Amalia
+          {currentThread?.title || "Amalia"}
         </h1>
       </div>
       <div className="text-md md:text-lg font-cormorant font-semibold underline text-black">
