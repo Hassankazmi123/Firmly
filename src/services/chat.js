@@ -16,17 +16,16 @@ const refreshAccessToken = async () => {
     }
 
     try {
-        console.log("🔄 Attempting to refresh token...");
-        // Try standard SimpleJWT endpoint first
+        console.log("Attempting to refresh token...");
+
         let response = await fetch(`${API_AUTH_URL}/token/refresh/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refresh: refreshToken })
         });
 
-        // If 404, try alternative endpoint
         if (response.status === 404) {
-            console.log("⚠️ /token/refresh/ not found, trying /refresh/...");
+            console.log("/token/refresh/ not found, trying /refresh/...");
             response = await fetch(`${API_AUTH_URL}/refresh/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -47,7 +46,7 @@ const refreshAccessToken = async () => {
             throw new Error("No access token in refresh response");
         }
 
-        console.log("✅ Token refreshed successfully");
+        console.log("Token refreshed successfully");
         localStorage.setItem("accessToken", newAccess);
         if (newRefresh) {
             localStorage.setItem("refreshToken", newRefresh);
@@ -55,7 +54,7 @@ const refreshAccessToken = async () => {
 
         return newAccess;
     } catch (error) {
-        console.error("❌ Token refresh failed:", error);
+        console.error("Token refresh failed:", error);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         throw error;
@@ -71,25 +70,21 @@ const authenticatedFetch = async (url, options = {}) => {
             headers: { ...headers, ...options.headers }
         });
 
-        // If 401, try to refresh token and retry
         if (response.status === 401) {
-            console.warn("⚠️ 401 Unauthorized, attempting to refresh token...");
+            console.warn("401 Unauthorized, attempting to refresh token...");
             try {
                 const newToken = await refreshAccessToken();
 
-                // Update headers with new token
                 headers = {
                     ...headers,
                     "Authorization": `Bearer ${newToken}`
                 };
 
-                // Retry original request
                 response = await fetch(url, {
                     ...options,
                     headers: { ...headers, ...options.headers }
                 });
             } catch (refreshError) {
-                // If refresh failed, throw session expired error
                 console.error("Session refresh failed:", refreshError);
                 throw new Error("Session expired. Please log in again.");
             }
@@ -103,7 +98,6 @@ const authenticatedFetch = async (url, options = {}) => {
 
 const handleResponse = async (response) => {
     if (response.status === 401) {
-        // This should only be reached if retry failed or wasn't attempted
         throw new Error("Session expired. Please log in again.");
     }
 
@@ -120,7 +114,7 @@ export const chatService = {
     /**
      * 1. Create a new free chat thread
      */
-    createNewThread: async (incognito = false, title = "New Chat") => {
+    createNewThread: async (incognito = true, title = "New Chat") => {
         try {
             return await authenticatedFetch(`${API_AUTH_URL}/chat/free/new`, {
                 method: "POST",

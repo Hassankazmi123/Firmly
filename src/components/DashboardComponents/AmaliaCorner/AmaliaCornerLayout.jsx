@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import ChatHeader from "./ChatHeader";
 import ChatMessage from "./ChatMessage";
 import ProgressBarsSection from "./ProgressBarsSection";
-import TextBlock from "./TextBlock";
+import SummaryCard from "./SummaryCard";
 import ChatInputFooter from "./ChatInputFooter";
 import Session1Chat from "./Session1Chat";
 import Session2Chat from "./Session2Chat";
@@ -174,15 +174,15 @@ const AmaliaCornerLayout = () => {
     sessionStorage.setItem("fromStartSession", "true");
     navigate("/dashboard");
   };
-  const glowAreas = [
-    "Goal Orientation - You excel at setting and pursuing objectives",
-    "Workplace Belonging - You create strong connections with your team",
-    "Resilience - You bounce back from challenges and setbacks",
+  const glowItems = [
+    { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
+    { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
+    { abbreviation: "RES", label: "Resilience", score: 87 },
   ];
-  const growAreas = [
-    "Empathy - Understanding and connecting with others' emotions",
-    "Self-Belief - Confidence in your leadership abilities",
-    "Engagement - Maintaining good motivation and involvement",
+  const growItems = [
+    { abbreviation: "EMP", label: "Empathy", score: 32 },
+    { abbreviation: "ENG", label: "Engagement", score: 24 },
+    { abbreviation: "SEL", label: "Self-belief", score: 22 },
   ];
   return (
     <div className="flex flex-col md:flex-row h-full overflow-hidden">
@@ -292,16 +292,22 @@ const AmaliaCornerLayout = () => {
                   <ChatMessage key={index} message={msg} />
                 ))}
                 <ProgressBarsSection />
-                <TextBlock
-                  title="Based on your profile, I can see your Glow Areas (strengths) are:"
-                  items={glowAreas}
-                  bgColor="bg-[#F5F5FF]"
-                />
-                <TextBlock
-                  title="Your Grow Areas (development opportunities) are:"
-                  items={growAreas}
-                  bgColor="bg-[#F5F5FF]"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  <SummaryCard
+                    title="Doing great"
+                    subtitle="Your female talent is thriving in the following domains."
+                    items={glowItems}
+                    bgColor="bg-[#378C78]"
+                    iconImage="/assets/images/dashboard/doing.webp"
+                  />
+                  <SummaryCard
+                    title="Growth areas"
+                    subtitle="These areas need your immediate attention to balance workplace wellbeing."
+                    items={growItems}
+                    bgColor="bg-[#C56A55]"
+                    iconImage="/assets/images/dashboard/growth.webp"
+                  />
+                </div>
                 <p className="text-sm md:text-base font-inter-regular text-black   bg-[#F5F5FF] p-4 rounded-xl">
                   You can now view your Glow and Grow areas at all times on your
                   dashboard. I will help you to work on them and improve your
@@ -490,9 +496,8 @@ const AmaliaCornerLayout = () => {
         )}
         {!showPathwayView && selectedConversation !== "session1" && selectedConversation !== "session2" && selectedConversation !== "session3" && selectedConversation !== "session4" && (
           <div
-            className={`absolute bottom-0 left-0 right-0 ${
-              isSidebarCollapsed ? "z-50" : ""
-            } md:z-50`}
+            className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+              } md:z-50`}
           >
             <ChatInputFooter />
           </div>
