@@ -28,17 +28,25 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     if (historyMessages.length > 0) {
       return historyMessages.map((msg, idx) => ({
         id: msg.id || idx,
-        type: msg.sender === 'user' ? 'user' : 'amalia',
+        type: (msg.sender && msg.sender.toLowerCase().trim() === 'user') ? 'user' : 'amalia',
         content: msg.text || msg.content
       }));
     }
     return [];
   };
 
+  const getDomain = () => {
+    return sessionStorage.getItem("currentPathwayDomain") || "emp";
+  };
+
   const initializeSession = async () => {
     setLoading(true);
+    const domain = getDomain();
     try {
-      const historyData = await pathwayService.getEmpathyHistory();
+      const historyData = domain === "goal"
+        ? await pathwayService.getGoalHistorySession1()
+        : await pathwayService.getEmpathyHistory();
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
@@ -47,7 +55,7 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
         await startSession();
       }
     } catch (error) {
-      console.error("Failed to initialize session:", error);
+      console.error(`Failed to initialize session 1 (${domain}):`, error);
       await startSession();
     } finally {
       setLoading(false);
@@ -55,8 +63,12 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
   };
 
   const startSession = async () => {
+    const domain = getDomain();
     try {
-      const data = await pathwayService.startEmpathySession1();
+      const data = domain === "goal"
+        ? await pathwayService.startGoalSession1()
+        : await pathwayService.startEmpathySession1();
+
       if (data) {
         const content = data.message || data.text || data.response;
         if (content) {
@@ -68,37 +80,50 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
         }
       }
     } catch (err) {
-      console.error("Error starting session:", err);
+      console.error(`Error starting session 1 (${domain}):`, err);
     }
   };
 
   const handleSendMessage = async (text) => {
+    const domain = getDomain();
     // Optimistic UI update
     const userMsg = { id: Date.now(), type: 'user', content: text };
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      await pathwayService.sendEmpathyMessage(text, "CORE");
+      if (domain === "goal") {
+        await pathwayService.sendGoalMessageSession1(text, "CORE");
+      } else {
+        await pathwayService.sendEmpathyMessage(text, "CORE");
+      }
 
       // Fetch fresh history to get the bot response and sync state
-      // This solves the issue where response wasn't showing until refresh
-      const historyData = await pathwayService.getEmpathyHistory();
+      const historyData = domain === "goal"
+        ? await pathwayService.getGoalHistorySession1()
+        : await pathwayService.getEmpathyHistory();
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
         setMessages(formatted);
       }
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error(`Failed to send message session 1 (${domain}):`, error);
     }
   };
 
   const handleNextSession = async () => {
+    const domain = getDomain();
     try {
-      // End session
-      await pathwayService.sendEmpathyMessage("", "GOODBYE");
+      if (domain === "goal") {
+        // Goal Setting Session 1 doesn't have a specified GOODBYE in the user message, 
+        // but follow same pattern if it exists.
+        await pathwayService.sendGoalMessageSession1("", "GOODBYE");
+      } else {
+        await pathwayService.sendEmpathyMessage("", "GOODBYE");
+      }
     } catch (error) {
-      console.error("Error ending session:", error);
+      console.error(`Error ending session 1 (${domain}):`, error);
     }
 
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
@@ -119,26 +144,20 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
         )}
 
         {messages.map((message) => (
-          <div key={message.id} className="mb-6">
-            {message.type === "amalia" ? (
-              <div className="bg-[#F5F5FF] rounded-lg p-4">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
-              </div>
-            ) : (
-              <div className="bg-[#f5f5f5] rounded-lg p-4 ml-auto max-w-fit">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
-              </div>
-            )}
-
-            {/* 
-              Simplified response logic: removed the complex specific 'showResponse' Logic 
-              from the static mock data as dynamic data won't have it unless backend provides.
-              Assuming linear chat flow.
-            */}
+          <div
+            key={message.id}
+            className={`mb-6 flex w-full ${message.type === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`p-4 rounded-xl max-w-[85%] ${message.type === "amalia"
+                ? "bg-[#F5F5FF]"
+                : "bg-[#f5f5f5] ml-auto"
+                }`}
+            >
+              <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
+                {message.content}
+              </p>
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />

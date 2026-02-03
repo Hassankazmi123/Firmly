@@ -28,17 +28,25 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
     if (historyMessages.length > 0) {
       return historyMessages.map((msg, idx) => ({
         id: msg.id || idx,
-        type: msg.sender === 'user' ? 'user' : 'amalia',
+        type: (msg.sender && msg.sender.toLowerCase().trim() === 'user') ? 'user' : 'amalia',
         content: msg.text || msg.content
       }));
     }
     return [];
   };
 
+  const getDomain = () => {
+    return sessionStorage.getItem("currentPathwayDomain") || "emp";
+  };
+
   const initializeSession = async () => {
     setLoading(true);
+    const domain = getDomain();
     try {
-      const historyData = await pathwayService.getEmpathyHistorySession2();
+      const historyData = domain === "goal"
+        ? await pathwayService.getGoalHistorySession2()
+        : await pathwayService.getEmpathyHistorySession2();
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
@@ -47,7 +55,7 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         await startSession();
       }
     } catch (error) {
-      console.error("Failed to initialize session 2:", error);
+      console.error(`Failed to initialize session 2 (${domain}):`, error);
       await startSession();
     } finally {
       setLoading(false);
@@ -55,8 +63,12 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
   };
 
   const startSession = async () => {
+    const domain = getDomain();
     try {
-      const data = await pathwayService.startEmpathySession2();
+      const data = domain === "goal"
+        ? await pathwayService.startGoalSession2()
+        : await pathwayService.startEmpathySession2();
+
       if (data) {
         const content = data.message || data.text || data.response;
         if (content) {
@@ -68,34 +80,47 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         }
       }
     } catch (err) {
-      console.error("Error starting session 2:", err);
+      console.error(`Error starting session 2 (${domain}):`, err);
     }
   };
 
   const handleSendMessage = async (text) => {
+    const domain = getDomain();
     const userMsg = { id: Date.now(), type: 'user', content: text };
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      await pathwayService.sendEmpathyMessageSession2(text, "CORE");
+      if (domain === "goal") {
+        await pathwayService.sendGoalMessageSession2(text, "CORE");
+      } else {
+        await pathwayService.sendEmpathyMessageSession2(text, "CORE");
+      }
 
       // Fetch fresh history to get the bot response and sync state
-      const historyData = await pathwayService.getEmpathyHistorySession2();
+      const historyData = domain === "goal"
+        ? await pathwayService.getGoalHistorySession2()
+        : await pathwayService.getEmpathyHistorySession2();
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
         setMessages(formatted);
       }
     } catch (error) {
-      console.error("Failed to send message session 2:", error);
+      console.error(`Failed to send message session 2 (${domain}):`, error);
     }
   };
 
   const handleNextSession = async () => {
+    const domain = getDomain();
     try {
-      await pathwayService.sendEmpathyMessageSession2("", "GOODBYE");
+      if (domain === "goal") {
+        await pathwayService.sendGoalMessageSession2("", "GOODBYE");
+      } else {
+        await pathwayService.sendEmpathyMessageSession2("", "GOODBYE");
+      }
     } catch (error) {
-      console.error("Error ending session 2:", error);
+      console.error(`Error ending session 2 (${domain}):`, error);
     }
 
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
@@ -116,20 +141,20 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         )}
 
         {messages.map((message) => (
-          <div key={message.id} className="mb-6">
-            {message.type === "amalia" ? (
-              <div className="bg-[#F5F5FF] rounded-lg p-4">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
-              </div>
-            ) : (
-              <div className="bg-[#f5f5f5] rounded-lg p-4 ml-auto max-w-fit">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
-              </div>
-            )}
+          <div
+            key={message.id}
+            className={`mb-6 flex w-full ${message.type === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`p-4 rounded-xl max-w-[85%] ${message.type === "amalia"
+                ? "bg-[#F5F5FF]"
+                : "bg-[#f5f5f5] ml-auto"
+                }`}
+            >
+              <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
+                {message.content}
+              </p>
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />

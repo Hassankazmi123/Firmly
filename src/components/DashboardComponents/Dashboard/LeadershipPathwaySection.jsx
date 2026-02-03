@@ -53,7 +53,10 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   const handleGenerate = async () => {
     console.log("Generate Leadership Pathway clicked");
     try {
-      await pathwayService.startPathway();
+      const response = await pathwayService.startPathway();
+      if (response && response.domain) {
+        sessionStorage.setItem("currentPathwayDomain", response.domain);
+      }
       console.log("Pathway started successfully");
     } catch (error) {
       console.error("Failed to start pathway:", error);

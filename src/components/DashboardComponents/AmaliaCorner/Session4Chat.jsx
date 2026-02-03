@@ -28,17 +28,25 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
     if (historyMessages.length > 0) {
       return historyMessages.map((msg, idx) => ({
         id: msg.id || idx,
-        type: msg.sender === 'user' ? 'user' : 'amalia',
+        type: (msg.sender && msg.sender.toLowerCase().trim() === 'user') ? 'user' : 'amalia',
         content: msg.text || msg.content
       }));
     }
     return [];
   };
 
+  const getDomain = () => {
+    return sessionStorage.getItem("currentPathwayDomain") || "emp";
+  };
+
   const initializeSession = async () => {
     setLoading(true);
+    const domain = getDomain();
     try {
-      const historyData = await pathwayService.getEmpathyHistorySession4();
+      const historyData = domain === "goal"
+        ? await pathwayService.getGoalHistorySession4()
+        : await pathwayService.getEmpathyHistorySession4();
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
@@ -47,7 +55,7 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
         await startSession();
       }
     } catch (error) {
-      console.error("Failed to initialize session 4:", error);
+      console.error(`Failed to initialize session 4 (${domain}):`, error);
       await startSession();
     } finally {
       setLoading(false);
@@ -55,8 +63,12 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
   };
 
   const startSession = async () => {
+    const domain = getDomain();
     try {
-      const data = await pathwayService.startEmpathySession4();
+      const data = domain === "goal"
+        ? await pathwayService.startGoalSession4()
+        : await pathwayService.startEmpathySession4();
+
       if (data) {
         const content = data.message || data.text || data.response;
         if (content) {
@@ -68,35 +80,48 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
         }
       }
     } catch (err) {
-      console.error("Error starting session 4:", err);
+      console.error(`Error starting session 4 (${domain}):`, err);
     }
   };
 
   const handleSendMessage = async (text) => {
+    const domain = getDomain();
     const userMsg = { id: Date.now(), type: 'user', content: text };
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      await pathwayService.sendEmpathyMessageSession4(text, "CORE");
+      if (domain === "goal") {
+        await pathwayService.sendGoalMessageSession4(text, "CORE");
+      } else {
+        await pathwayService.sendEmpathyMessageSession4(text, "CORE");
+      }
 
       // Fetch fresh history to get the bot response and sync state
-      const historyData = await pathwayService.getEmpathyHistorySession4();
+      const historyData = domain === "goal"
+        ? await pathwayService.getGoalHistorySession4()
+        : await pathwayService.getEmpathyHistorySession4();
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
         setMessages(formatted);
       }
     } catch (error) {
-      console.error("Failed to send message session 4:", error);
+      console.error(`Failed to send message session 4 (${domain}):`, error);
     }
   };
 
   const handleShareFeedback = async () => {
+    const domain = getDomain();
     try {
       // Properly end the session before showing feedback modal
-      await pathwayService.sendEmpathyMessageSession4("", "GOODBYE");
+      if (domain === "goal") {
+        await pathwayService.sendGoalMessageSession4("", "GOODBYE");
+      } else {
+        await pathwayService.sendEmpathyMessageSession4("", "GOODBYE");
+      }
     } catch (error) {
-      console.error("Error ending session 4 for feedback:", error);
+      console.error(`Error ending session 4 (${domain}) for feedback:`, error);
     }
     setIsFeedbackModalOpen(true);
   };
@@ -109,20 +134,20 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
         )}
 
         {messages.map((message) => (
-          <div key={message.id} className="mb-6">
-            {message.type === "amalia" ? (
-              <div className="bg-[#F5F5FF] rounded-lg p-4">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
-              </div>
-            ) : (
-              <div className="bg-[#f5f5f5] rounded-lg p-4 ml-auto max-w-fit">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
-              </div>
-            )}
+          <div
+            key={message.id}
+            className={`mb-6 flex w-full ${message.type === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`p-4 rounded-xl max-w-[85%] ${message.type === "amalia"
+                ? "bg-[#F5F5FF]"
+                : "bg-[#f5f5f5] ml-auto"
+                }`}
+            >
+              <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
+                {message.content}
+              </p>
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />

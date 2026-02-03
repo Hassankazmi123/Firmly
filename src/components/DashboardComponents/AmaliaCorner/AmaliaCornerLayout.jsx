@@ -152,7 +152,10 @@ const AmaliaCornerLayout = () => {
   );
   const handleGeneratePathway = async () => {
     try {
-      await pathwayService.startPathway();
+      const response = await pathwayService.startPathway();
+      if (response && response.domain) {
+        sessionStorage.setItem("currentPathwayDomain", response.domain);
+      }
     } catch (e) {
       console.error("Failed to start pathway from layout:", e);
     }
@@ -176,17 +179,48 @@ const AmaliaCornerLayout = () => {
     navigate("/dashboard");
   };
 
+  const handleSendMessage = async (text) => {
+    const userMsg = { id: Date.now(), type: 'user', content: text };
+    setMessages((prev) => [...prev, userMsg]);
+
+    try {
+      // Optimistically add and then sync or just keep local if no API for diagnostic chat
+      // If we want to sync with session 1 history:
+      await pathwayService.sendEmpathyMessage(text, "CORE");
+      const historyData = await pathwayService.getEmpathyHistory();
+
+      const formatted = (Array.isArray(historyData) ? historyData : (historyData?.messages || [])).map((msg, idx) => ({
+        id: msg.id || idx,
+        type: (msg.sender && msg.sender.toLowerCase().trim() === 'user') ? 'user' : 'amalia',
+        content: msg.text || msg.content
+      }));
+
+      if (formatted.length > 0) {
+        setMessages(formatted);
+      }
+    } catch (error) {
+      console.error("Failed to send message in diagnostic view:", error);
+    }
+  };
+
   const handleStartSession = () => {
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
     sessionStorage.setItem("fromStartSession", "true");
     navigate("/dashboard");
   };
+  const isGoalPath = sessionStorage.getItem("currentPathwayDomain") === "goal";
+  const domainLabel = isGoalPath ? "Goal Setting" : "Empathy";
+
   const glowItems = [
     { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
     { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
     { abbreviation: "RES", label: "Resilience", score: 87 },
   ];
-  const growItems = [
+  const growItems = isGoalPath ? [
+    { abbreviation: "GOA", label: "Goal Orientation", score: 32 },
+    { abbreviation: "ENG", label: "Engagement", score: 24 },
+    { abbreviation: "SEL", label: "Self-belief", score: 22 },
+  ] : [
     { abbreviation: "EMP", label: "Empathy", score: 32 },
     { abbreviation: "ENG", label: "Engagement", score: 24 },
     { abbreviation: "SEL", label: "Self-belief", score: 22 },
@@ -236,33 +270,33 @@ const AmaliaCornerLayout = () => {
                 <div className="bg-[#F5F5F5] rounded-2xl p-6 md:p-8 mb-8">
                   <p className="text-base md:text-lg text-[#3D3D3D] font-inter mb-6">
                     We'll start with{" "}
-                    <span className="font-semibold">Empathy</span>. For that,
+                    <span className="font-semibold">{domainLabel}</span>. For that,
                     I've scheduled 4 sessions for you:
                   </p>
                   <ul className="space-y-3 mb-6">
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 1: The Power of Empathetic Leadership (Common
+                        Session 1: {isGoalPath ? "Strategic Leadership Goals" : "The Power of Empathetic Leadership"} (Common
                         Understanding)
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 2: Reflective Practice - Empathy in Action
+                        Session 2: {isGoalPath ? "Growth Mindset and Goal Accuracy" : "Reflective Practice - Empathy in Action"}
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 3: The Empathy Toolkit - Practical Applications
+                        Session 3: {isGoalPath ? "Actionable Goal Framework" : "The Empathy Toolkit - Practical Applications"}
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 4: Integration and Forward Movement
+                        Session 4: {isGoalPath ? "Integration and Long-term Success" : "Integration and Forward Movement"}
                       </span>
                     </li>
                   </ul>
@@ -442,40 +476,40 @@ const AmaliaCornerLayout = () => {
                 </div>
                 <div className="bg-[#F5F5FF] rounded-xl p-4  mb-4 md:mb-6">
                   <p className="text-base  text-black font-regular font-inter mb-2">
-                    We'll start with Empathy. For that, I've scheduled 4
+                    We'll start with {domainLabel}. For that, I've scheduled 4
                     sessions for you:
                   </p>
                   <ul className="space-y-1 mb-2">
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 1: The Power of Empathetic Leadership (Common
+                        Session 1: {isGoalPath ? "Strategic Leadership Goals" : "The Power of Empathetic Leadership"} (Common
                         Understanding)
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 2: Reflective Practice - Empathy in Action
+                        Session 2: {isGoalPath ? "Growth Mindset and Goal Accuracy" : "Reflective Practice - Empathy in Action"}
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 3: The Empathy Toolkit - Practical Applications
+                        Session 3: {isGoalPath ? "Actionable Goal Framework" : "The Empathy Toolkit - Practical Applications"}
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 4: Integration and Forward Movement
+                        Session 4: {isGoalPath ? "Integration and Long-term Success" : "Integration and Forward Movement"}
                       </span>
                     </li>
                   </ul>
                   <p className="text-base text-black font-regular/70 font-inter mb-2 leading-relaxed">
                     Each session is designed to be conversational and practical,
                     building on real workplace scenarios. We'll work together to
-                    develop your empathetic leadership skills through
+                    develop your {domainLabel.toLowerCase()} skills through
                     evidence-based techniques.
                   </p>
                   <p className="text-base text-black font-regular/70 font-inter">
@@ -506,7 +540,7 @@ const AmaliaCornerLayout = () => {
             className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
               } md:z-50`}
           >
-            <ChatInputFooter />
+            <ChatInputFooter onSend={handleSendMessage} />
           </div>
         )}
       </div>
