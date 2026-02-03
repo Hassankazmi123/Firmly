@@ -418,5 +418,85 @@ export const pathwayService = {
         return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s4/history`, {
             method: "GET",
         });
+    },
+
+    // Self Awareness Session 1 Methods
+    startSelfAwarenessSession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s1/start`, {
+            method: "POST",
+        });
+    },
+
+    sendSelfAwarenessMessageSession1: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s1/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getSelfAwarenessHistorySession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s1/history`, {
+            method: "GET",
+        });
+    },
+
+    // Self Awareness Session 2 Methods
+    startSelfAwarenessSession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s2/start`, {
+            method: "POST",
+        });
+    },
+
+    sendSelfAwarenessMessageSession2: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s2/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getSelfAwarenessHistorySession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s2/history`, {
+            method: "GET",
+        });
+    },
+
+    // Self Awareness Session 3 Methods
+    startSelfAwarenessSession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s3/start`, {
+            method: "POST",
+        });
+    },
+
+    sendSelfAwarenessMessageSession3: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s3/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getSelfAwarenessHistorySession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s3/history`, {
+            method: "GET",
+        });
+    },
+
+    // Self Awareness Session 4 Methods
+    startSelfAwarenessSession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s4/start`, {
+            method: "POST",
+        });
+    },
+
+    sendSelfAwarenessMessageSession4: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s4/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getSelfAwarenessHistorySession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/self/s4/history`, {
+            method: "GET",
+        });
     }
 };

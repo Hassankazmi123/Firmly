@@ -214,6 +214,9 @@ const AmaliaCornerLayout = () => {
       } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
         domain = "eng";
         sessionStorage.setItem("currentPathwayDomain", "eng");
+      } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
+        domain = "self";
+        sessionStorage.setItem("currentPathwayDomain", "self");
       }
 
       let historyData;
@@ -227,6 +230,9 @@ const AmaliaCornerLayout = () => {
       } else if (domain === "eng") {
         await pathwayService.sendEngagementMessageSession1(text, "CORE");
         historyData = await pathwayService.getEngagementHistorySession1();
+      } else if (domain === "self") {
+        await pathwayService.sendSelfAwarenessMessageSession1(text, "CORE");
+        historyData = await pathwayService.getSelfAwarenessHistorySession1();
       } else {
         await pathwayService.sendEmpathyMessage(text, "CORE");
         historyData = await pathwayService.getEmpathyHistory();
@@ -253,6 +259,7 @@ const AmaliaCornerLayout = () => {
     if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
     if (d.includes("goal")) return "goal";
     if (d.includes("engagement") || d.includes("engage")) return "eng";
+    if (d.includes("self")) return "self";
     if (d.includes("empathy") || d.includes("emp")) return "emp";
     return "emp";
   };
@@ -270,6 +277,7 @@ const AmaliaCornerLayout = () => {
       case "goal": return "Goal Setting";
       case "res": return "Resilience";
       case "eng": return "Engagement";
+      case "self": return "Self Awareness";
       default: return "Empathy";
     }
   };
@@ -296,6 +304,11 @@ const AmaliaCornerLayout = () => {
         { abbreviation: "ENG", label: "Engagement", score: 32 },
         { abbreviation: "SEL", label: "Self-belief", score: 24 },
         { abbreviation: "WOR", label: "Workplace Belonging", score: 22 },
+      ];
+      case "self": return [
+        { abbreviation: "SEL", label: "Self Awareness", score: 32 },
+        { abbreviation: "EMOT", label: "Emotional Reg", score: 24 },
+        { abbreviation: "SOC", label: "Social", score: 22 },
       ];
       default: return [
         { abbreviation: "EMP", label: "Empathy", score: 32 },
@@ -324,6 +337,12 @@ const AmaliaCornerLayout = () => {
         if (num === 2) return "Identifying Engagement Gaps";
         if (num === 3) return "Actionable Engagement Strategies";
         if (num === 4) return "Sustaining High Engagement";
+        break;
+      case "self":
+        if (num === 1) return "Building Self Awareness";
+        if (num === 2) return "Understanding Emotions";
+        if (num === 3) return "Mindful Leadership";
+        if (num === 4) return "Integrating Awareness";
         break;
       default:
         if (num === 1) return "The Power of Empathetic Leadership";
