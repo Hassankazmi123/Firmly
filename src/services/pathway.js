@@ -53,5 +53,65 @@ export const pathwayService = {
         return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s1/history`, {
             method: "GET",
         });
+    },
+
+    // Session 2 Methods
+    startEmpathySession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s2/start`, {
+            method: "POST",
+        });
+    },
+
+    sendEmpathyMessageSession2: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s2/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getEmpathyHistorySession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s2/history`, {
+            method: "GET",
+        });
+    },
+
+    // Session 3 Methods
+    startEmpathySession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s3/start`, {
+            method: "POST",
+        });
+    },
+
+    sendEmpathyMessageSession3: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s3/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getEmpathyHistorySession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s3/history`, {
+            method: "GET",
+        });
+    },
+
+    // Session 4 Methods
+    startEmpathySession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s4/start`, {
+            method: "POST",
+        });
+    },
+
+    sendEmpathyMessageSession4: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s4/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getEmpathyHistorySession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/emp/s4/history`, {
+            method: "GET",
+        });
     }
 };

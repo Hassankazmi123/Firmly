@@ -1,170 +1,146 @@
 import React, { useState, useEffect, useRef } from "react";
 import ChatInputFooter from "./ChatInputFooter";
 import SessionFeedbackModal from "../AllModals/SessionFeedbackModal";
+import { pathwayService } from "../../../services/pathway";
 
 const Session4Chat = ({ isSidebarCollapsed = true }) => {
-  const userResponses = {};
+  const [messages, setMessages] = useState([]);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const messagesEndRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    initializeSession();
   }, []);
 
-  const handleShareFeedback = () => {
-    setIsFeedbackModalOpen(true);
+  const processHistoryData = (historyData) => {
+    let historyMessages = [];
+    if (Array.isArray(historyData)) {
+      historyMessages = historyData;
+    } else if (historyData && Array.isArray(historyData.messages)) {
+      historyMessages = historyData.messages;
+    }
+
+    if (historyMessages.length > 0) {
+      return historyMessages.map((msg, idx) => ({
+        id: msg.id || idx,
+        type: msg.sender === 'user' ? 'user' : 'amalia',
+        content: msg.text || msg.content
+      }));
+    }
+    return [];
   };
 
-  const messages = [
-    {
-      id: 1,
-      type: "amalia",
-      content: (
-        <>
-          Welcome to our final session! Before we dive in, I want to thank you
-          for your engagement throughout this program. Developing empathy is an
-          ongoing journey, and the awareness and commitment you've shown are
-          significant steps. How are you feeling about our work together so far?
-        </>
-      ),
-      showResponse: true,
-      responseId: "response1",
-    },
-    {
-      id: 2,
-      type: "amalia",
-      content:
-        "I'm excited to hear about your experiences working with the Empathy Leadership Workbook. What insights or challenges have emerged during your practice?",
-      showResponse: true,
-      responseId: "response2",
-    },
-    {
-      id: 3,
-      type: "amalia",
-      content: (
-        <>
-          Thank you for sharing those experiences. Your observations about
-          [specific feedback] align with what research shows about empathy
-          development. Hojat and colleagues (2013) demonstrated in their
-          longitudinal study that empathy develops through consistent practice and
-          reflection—exactly the approach you're taking. Based on your
-          experiences, let's identify:
-          1. Where you've seen the most significant growth
-          <br />
-          2. Where you're encountering challenges
-          <br />
-          3. Which techniques are most effective for your leadership style
-          The McKinsey & Company and LeanIn.Org (2023) Women in the Workplace
-          report shows that women leaders who focus on people development and
-          empathetic approaches contribute significantly to team satisfaction and
-          retention.
-        </>
-      ),
-      showResponse: true,
-      responseId: "response3",
-    },
-    {
-      id: 4,
-      type: "amalia",
-      content: (
-        <>
-          Those are valuable insights. Now, let's create your sustainable empathy
-          development plan:
-          1. <strong>Daily Practice:</strong> A 5-minute empathy reflection to
-          incorporate into your routine
-          <br />
-          2. <strong>Weekly Application:</strong> One specific situation where
-          you'll deliberately apply an empathy technique
-          <br />
-          3. <strong>Monthly Assessment:</strong> A structured check-in process
-          with me to track your progress
-          <br />
-          4. <strong>Resources:</strong> Additional research-backed resources
-          tailored to your specific challenges
-          Gallup's (2023) State of the Global Workplace research highlights that
-          leadership approaches that prioritize understanding employee needs and
-          perspectives contribute to better organizational outcomes. The most
-          successful women leaders make empathy development an ongoing practice
-          rather than a one-time skill acquisition.
-          Before we wrap up, what's one insight from our conversations that you
-          found most valuable?
-        </>
-      ),
-      showResponse: true,
-      responseId: "response4",
-    },
-    {
-      id: 5,
-      type: "amalia",
-      content: (
-        <>
-          I'm so impressed with your commitment to developing empathetic
-          leadership. You've made remarkable progress in recognizing how empathy
-          can be a strategic advantage rather than just an interpersonal nicety.
-          The empathy skills you're cultivating will not only enhance your
-          effectiveness as a leader but also contribute to creating more
-          inclusive and innovative workplace cultures—something Woolley and
-          colleagues (2010) observed in their research on collective intelligence
-          in diverse teams.
-          <br />
-          I wish you continued success and growth on your leadership journey!
-        </>
-      ),
-      showResponse: false,
-    },
-  ];
+  const initializeSession = async () => {
+    setLoading(true);
+    try {
+      const historyData = await pathwayService.getEmpathyHistorySession4();
+      const formatted = processHistoryData(historyData);
+
+      if (formatted.length > 0) {
+        setMessages(formatted);
+      } else {
+        await startSession();
+      }
+    } catch (error) {
+      console.error("Failed to initialize session 4:", error);
+      await startSession();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startSession = async () => {
+    try {
+      const data = await pathwayService.startEmpathySession4();
+      if (data) {
+        const content = data.message || data.text || data.response;
+        if (content) {
+          setMessages([{
+            id: Date.now(),
+            type: 'amalia',
+            content: content
+          }]);
+        }
+      }
+    } catch (err) {
+      console.error("Error starting session 4:", err);
+    }
+  };
+
+  const handleSendMessage = async (text) => {
+    const userMsg = { id: Date.now(), type: 'user', content: text };
+    setMessages((prev) => [...prev, userMsg]);
+
+    try {
+      await pathwayService.sendEmpathyMessageSession4(text, "CORE");
+
+      // Fetch fresh history to get the bot response and sync state
+      const historyData = await pathwayService.getEmpathyHistorySession4();
+      const formatted = processHistoryData(historyData);
+
+      if (formatted.length > 0) {
+        setMessages(formatted);
+      }
+    } catch (error) {
+      console.error("Failed to send message session 4:", error);
+    }
+  };
+
+  const handleShareFeedback = async () => {
+    try {
+      // Properly end the session before showing feedback modal
+      await pathwayService.sendEmpathyMessageSession4("", "GOODBYE");
+    } catch (error) {
+      console.error("Error ending session 4 for feedback:", error);
+    }
+    setIsFeedbackModalOpen(true);
+  };
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto w-full px-4 pb-32 max-w-5xl mx-auto">
+        {loading && messages.length === 0 && (
+          <div className="p-4 text-center text-gray-500">Loading session...</div>
+        )}
+
         {messages.map((message) => (
           <div key={message.id} className="mb-6">
             {message.type === "amalia" ? (
               <div className="bg-[#F5F5FF] rounded-lg p-4">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed">
+                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
                   {message.content}
                 </p>
               </div>
             ) : (
               <div className="bg-[#f5f5f5] rounded-lg p-4 ml-auto max-w-fit">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed">
+                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
                   {message.content}
-                </p>
-              </div>
-            )}
-
-            {message.showResponse && !userResponses[message.responseId] && (
-              <div className="mt-4 bg-[#f5f5f5] rounded-lg p-4 ml-auto max-w-fit">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed">
-                  User response appears here
-                </p>
-              </div>
-            )}
-
-            {message.showResponse && userResponses[message.responseId] && (
-              <div className="mt-4 bg-[#3D3D3D] rounded-lg p-4 ml-auto max-w-[85%]">
-                <p className="text-sm md:text-base text-white font-inter leading-relaxed">
-                  {userResponses[message.responseId]}
                 </p>
               </div>
             )}
           </div>
         ))}
+        <div ref={messagesEndRef} />
+
         <div className="flex lg:flex-row flex-col gap-4 max-w-fit mx-auto mt-8 mb-4">
           <button
             onClick={handleShareFeedback}
-            className="flex-1   py-3.5 px-5  bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+            className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
           >
             Share Feedback
           </button>
         </div>
       </div>
       <div
-        className={`absolute bottom-0 left-0 right-0 ${
-          isSidebarCollapsed ? "z-50" : ""
-        } md:z-50`}
+        className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+          } md:z-50`}
       >
-        <ChatInputFooter />
+        <ChatInputFooter onSend={handleSendMessage} />
       </div>
       <SessionFeedbackModal
         isOpen={isFeedbackModalOpen}

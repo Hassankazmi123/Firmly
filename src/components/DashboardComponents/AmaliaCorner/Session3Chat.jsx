@@ -1,17 +1,103 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatInputFooter from "./ChatInputFooter";
 import { useNavigate } from "react-router-dom";
+import { pathwayService } from "../../../services/pathway";
 
 const Session3Chat = ({ isSidebarCollapsed = true }) => {
   const navigate = useNavigate();
-  const userResponses = {};
+  const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    initializeSession();
   }, []);
 
-  const handleNextSession = () => {
+  const processHistoryData = (historyData) => {
+    let historyMessages = [];
+    if (Array.isArray(historyData)) {
+      historyMessages = historyData;
+    } else if (historyData && Array.isArray(historyData.messages)) {
+      historyMessages = historyData.messages;
+    }
+
+    if (historyMessages.length > 0) {
+      return historyMessages.map((msg, idx) => ({
+        id: msg.id || idx,
+        type: msg.sender === 'user' ? 'user' : 'amalia',
+        content: msg.text || msg.content
+      }));
+    }
+    return [];
+  };
+
+  const initializeSession = async () => {
+    setLoading(true);
+    try {
+      const historyData = await pathwayService.getEmpathyHistorySession3();
+      const formatted = processHistoryData(historyData);
+
+      if (formatted.length > 0) {
+        setMessages(formatted);
+      } else {
+        await startSession();
+      }
+    } catch (error) {
+      console.error("Failed to initialize session 3:", error);
+      await startSession();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startSession = async () => {
+    try {
+      const data = await pathwayService.startEmpathySession3();
+      if (data) {
+        const content = data.message || data.text || data.response;
+        if (content) {
+          setMessages([{
+            id: Date.now(),
+            type: 'amalia',
+            content: content
+          }]);
+        }
+      }
+    } catch (err) {
+      console.error("Error starting session 3:", err);
+    }
+  };
+
+  const handleSendMessage = async (text) => {
+    const userMsg = { id: Date.now(), type: 'user', content: text };
+    setMessages((prev) => [...prev, userMsg]);
+
+    try {
+      await pathwayService.sendEmpathyMessageSession3(text, "CORE");
+
+      // Fetch fresh history to get the bot response and sync state
+      const historyData = await pathwayService.getEmpathyHistorySession3();
+      const formatted = processHistoryData(historyData);
+
+      if (formatted.length > 0) {
+        setMessages(formatted);
+      }
+    } catch (error) {
+      console.error("Failed to send message session 3:", error);
+    }
+  };
+
+  const handleNextSession = async () => {
+    try {
+      await pathwayService.sendEmpathyMessageSession3("", "GOODBYE");
+    } catch (error) {
+      console.error("Error ending session 3:", error);
+    }
+
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
     sessionStorage.setItem("fromStartSession", "true");
     sessionStorage.setItem("fromSession3Next", "true");
@@ -22,127 +108,32 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
     navigate("/dashboard");
   };
 
-  const messages = [
-    {
-      id: 1,
-      type: "amalia",
-      content: (
-        <>
-          Welcome back! I'm thrilled to continue our journey together. In this
-          session, we'll move from understanding and reflection to practical
-          application. This is where you'll develop concrete tools and
-          techniques that you can use immediately in your leadership practice.
-        </>
-      ),
-      showResponse: false,
-    },
-    {
-      id: 2,
-      type: "amalia",
-      content:
-        "How have you been applying the reflective practices we discussed?",
-      showResponse: false,
-    },
-    {
-      id: 3,
-      type: "user",
-      content:
-        "I've been trying to pause and consider different perspectives before responding. It's been challenging but really insightful!",
-      showResponse: false,
-    },
-    {
-      id: 4,
-      type: "amalia",
-      content: (
-        <>
-          That's excellent progress! Now let's build on that foundation with
-          practical tools. The Empathy Toolkit consists of evidence-based
-          techniques that research shows are effective for developing empathetic
-          leadership skills.
-          <br />
-          Today, we'll explore three key tools:
-          <br />
-          <strong>1. Active Listening Framework:</strong> A structured approach
-          to truly hearing and understanding others' perspectives, developed
-          from Rogers' (1957) person-centered therapy principles and adapted for
-          leadership contexts.
-          <br />
-          <strong>2. Perspective-Taking Exercises:</strong> Practical techniques
-          to systematically consider situations from multiple viewpoints, based
-          on Galinsky and colleagues' (2008) research on perspective-taking and
-          negotiation.
-          <br />
-          <strong>3. Empathetic Response Strategies:</strong> Concrete methods
-          for responding to others in ways that demonstrate understanding and
-          connection, drawing from Goleman's (2006) work on emotional
-          intelligence in leadership.
-          <br />
-          These tools aren't just theoretical—they're practical techniques you
-          can use in meetings, one-on-ones, and difficult conversations. We'll
-          practice them together so you feel confident applying them in real
-          situations.
-          <br />
-          Are you ready to start with the Active Listening Framework?
-        </>
-      ),
-      showResponse: true,
-      responseId: "response1",
-    },
-    {
-      id: 5,
-      type: "amalia",
-      content: (
-        <>
-          Wonderful! Remember, these tools become more powerful with practice.
-          The more you use them, the more natural they'll become. In our final
-          session, we'll focus on integrating all of these skills into your
-          ongoing leadership practice.
-          <br />
-          Before we meet again, I encourage you to try at least one of these
-          tools in a real workplace situation. Notice what happens when you
-          apply it.
-        </>
-      ),
-      showResponse: false,
-    },
-  ];
-
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto w-full px-4 pb-32 max-w-5xl mx-auto">
+        {loading && messages.length === 0 && (
+          <div className="p-4 text-center text-gray-500">Loading session...</div>
+        )}
+
         {messages.map((message) => (
           <div key={message.id} className="mb-6">
             {message.type === "amalia" ? (
               <div className="bg-[#F5F5FF] rounded-lg p-4">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed">
+                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
                   {message.content}
                 </p>
               </div>
             ) : (
               <div className="bg-[#f5f5f5] rounded-lg p-4 ml-auto max-w-fit">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed">
+                <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
                   {message.content}
-                </p>
-              </div>
-            )}
-
-            {message.showResponse && !userResponses[message.responseId] && (
-              <div className="mt-4 bg-[#f5f5f5] rounded-lg p-4 ml-auto max-w-fit">
-                <p className="text-sm md:text-base text-black font-inter leading-relaxed">
-                  User response appears here
-                </p>
-              </div>
-            )}
-
-            {message.showResponse && userResponses[message.responseId] && (
-              <div className="mt-4 bg-[#3D3D3D] rounded-lg p-4 ml-auto max-w-[85%]">
-                <p className="text-sm md:text-base text-white font-inter leading-relaxed">
-                  {userResponses[message.responseId]}
                 </p>
               </div>
             )}
           </div>
         ))}
+        <div ref={messagesEndRef} />
+
         <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
           <button
             onClick={handleNextSession}
@@ -159,11 +150,10 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
         </div>
       </div>
       <div
-        className={`absolute bottom-0 left-0 right-0 ${
-          isSidebarCollapsed ? "z-50" : ""
-        } md:z-50`}
+        className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+          } md:z-50`}
       >
-        <ChatInputFooter />
+        <ChatInputFooter onSend={handleSendMessage} />
       </div>
     </div>
   );
