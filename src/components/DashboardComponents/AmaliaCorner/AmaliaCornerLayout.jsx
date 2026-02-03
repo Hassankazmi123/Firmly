@@ -102,6 +102,23 @@ const AmaliaCornerLayout = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const detectDomain = async () => {
+      const existingDomain = sessionStorage.getItem("currentPathwayDomain");
+      if (!existingDomain || existingDomain === "null" || existingDomain === "undefined") {
+        try {
+          const response = await pathwayService.startPathway();
+          if (response && response.domain) {
+            sessionStorage.setItem("currentPathwayDomain", response.domain);
+          }
+        } catch (e) {
+          console.error("Auto domain detection failed:", e);
+        }
+      }
+    };
+    detectDomain();
+  }, []);
+
   const handleConversationSelect = (conversationId) => {
     if (conversationId === "cultivating-empathy") {
       if (showSession1) {
@@ -184,10 +201,36 @@ const AmaliaCornerLayout = () => {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      // Optimistically add and then sync or just keep local if no API for diagnostic chat
-      // If we want to sync with session 1 history:
-      await pathwayService.sendEmpathyMessage(text, "CORE");
-      const historyData = await pathwayService.getEmpathyHistory();
+      let domain = getDomain();
+
+      // Keyword-based domain switching fallback
+      const lowerText = text.toLowerCase();
+      if (lowerText.includes("resilience") || lowerText.includes("resilien") || lowerText.includes(" res")) {
+        domain = "res";
+        sessionStorage.setItem("currentPathwayDomain", "res");
+      } else if (lowerText.includes("goal")) {
+        domain = "goal";
+        sessionStorage.setItem("currentPathwayDomain", "goal");
+      } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
+        domain = "eng";
+        sessionStorage.setItem("currentPathwayDomain", "eng");
+      }
+
+      let historyData;
+
+      if (domain === "goal") {
+        await pathwayService.sendGoalMessageSession1(text, "CORE");
+        historyData = await pathwayService.getGoalHistorySession1();
+      } else if (domain === "res") {
+        await pathwayService.sendResilienceMessageSession1(text, "CORE");
+        historyData = await pathwayService.getResilienceHistorySession1();
+      } else if (domain === "eng") {
+        await pathwayService.sendEngagementMessageSession1(text, "CORE");
+        historyData = await pathwayService.getEngagementHistorySession1();
+      } else {
+        await pathwayService.sendEmpathyMessage(text, "CORE");
+        historyData = await pathwayService.getEmpathyHistory();
+      }
 
       const formatted = (Array.isArray(historyData) ? historyData : (historyData?.messages || [])).map((msg, idx) => ({
         id: msg.id || idx,
@@ -203,28 +246,96 @@ const AmaliaCornerLayout = () => {
     }
   };
 
+  const getDomain = () => {
+    const rawDomain = sessionStorage.getItem("currentPathwayDomain");
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined") return "emp";
+    const d = rawDomain.toLowerCase();
+    if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
+    if (d.includes("goal")) return "goal";
+    if (d.includes("engagement") || d.includes("engage")) return "eng";
+    if (d.includes("empathy") || d.includes("emp")) return "emp";
+    return "emp";
+  };
+
   const handleStartSession = () => {
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
     sessionStorage.setItem("fromStartSession", "true");
     navigate("/dashboard");
   };
-  const isGoalPath = sessionStorage.getItem("currentPathwayDomain") === "goal";
-  const domainLabel = isGoalPath ? "Goal Setting" : "Empathy";
+
+  const domain = getDomain();
+
+  const getDomainLabel = () => {
+    switch (domain) {
+      case "goal": return "Goal Setting";
+      case "res": return "Resilience";
+      case "eng": return "Engagement";
+      default: return "Empathy";
+    }
+  };
 
   const glowItems = [
     { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
     { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
     { abbreviation: "RES", label: "Resilience", score: 87 },
   ];
-  const growItems = isGoalPath ? [
-    { abbreviation: "GOA", label: "Goal Orientation", score: 32 },
-    { abbreviation: "ENG", label: "Engagement", score: 24 },
-    { abbreviation: "SEL", label: "Self-belief", score: 22 },
-  ] : [
-    { abbreviation: "EMP", label: "Empathy", score: 32 },
-    { abbreviation: "ENG", label: "Engagement", score: 24 },
-    { abbreviation: "SEL", label: "Self-belief", score: 22 },
-  ];
+
+  const getGrowItems = () => {
+    switch (domain) {
+      case "goal": return [
+        { abbreviation: "GOA", label: "Goal Orientation", score: 32 },
+        { abbreviation: "ENG", label: "Engagement", score: 24 },
+        { abbreviation: "SEL", label: "Self-belief", score: 22 },
+      ];
+      case "res": return [
+        { abbreviation: "RES", label: "Resilience", score: 32 },
+        { abbreviation: "ENG", label: "Engagement", score: 24 },
+        { abbreviation: "SEL", label: "Self-belief", score: 22 },
+      ];
+      case "eng": return [
+        { abbreviation: "ENG", label: "Engagement", score: 32 },
+        { abbreviation: "SEL", label: "Self-belief", score: 24 },
+        { abbreviation: "WOR", label: "Workplace Belonging", score: 22 },
+      ];
+      default: return [
+        { abbreviation: "EMP", label: "Empathy", score: 32 },
+        { abbreviation: "ENG", label: "Engagement", score: 24 },
+        { abbreviation: "SEL", label: "Self-belief", score: 22 },
+      ];
+    }
+  };
+
+  const getSessionTitle = (num) => {
+    switch (domain) {
+      case "goal":
+        if (num === 1) return "Strategic Leadership Goals";
+        if (num === 2) return "Growth Mindset and Goal Accuracy";
+        if (num === 3) return "Actionable Goal Framework";
+        if (num === 4) return "Integration and Long-term Success";
+        break;
+      case "res":
+        if (num === 1) return "The Foundation of Resilience";
+        if (num === 2) return "Stress Management & Adaptability";
+        if (num === 3) return "Building a Resilient Mindset";
+        if (num === 4) return "Sustainable Performance Integration";
+        break;
+      case "eng":
+        if (num === 1) return "The Drivers of Team Engagement";
+        if (num === 2) return "Identifying Engagement Gaps";
+        if (num === 3) return "Actionable Engagement Strategies";
+        if (num === 4) return "Sustaining High Engagement";
+        break;
+      default:
+        if (num === 1) return "The Power of Empathetic Leadership";
+        if (num === 2) return "Reflective Practice - Empathy in Action";
+        if (num === 3) return "The Empathy Toolkit - Practical Applications";
+        if (num === 4) return "Integration and Forward Movement";
+    }
+    return "";
+  };
+
+  const domainLabel = getDomainLabel();
+  const growItems = getGrowItems();
   return (
     <div className="flex flex-col md:flex-row h-full overflow-hidden">
       <Sidebar
@@ -277,26 +388,25 @@ const AmaliaCornerLayout = () => {
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 1: {isGoalPath ? "Strategic Leadership Goals" : "The Power of Empathetic Leadership"} (Common
-                        Understanding)
+                        Session 1: {getSessionTitle(1)} (Common Understanding)
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 2: {isGoalPath ? "Growth Mindset and Goal Accuracy" : "Reflective Practice - Empathy in Action"}
+                        Session 2: {getSessionTitle(2)}
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 3: {isGoalPath ? "Actionable Goal Framework" : "The Empathy Toolkit - Practical Applications"}
+                        Session 3: {getSessionTitle(3)}
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 4: {isGoalPath ? "Integration and Long-term Success" : "Integration and Forward Movement"}
+                        Session 4: {getSessionTitle(4)}
                       </span>
                     </li>
                   </ul>
@@ -483,26 +593,25 @@ const AmaliaCornerLayout = () => {
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 1: {isGoalPath ? "Strategic Leadership Goals" : "The Power of Empathetic Leadership"} (Common
-                        Understanding)
+                        Session 1: {getSessionTitle(1)} (Common Understanding)
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 2: {isGoalPath ? "Growth Mindset and Goal Accuracy" : "Reflective Practice - Empathy in Action"}
+                        Session 2: {getSessionTitle(2)}
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 3: {isGoalPath ? "Actionable Goal Framework" : "The Empathy Toolkit - Practical Applications"}
+                        Session 3: {getSessionTitle(3)}
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
-                        Session 4: {isGoalPath ? "Integration and Long-term Success" : "Integration and Forward Movement"}
+                        Session 4: {getSessionTitle(4)}
                       </span>
                     </li>
                   </ul>

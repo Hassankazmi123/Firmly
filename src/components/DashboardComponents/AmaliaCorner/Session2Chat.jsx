@@ -36,7 +36,14 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
   };
 
   const getDomain = () => {
-    return sessionStorage.getItem("currentPathwayDomain") || "emp";
+    const rawDomain = sessionStorage.getItem("currentPathwayDomain");
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined") return "emp";
+    const d = rawDomain.toLowerCase();
+    if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
+    if (d.includes("goal")) return "goal";
+    if (d.includes("engagement") || d.includes("engage")) return "eng";
+    if (d.includes("empathy") || d.includes("emp")) return "emp";
+    return "emp";
   };
 
   const initializeSession = async () => {
@@ -48,6 +55,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         historyData = await pathwayService.getGoalHistorySession2();
       } else if (domain === "res") {
         historyData = await pathwayService.getResilienceHistorySession2();
+      } else if (domain === "eng") {
+        historyData = await pathwayService.getEngagementHistorySession2();
       } else {
         historyData = await pathwayService.getEmpathyHistorySession2();
       }
@@ -75,6 +84,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         data = await pathwayService.startGoalSession2();
       } else if (domain === "res") {
         data = await pathwayService.startResilienceSession2();
+      } else if (domain === "eng") {
+        data = await pathwayService.startEngagementSession2();
       } else {
         data = await pathwayService.startEmpathySession2();
       }
@@ -100,10 +111,27 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
+      let domain = getDomain();
+
+      // Keyword-based domain switching fallback
+      const lowerText = text.toLowerCase();
+      if (lowerText.includes("resilience") || lowerText.includes("resilien") || lowerText.includes(" res")) {
+        domain = "res";
+        sessionStorage.setItem("currentPathwayDomain", "res");
+      } else if (lowerText.includes("goal")) {
+        domain = "goal";
+        sessionStorage.setItem("currentPathwayDomain", "goal");
+      } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
+        domain = "eng";
+        sessionStorage.setItem("currentPathwayDomain", "eng");
+      }
+
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession2(text, "CORE");
       } else if (domain === "res") {
         await pathwayService.sendResilienceMessageSession2(text, "CORE");
+      } else if (domain === "eng") {
+        await pathwayService.sendEngagementMessageSession2(text, "CORE");
       } else {
         await pathwayService.sendEmpathyMessageSession2(text, "CORE");
       }
@@ -114,6 +142,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         historyData = await pathwayService.getGoalHistorySession2();
       } else if (domain === "res") {
         historyData = await pathwayService.getResilienceHistorySession2();
+      } else if (domain === "eng") {
+        historyData = await pathwayService.getEngagementHistorySession2();
       } else {
         historyData = await pathwayService.getEmpathyHistorySession2();
       }
@@ -135,6 +165,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         await pathwayService.sendGoalMessageSession2("", "GOODBYE");
       } else if (domain === "res") {
         await pathwayService.sendResilienceMessageSession2("", "GOODBYE");
+      } else if (domain === "eng") {
+        await pathwayService.sendEngagementMessageSession2("", "GOODBYE");
       } else {
         await pathwayService.sendEmpathyMessageSession2("", "GOODBYE");
       }

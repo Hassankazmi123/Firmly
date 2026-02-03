@@ -10,7 +10,28 @@ const Sidebar = ({
   selectedConversation,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const isGoalPath = sessionStorage.getItem("currentPathwayDomain") === "goal";
+
+  const getDomain = () => {
+    const rawDomain = sessionStorage.getItem("currentPathwayDomain");
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined") return "emp";
+    const d = rawDomain.toLowerCase();
+    if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
+    if (d.includes("goal")) return "goal";
+    if (d.includes("engagement") || d.includes("engage")) return "eng";
+    if (d.includes("empathy") || d.includes("emp")) return "emp";
+    return "emp";
+  };
+
+  const domain = getDomain();
+
+  const getPathwayLabel = () => {
+    switch (domain) {
+      case "goal": return "Leadership Goal Setting";
+      case "res": return "Resilience";
+      case "eng": return "Engagement";
+      default: return "Cultivating Empathy";
+    }
+  };
 
   return (
     <>
@@ -103,7 +124,7 @@ const Sidebar = ({
                   JUN 09, 2025 - 11:18 am
                 </p>
                 <p className="text-sm md:text-lg font-medium text-[#3D3D3D] font-inter">
-                  {isGoalPath ? "Leadership Goal Setting" : "Cultivating Empathy"}
+                  {getPathwayLabel()}
                 </p>
               </div>
               <div

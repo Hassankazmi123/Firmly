@@ -338,5 +338,85 @@ export const pathwayService = {
         return await authenticatedFetch(`${API_PATHWAY_URL}/res/s4/history`, {
             method: "GET",
         });
+    },
+
+    // Engagement Session 1 Methods
+    startEngagementSession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s1/start`, {
+            method: "POST",
+        });
+    },
+
+    sendEngagementMessageSession1: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s1/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getEngagementHistorySession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s1/history`, {
+            method: "GET",
+        });
+    },
+
+    // Engagement Session 2 Methods
+    startEngagementSession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s2/start`, {
+            method: "POST",
+        });
+    },
+
+    sendEngagementMessageSession2: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s2/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getEngagementHistorySession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s2/history`, {
+            method: "GET",
+        });
+    },
+
+    // Engagement Session 3 Methods
+    startEngagementSession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s3/start`, {
+            method: "POST",
+        });
+    },
+
+    sendEngagementMessageSession3: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s3/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getEngagementHistorySession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s3/history`, {
+            method: "GET",
+        });
+    },
+
+    // Engagement Session 4 Methods
+    startEngagementSession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s4/start`, {
+            method: "POST",
+        });
+    },
+
+    sendEngagementMessageSession4: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s4/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getEngagementHistorySession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/eng/s4/history`, {
+            method: "GET",
+        });
     }
 };
