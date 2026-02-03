@@ -102,6 +102,9 @@ const AmaliaCornerLayout = () => {
     }
   }, []);
 
+  const [nextSessionTitle, setNextSessionTitle] = useState("");
+  const [unlockTime, setUnlockTime] = useState(null);
+
   useEffect(() => {
     const detectDomain = async () => {
       const existingDomain = sessionStorage.getItem("currentPathwayDomain");
@@ -118,6 +121,25 @@ const AmaliaCornerLayout = () => {
     };
     detectDomain();
   }, []);
+
+  useEffect(() => {
+    if (showPathwayView) {
+      const fetchNextSessionInfo = async () => {
+        try {
+          const info = await pathwayService.getNextSessionInfo();
+          if (info) {
+            console.log("Next session info:", info);
+            // You can use info.unlockTime or similar fields here to update UI
+            setUnlockTime(info.unlockTime);
+            setNextSessionTitle(info.nextSessionTitle);
+          }
+        } catch (error) {
+          console.error("Failed to fetch next session info:", error);
+        }
+      };
+      fetchNextSessionInfo();
+    }
+  }, [showPathwayView]);
 
   const handleConversationSelect = (conversationId) => {
     if (conversationId === "cultivating-empathy") {
@@ -217,6 +239,9 @@ const AmaliaCornerLayout = () => {
       } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
         domain = "self";
         sessionStorage.setItem("currentPathwayDomain", "self");
+      } else if (lowerText.includes("belonging") || lowerText.includes("belong")) {
+        domain = "belong";
+        sessionStorage.setItem("currentPathwayDomain", "belong");
       }
 
       let historyData;
@@ -233,6 +258,9 @@ const AmaliaCornerLayout = () => {
       } else if (domain === "self") {
         await pathwayService.sendSelfAwarenessMessageSession1(text, "CORE");
         historyData = await pathwayService.getSelfAwarenessHistorySession1();
+      } else if (domain === "belong") {
+        await pathwayService.sendBelongingMessageSession1(text, "CORE");
+        historyData = await pathwayService.getBelongingHistorySession1();
       } else {
         await pathwayService.sendEmpathyMessage(text, "CORE");
         historyData = await pathwayService.getEmpathyHistory();
@@ -260,6 +288,7 @@ const AmaliaCornerLayout = () => {
     if (d.includes("goal")) return "goal";
     if (d.includes("engagement") || d.includes("engage")) return "eng";
     if (d.includes("self")) return "self";
+    if (d.includes("belonging") || d.includes("belong")) return "belong";
     if (d.includes("empathy") || d.includes("emp")) return "emp";
     return "emp";
   };
@@ -278,6 +307,7 @@ const AmaliaCornerLayout = () => {
       case "res": return "Resilience";
       case "eng": return "Engagement";
       case "self": return "Self Awareness";
+      case "belong": return "Belonging";
       default: return "Empathy";
     }
   };
@@ -309,6 +339,11 @@ const AmaliaCornerLayout = () => {
         { abbreviation: "SEL", label: "Self Awareness", score: 32 },
         { abbreviation: "EMOT", label: "Emotional Reg", score: 24 },
         { abbreviation: "SOC", label: "Social", score: 22 },
+      ];
+      case "belong": return [
+        { abbreviation: "BEL", label: "Belonging", score: 32 },
+        { abbreviation: "INC", label: "Inclusion", score: 24 },
+        { abbreviation: "CON", label: "Connection", score: 22 },
       ];
       default: return [
         { abbreviation: "EMP", label: "Empathy", score: 32 },
@@ -343,6 +378,12 @@ const AmaliaCornerLayout = () => {
         if (num === 2) return "Understanding Emotions";
         if (num === 3) return "Mindful Leadership";
         if (num === 4) return "Integrating Awareness";
+        break;
+      case "belong":
+        if (num === 1) return "Foundations of Belonging";
+        if (num === 2) return "Inclusion in Practice";
+        if (num === 3) return "Building Connections";
+        if (num === 4) return "Sustaining Belonging";
         break;
       default:
         if (num === 1) return "The Power of Empathetic Leadership";

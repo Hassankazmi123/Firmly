@@ -498,5 +498,92 @@ export const pathwayService = {
         return await authenticatedFetch(`${API_PATHWAY_URL}/self/s4/history`, {
             method: "GET",
         });
+    },
+
+    // Belonging Session 1 Methods
+    startBelongingSession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s1/start`, {
+            method: "POST",
+        });
+    },
+
+    sendBelongingMessageSession1: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s1/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getBelongingHistorySession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s1/history`, {
+            method: "GET",
+        });
+    },
+
+    // Belonging Session 2 Methods
+    startBelongingSession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s2/start`, {
+            method: "POST",
+        });
+    },
+
+    sendBelongingMessageSession2: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s2/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getBelongingHistorySession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s2/history`, {
+            method: "GET",
+        });
+    },
+
+    // Belonging Session 3 Methods
+    startBelongingSession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s3/start`, {
+            method: "POST",
+        });
+    },
+
+    sendBelongingMessageSession3: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s3/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getBelongingHistorySession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s3/history`, {
+            method: "GET",
+        });
+    },
+
+    // Belonging Session 4 Methods
+    startBelongingSession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s4/start`, {
+            method: "POST",
+        });
+    },
+
+    sendBelongingMessageSession4: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s4/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getBelongingHistorySession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/belong/s4/history`, {
+            method: "GET",
+        });
+    },
+
+    // Generic Methods
+    getNextSessionInfo: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/next-session`, {
+            method: "GET",
+        });
     }
 };

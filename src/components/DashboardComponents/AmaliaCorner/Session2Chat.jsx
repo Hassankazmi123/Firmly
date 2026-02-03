@@ -43,6 +43,7 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
     if (d.includes("goal")) return "goal";
     if (d.includes("engagement") || d.includes("engage")) return "eng";
     if (d.includes("self")) return "self";
+    if (d.includes("belonging") || d.includes("belong")) return "belong";
     if (d.includes("empathy") || d.includes("emp")) return "emp";
     return "emp";
   };
@@ -60,6 +61,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         historyData = await pathwayService.getEngagementHistorySession2();
       } else if (domain === "self") {
         historyData = await pathwayService.getSelfAwarenessHistorySession2();
+      } else if (domain === "belong") {
+        historyData = await pathwayService.getBelongingHistorySession2();
       } else {
         historyData = await pathwayService.getEmpathyHistorySession2();
       }
@@ -91,6 +94,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         data = await pathwayService.startEngagementSession2();
       } else if (domain === "self") {
         data = await pathwayService.startSelfAwarenessSession2();
+      } else if (domain === "belong") {
+        data = await pathwayService.startBelongingSession2();
       } else {
         data = await pathwayService.startEmpathySession2();
       }
@@ -133,6 +138,9 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
       } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
         domain = "self";
         sessionStorage.setItem("currentPathwayDomain", "self");
+      } else if (lowerText.includes("belonging") || lowerText.includes("belong")) {
+        domain = "belong";
+        sessionStorage.setItem("currentPathwayDomain", "belong");
       }
 
       if (domain === "goal") {
@@ -143,6 +151,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         await pathwayService.sendEngagementMessageSession2(text, "CORE");
       } else if (domain === "self") {
         await pathwayService.sendSelfAwarenessMessageSession2(text, "CORE");
+      } else if (domain === "belong") {
+        await pathwayService.sendBelongingMessageSession2(text, "CORE");
       } else {
         await pathwayService.sendEmpathyMessageSession2(text, "CORE");
       }
@@ -157,6 +167,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         historyData = await pathwayService.getEngagementHistorySession2();
       } else if (domain === "self") {
         historyData = await pathwayService.getSelfAwarenessHistorySession2();
+      } else if (domain === "belong") {
+        historyData = await pathwayService.getBelongingHistorySession2();
       } else {
         historyData = await pathwayService.getEmpathyHistorySession2();
       }
@@ -182,6 +194,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
         await pathwayService.sendEngagementMessageSession2("", "GOODBYE");
       } else if (domain === "self") {
         await pathwayService.sendSelfAwarenessMessageSession2("", "GOODBYE");
+      } else if (domain === "belong") {
+        await pathwayService.sendBelongingMessageSession2("", "GOODBYE");
       } else {
         await pathwayService.sendEmpathyMessageSession2("", "GOODBYE");
       }
