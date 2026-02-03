@@ -11,6 +11,7 @@ import Session2Chat from "./Session2Chat";
 import Session3Chat from "./Session3Chat";
 import Session4Chat from "./Session4Chat";
 import { Clock, Lock } from "lucide-react";
+import { pathwayService } from "../../../services/pathway";
 const AmaliaCornerLayout = () => {
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
@@ -149,7 +150,13 @@ const AmaliaCornerLayout = () => {
       environment.
     </>
   );
-  const handleGeneratePathway = () => {
+  const handleGeneratePathway = async () => {
+    try {
+      await pathwayService.startPathway();
+    } catch (e) {
+      console.error("Failed to start pathway from layout:", e);
+    }
+
     const pathwayMessage = (
       <>
         Great! Let's work together to create your personalized Leadership

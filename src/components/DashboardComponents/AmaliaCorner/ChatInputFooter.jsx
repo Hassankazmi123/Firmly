@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-const ChatInputFooter = () => {
+const ChatInputFooter = ({ onSend }) => {
   const [message, setMessage] = useState("");
   const handleSend = () => {
     if (message.trim()) {
+      if (onSend) {
+        onSend(message);
+      }
       setMessage("");
     }
   };
