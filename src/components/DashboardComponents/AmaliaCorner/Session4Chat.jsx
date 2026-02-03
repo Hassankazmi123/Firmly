@@ -43,9 +43,14 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
     setLoading(true);
     const domain = getDomain();
     try {
-      const historyData = domain === "goal"
-        ? await pathwayService.getGoalHistorySession4()
-        : await pathwayService.getEmpathyHistorySession4();
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession4();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession4();
+      } else {
+        historyData = await pathwayService.getEmpathyHistorySession4();
+      }
 
       const formatted = processHistoryData(historyData);
 
@@ -65,9 +70,14 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
   const startSession = async () => {
     const domain = getDomain();
     try {
-      const data = domain === "goal"
-        ? await pathwayService.startGoalSession4()
-        : await pathwayService.startEmpathySession4();
+      let data;
+      if (domain === "goal") {
+        data = await pathwayService.startGoalSession4();
+      } else if (domain === "res") {
+        data = await pathwayService.startResilienceSession4();
+      } else {
+        data = await pathwayService.startEmpathySession4();
+      }
 
       if (data) {
         const content = data.message || data.text || data.response;
@@ -92,14 +102,21 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
     try {
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession4(text, "CORE");
+      } else if (domain === "res") {
+        await pathwayService.sendResilienceMessageSession4(text, "CORE");
       } else {
         await pathwayService.sendEmpathyMessageSession4(text, "CORE");
       }
 
       // Fetch fresh history to get the bot response and sync state
-      const historyData = domain === "goal"
-        ? await pathwayService.getGoalHistorySession4()
-        : await pathwayService.getEmpathyHistorySession4();
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession4();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession4();
+      } else {
+        historyData = await pathwayService.getEmpathyHistorySession4();
+      }
 
       const formatted = processHistoryData(historyData);
 
@@ -117,6 +134,8 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
       // Properly end the session before showing feedback modal
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession4("", "GOODBYE");
+      } else if (domain === "res") {
+        await pathwayService.sendResilienceMessageSession4("", "GOODBYE");
       } else {
         await pathwayService.sendEmpathyMessageSession4("", "GOODBYE");
       }

@@ -43,9 +43,14 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     setLoading(true);
     const domain = getDomain();
     try {
-      const historyData = domain === "goal"
-        ? await pathwayService.getGoalHistorySession1()
-        : await pathwayService.getEmpathyHistory();
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession1();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession1();
+      } else {
+        historyData = await pathwayService.getEmpathyHistory();
+      }
 
       const formatted = processHistoryData(historyData);
 
@@ -65,9 +70,14 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
   const startSession = async () => {
     const domain = getDomain();
     try {
-      const data = domain === "goal"
-        ? await pathwayService.startGoalSession1()
-        : await pathwayService.startEmpathySession1();
+      let data;
+      if (domain === "goal") {
+        data = await pathwayService.startGoalSession1();
+      } else if (domain === "res") {
+        data = await pathwayService.startResilienceSession1();
+      } else {
+        data = await pathwayService.startEmpathySession1();
+      }
 
       if (data) {
         const content = data.message || data.text || data.response;
@@ -93,14 +103,21 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     try {
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession1(text, "CORE");
+      } else if (domain === "res") {
+        await pathwayService.sendResilienceMessageSession1(text, "CORE");
       } else {
         await pathwayService.sendEmpathyMessage(text, "CORE");
       }
 
       // Fetch fresh history to get the bot response and sync state
-      const historyData = domain === "goal"
-        ? await pathwayService.getGoalHistorySession1()
-        : await pathwayService.getEmpathyHistory();
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession1();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession1();
+      } else {
+        historyData = await pathwayService.getEmpathyHistory();
+      }
 
       const formatted = processHistoryData(historyData);
 
@@ -119,6 +136,8 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
         // Goal Setting Session 1 doesn't have a specified GOODBYE in the user message, 
         // but follow same pattern if it exists.
         await pathwayService.sendGoalMessageSession1("", "GOODBYE");
+      } else if (domain === "res") {
+        await pathwayService.sendResilienceMessageSession1("", "GOODBYE");
       } else {
         await pathwayService.sendEmpathyMessage("", "GOODBYE");
       }

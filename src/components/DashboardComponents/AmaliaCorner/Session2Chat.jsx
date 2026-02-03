@@ -43,9 +43,14 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
     setLoading(true);
     const domain = getDomain();
     try {
-      const historyData = domain === "goal"
-        ? await pathwayService.getGoalHistorySession2()
-        : await pathwayService.getEmpathyHistorySession2();
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession2();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession2();
+      } else {
+        historyData = await pathwayService.getEmpathyHistorySession2();
+      }
 
       const formatted = processHistoryData(historyData);
 
@@ -65,9 +70,14 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
   const startSession = async () => {
     const domain = getDomain();
     try {
-      const data = domain === "goal"
-        ? await pathwayService.startGoalSession2()
-        : await pathwayService.startEmpathySession2();
+      let data;
+      if (domain === "goal") {
+        data = await pathwayService.startGoalSession2();
+      } else if (domain === "res") {
+        data = await pathwayService.startResilienceSession2();
+      } else {
+        data = await pathwayService.startEmpathySession2();
+      }
 
       if (data) {
         const content = data.message || data.text || data.response;
@@ -92,14 +102,21 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
     try {
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession2(text, "CORE");
+      } else if (domain === "res") {
+        await pathwayService.sendResilienceMessageSession2(text, "CORE");
       } else {
         await pathwayService.sendEmpathyMessageSession2(text, "CORE");
       }
 
       // Fetch fresh history to get the bot response and sync state
-      const historyData = domain === "goal"
-        ? await pathwayService.getGoalHistorySession2()
-        : await pathwayService.getEmpathyHistorySession2();
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession2();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession2();
+      } else {
+        historyData = await pathwayService.getEmpathyHistorySession2();
+      }
 
       const formatted = processHistoryData(historyData);
 
@@ -116,6 +133,8 @@ const Session2Chat = ({ isSidebarCollapsed = true }) => {
     try {
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession2("", "GOODBYE");
+      } else if (domain === "res") {
+        await pathwayService.sendResilienceMessageSession2("", "GOODBYE");
       } else {
         await pathwayService.sendEmpathyMessageSession2("", "GOODBYE");
       }

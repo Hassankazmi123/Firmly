@@ -258,5 +258,85 @@ export const pathwayService = {
         return await authenticatedFetch(`${API_PATHWAY_URL}/goal/s4/history`, {
             method: "GET",
         });
+    },
+
+    // Resilience Session 1 Methods
+    startResilienceSession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s1/start`, {
+            method: "POST",
+        });
+    },
+
+    sendResilienceMessageSession1: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s1/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getResilienceHistorySession1: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s1/history`, {
+            method: "GET",
+        });
+    },
+
+    // Resilience Session 2 Methods
+    startResilienceSession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s2/start`, {
+            method: "POST",
+        });
+    },
+
+    sendResilienceMessageSession2: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s2/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getResilienceHistorySession2: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s2/history`, {
+            method: "GET",
+        });
+    },
+
+    // Resilience Session 3 Methods
+    startResilienceSession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s3/start`, {
+            method: "POST",
+        });
+    },
+
+    sendResilienceMessageSession3: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s3/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getResilienceHistorySession3: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s3/history`, {
+            method: "GET",
+        });
+    },
+
+    // Resilience Session 4 Methods
+    startResilienceSession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s4/start`, {
+            method: "POST",
+        });
+    },
+
+    sendResilienceMessageSession4: async (text, phase = "CORE") => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s4/message`, {
+            method: "POST",
+            body: JSON.stringify({ text, phase }),
+        });
+    },
+
+    getResilienceHistorySession4: async () => {
+        return await authenticatedFetch(`${API_PATHWAY_URL}/res/s4/history`, {
+            method: "GET",
+        });
     }
 };
