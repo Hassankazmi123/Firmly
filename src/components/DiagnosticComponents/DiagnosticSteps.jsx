@@ -12,14 +12,10 @@ const DiagnosticSteps = () => {
   const [totalQuestions, setTotalQuestions] = useState(0); // If available
   const [currentStepIndex, setCurrentStepIndex] = useState(0); // For progress bar/counter
 
-  // User response for the current question
-  const [currentResponse, setCurrentResponse] = useState(3); // Default neutral
+  const [currentResponse, setCurrentResponse] = useState(3);
 
-  // History to support "Previous" button functionality (caching visited questions)
-  // Each item: { question, response, stepIndex }
   const [history, setHistory] = useState([]);
 
-  // To prevent double-fetching on mount if React.StrictMode is on
   const highlightRun = useRef(false);
 
   useEffect(() => {
@@ -29,25 +25,21 @@ const DiagnosticSteps = () => {
 
       try {
         setIsLoading(true);
-        // 1. Start or resume assessment
         const startData = await assessmentService.startAssessment("v1");
-        // startData should contain { id: 'run_id', questions: [...] } based on user hints
         const rId = startData.id;
         setRunId(rId);
 
-        // Try to determine total questions count
         if (startData.questions && Array.isArray(startData.questions)) {
           setTotalQuestions(startData.questions.length);
         }
 
-        // 2. Fetch the next unanswered question
         const nextQ = await assessmentService.getNextQuestion(rId);
 
-        console.log("Next Question Received:", nextQ); // Debug log
+        console.log("Next Question Received:", nextQ);
 
         if (nextQ) {
           setCurrentQuestion(nextQ);
-          // If the API returns which index this question is, use it. Otherwise, assume 0 for start.
+
           try {
             const progressData = await assessmentService.getProgress(rId);
             if (progressData && typeof progressData.answered_count === 'number') {
@@ -57,7 +49,6 @@ const DiagnosticSteps = () => {
             console.warn("Could not fetch progress", ignore);
           }
         } else {
-          // No next question? Maybe already finished?
           navigate("/diagnostic/completed", { state: { runId: rId } });
         }
 
@@ -86,7 +77,7 @@ const DiagnosticSteps = () => {
           <p className="text-gray-600 mb-6 font-inter text-sm">{error}</p>
           {isAuthError ? (
             <button
-              onClick={() => navigate("/onboarding")} // Or wherever login is
+              onClick={() => navigate("/onboarding")}
               className="bg-[#222] text-white px-6 py-2.5 rounded-full font-medium active:scale-95 transition-all w-full"
             >
               Log In
@@ -104,10 +95,7 @@ const DiagnosticSteps = () => {
     );
   }
 
-  // Color scheme function based on current step index 
   const getColorScheme = (step) => {
-    // We have 26 questions (indices 0-25).
-    // Mapping ranges directly to ensure Q26 (index 25) hits the final blue block.
 
     if (step < 5) {
       return {

@@ -8,6 +8,7 @@ const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
 
 const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
   const [profileImage, setProfileImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [age, setAge] = useState("");
@@ -21,6 +22,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setProfileImage(e.target.result);
@@ -65,21 +67,25 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
     setIsLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("first_name", firstName);
+      formData.append("last_name", lastName);
+      formData.append("age", parseInt(age));
+      formData.append("years_of_experience", parseInt(experience));
+      formData.append("job_role", jobRole);
+      formData.append("organization", organization);
+
+      if (selectedFile) {
+        formData.append("profile_image", selectedFile);
+      }
+
       const response = await fetch(`${API_AUTH_URL}/complete-profile/`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${authTokens.access}`,
-          "Content-Type": "application/json",
-          "Accept": "application/json",
+          // Content-Type is not set for FormData
         },
-        body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          age: parseInt(age),
-          years_of_experience: parseInt(experience),
-          job_role: jobRole,
-          organization: organization,
-        }),
+        body: formData,
       });
 
       const data = await response.json();

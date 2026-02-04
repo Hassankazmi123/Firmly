@@ -76,34 +76,43 @@ export default function PersonalInformationSection({
           <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             Current job role
           </label>
-          <select
+          <input
+            type="text"
             name="currentJobRole"
             value={personalInfo.currentJobRole}
             onChange={onPersonalInfoChange}
             className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
-          >
-            <option value="Computing">Computing</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Design">Design</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Sales">Sales</option>
-          </select>
+          />
+
         </div>
         <div>
           <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
             Years of experience
           </label>
-          <select
+          <input
+            type="number"
             name="yearsOfExperience"
             value={personalInfo.yearsOfExperience}
             onChange={onPersonalInfoChange}
+            placeholder="Years"
+            min="0"
+            max="50"
             className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
-          >
-            <option value="0-1 years">0-1 years</option>
-            <option value="2-5 years">2-5 years</option>
-            <option value="6-10 years">6-10 years</option>
-            <option value="11+ years">11+ years</option>
-          </select>
+          />
+
+        </div>
+        <div>
+          <label className="block  font-medium font-inter text-[#3D3D3D]/60 lg:mb-2 mb-1 lg:text-md text-sm">
+            Current organization
+          </label>
+          <input
+            type="text"
+            name="organization"
+            value={personalInfo.organization}
+            onChange={onPersonalInfoChange}
+            placeholder="Enter your organization"
+            className="w-full lg:px-4 px-2 lg:py-3 py-1.5 bg-[#f7f7f7] lg:text-md text-sm border border-[#e8e8e8] rounded-lg lg:rounded-2xl text-gray-900 focus:outline-none focus:ring-[1px] focus:ring-[#6664D3] focus:border-transparent"
+          />
         </div>
       </div>
       <button
