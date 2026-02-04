@@ -13,9 +13,15 @@ const Sidebar = ({
 
   const getDomain = () => {
     const rawDomain = sessionStorage.getItem("currentPathwayDomain");
-    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined") return "emp";
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined")
+      return "emp";
     const d = rawDomain.toLowerCase();
-    if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
+    if (
+      d.includes("resilience") ||
+      d.includes("resilien") ||
+      d.includes(" res")
+    )
+      return "res";
     if (d.includes("goal")) return "goal";
     if (d.includes("engagement") || d.includes("engage")) return "eng";
     if (d.includes("empathy") || d.includes("emp")) return "emp";
@@ -26,10 +32,14 @@ const Sidebar = ({
 
   const getPathwayLabel = () => {
     switch (domain) {
-      case "goal": return "Leadership Goal Setting";
-      case "res": return "Resilience";
-      case "eng": return "Engagement";
-      default: return "Cultivating Empathy";
+      case "goal":
+        return "Leadership Goal Setting";
+      case "res":
+        return "Resilience";
+      case "eng":
+        return "Engagement";
+      default:
+        return "Cultivating Empathy";
     }
   };
 
@@ -64,10 +74,11 @@ const Sidebar = ({
         </button>
       )}
       <div
-        className={`bg-white rounded-2xl transition-all duration-300 ${isCollapsed
-          ? "w-0 overflow-hidden -translate-x-full md:translate-x-0"
-          : "w-3/4 md:w-1/4 lg:w-1/5 translate-x-0 mr-4"
-          } fixed md:relative z-50 md:z-auto flex flex-col h-screen`}
+        className={`bg-white rounded-2xl transition-all duration-300 ${
+          isCollapsed
+            ? "w-0 overflow-hidden -translate-x-full md:translate-x-0"
+            : "w-3/4 md:w-1/4 lg:w-1/5 translate-x-0 mr-4"
+        } fixed md:relative z-50 md:z-auto flex flex-col h-full`}
       >
         <div className="px-5 py-3 flex items-center justify-between mt-4">
           <h2 className="text-xl md:text-2xl font-semibold text-black font-cormorant">
@@ -115,10 +126,11 @@ const Sidebar = ({
                   onConversationSelect &&
                   onConversationSelect("cultivating-empathy")
                 }
-                className={`rounded-xl border border-[#ECECEC] p-3 mb-2 cursor-pointer transition-colors ${selectedConversation === "cultivating-empathy"
-                  ? "bg-[#F5F5F5]"
-                  : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
-                  }`}
+                className={`rounded-xl border border-[#ECECEC] p-3 mb-2 cursor-pointer transition-colors ${
+                  selectedConversation === "cultivating-empathy"
+                    ? "bg-[#F5F5F5]"
+                    : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
+                }`}
               >
                 <p className="text-xs text-[#3D3D3D]/60 mb-1">
                   JUN 09, 2025 - 11:18 am
@@ -131,10 +143,11 @@ const Sidebar = ({
                 onClick={() =>
                   onConversationSelect && onConversationSelect("session1")
                 }
-                className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${selectedConversation === "session1"
-                  ? "bg-[#E8E8E8]"
-                  : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
-                  }`}
+                className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${
+                  selectedConversation === "session1"
+                    ? "bg-[#E8E8E8]"
+                    : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
+                }`}
               >
                 <p className="text-xs md:text-sm text-[#3D3D3D] font-inter">
                   • Session 1
@@ -145,10 +158,11 @@ const Sidebar = ({
                   onClick={() =>
                     onConversationSelect && onConversationSelect("session2")
                   }
-                  className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${selectedConversation === "session2"
-                    ? "bg-[#E8E8E8]"
-                    : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
-                    }`}
+                  className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${
+                    selectedConversation === "session2"
+                      ? "bg-[#E8E8E8]"
+                      : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
+                  }`}
                 >
                   <p className="text-xs md:text-sm text-[#3D3D3D] font-inter">
                     • Session 2
@@ -160,10 +174,11 @@ const Sidebar = ({
                   onClick={() =>
                     onConversationSelect && onConversationSelect("session3")
                   }
-                  className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${selectedConversation === "session3"
-                    ? "bg-[#E8E8E8]"
-                    : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
-                    }`}
+                  className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${
+                    selectedConversation === "session3"
+                      ? "bg-[#E8E8E8]"
+                      : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
+                  }`}
                 >
                   <p className="text-xs md:text-sm text-[#3D3D3D] font-inter">
                     • Session 3
@@ -175,10 +190,11 @@ const Sidebar = ({
                   onClick={() =>
                     onConversationSelect && onConversationSelect("session4")
                   }
-                  className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${selectedConversation === "session4"
-                    ? "bg-[#E8E8E8]"
-                    : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
-                    }`}
+                  className={`rounded-xl border border-[#ECECEC] p-3 mb-2 ml-4 cursor-pointer transition-colors ${
+                    selectedConversation === "session4"
+                      ? "bg-[#E8E8E8]"
+                      : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
+                  }`}
                 >
                   <p className="text-xs md:text-sm text-[#3D3D3D] font-inter">
                     • Session 4
@@ -191,10 +207,11 @@ const Sidebar = ({
             onClick={() =>
               onConversationSelect && onConversationSelect("diagnostic")
             }
-            className={`rounded-xl border border-[#ECECEC] p-3 mb-2 cursor-pointer transition-colors ${selectedConversation === "diagnostic"
-              ? "bg-[#F5F5F5]"
-              : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
-              }`}
+            className={`rounded-xl border border-[#ECECEC] p-3 mb-2 cursor-pointer transition-colors ${
+              selectedConversation === "diagnostic"
+                ? "bg-[#F5F5F5]"
+                : "bg-[#F5F5F5] hover:bg-[#E5E5E5]"
+            }`}
           >
             <p className="text-xs text-[#3D3D3D]/60 mb-1">
               JUN 08, 2025 - 03:52 pm

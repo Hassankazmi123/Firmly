@@ -28,16 +28,20 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     if (historyMessages.length > 0) {
       // Filter out the initial "Hello" message if it comes from Amalia
       return historyMessages
-        .filter(msg => {
+        .filter((msg) => {
           const content = msg.text || msg.content || "";
           const isHello = content.trim() === "Hello";
-          const isAmalia = !msg.sender || msg.sender.toLowerCase().trim() !== 'user';
+          const isAmalia =
+            !msg.sender || msg.sender.toLowerCase().trim() !== "user";
           return !(isHello && isAmalia);
         })
         .map((msg, idx) => ({
           id: msg.id || idx,
-          type: (msg.sender && msg.sender.toLowerCase().trim() === 'user') ? 'user' : 'amalia',
-          content: msg.text || msg.content
+          type:
+            msg.sender && msg.sender.toLowerCase().trim() === "user"
+              ? "user"
+              : "amalia",
+          content: msg.text || msg.content,
         }));
     }
     return [];
@@ -45,9 +49,15 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
 
   const getDomain = () => {
     const rawDomain = sessionStorage.getItem("currentPathwayDomain");
-    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined") return "emp";
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined")
+      return "emp";
     const d = rawDomain.toLowerCase();
-    if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
+    if (
+      d.includes("resilience") ||
+      d.includes("resilien") ||
+      d.includes(" res")
+    )
+      return "res";
     if (d.includes("goal")) return "goal";
     if (d.includes("engagement") || d.includes("engage")) return "eng";
     if (d.includes("self")) return "self";
@@ -111,11 +121,13 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
       if (data) {
         const content = data.message || data.text || data.response;
         if (content) {
-          setMessages([{
-            id: Date.now(),
-            type: 'amalia',
-            content: content
-          }]);
+          setMessages([
+            {
+              id: Date.now(),
+              type: "amalia",
+              content: content,
+            },
+          ]);
         }
       }
     } catch (err) {
@@ -126,7 +138,7 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
   const handleSendMessage = async (text) => {
     const domain = getDomain();
     // Optimistic UI update
-    const userMsg = { id: Date.now(), type: 'user', content: text };
+    const userMsg = { id: Date.now(), type: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
 
     try {
@@ -134,19 +146,32 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
 
       // Keyword-based domain switching fallback
       const lowerText = text.toLowerCase();
-      if (lowerText.includes("resilience") || lowerText.includes("resilien") || lowerText.includes(" res")) {
+      if (
+        lowerText.includes("resilience") ||
+        lowerText.includes("resilien") ||
+        lowerText.includes(" res")
+      ) {
         domain = "res";
         sessionStorage.setItem("currentPathwayDomain", "res");
       } else if (lowerText.includes("goal")) {
         domain = "goal";
         sessionStorage.setItem("currentPathwayDomain", "goal");
-      } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
+      } else if (
+        lowerText.includes("engagement") ||
+        lowerText.includes("engage")
+      ) {
         domain = "eng";
         sessionStorage.setItem("currentPathwayDomain", "eng");
-      } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
+      } else if (
+        lowerText.includes("self") &&
+        lowerText.includes("awareness")
+      ) {
         domain = "self";
         sessionStorage.setItem("currentPathwayDomain", "self");
-      } else if (lowerText.includes("belonging") || lowerText.includes("belong")) {
+      } else if (
+        lowerText.includes("belonging") ||
+        lowerText.includes("belong")
+      ) {
         domain = "belong";
         sessionStorage.setItem("currentPathwayDomain", "belong");
       }
@@ -225,7 +250,9 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto w-full px-4 pb-32 max-w-5xl mx-auto">
         {loading && messages.length === 0 && (
-          <div className="p-4 text-center text-gray-500">Loading session...</div>
+          <div className="p-4 text-center text-gray-500">
+            Loading session...
+          </div>
         )}
 
         {messages.map((message) => (
@@ -234,10 +261,11 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
             className={`mb-6 flex w-full ${message.type === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`p-4 rounded-xl max-w-[85%] ${message.type === "amalia"
-                ? "bg-[#F5F5FF]"
-                : "bg-[#f5f5f5] ml-auto"
-                }`}
+              className={`p-4 rounded-xl max-w-[85%] ${
+                message.type === "amalia"
+                  ? "bg-[#F5F5FF]"
+                  : "bg-[#f5f5f5] ml-auto"
+              }`}
             >
               <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
                 {message.content}
@@ -250,21 +278,22 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
         <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
           <button
             onClick={handleNextSession}
-            className="flex-1 px-5  py-3.5 lg:max-w-fit  bg-[#F5F5F5]  text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+            className="flex-1 px-5  py-3.5  bg-[#F5F5F5]  text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
           >
             Next Session
           </button>
           <button
             onClick={handleGoToDashboard}
-            className="flex-1   py-3.5 px-5 lg:max-w-fit  bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+            className="flex-1   py-3.5 px-5  bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
           >
             Go to Dashboard
           </button>
         </div>
       </div>
       <div
-        className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
-          } md:z-50`}
+        className={`absolute bottom-0 left-0 right-0 ${
+          isSidebarCollapsed ? "z-50" : ""
+        } md:z-50`}
       >
         <ChatInputFooter onSend={handleSendMessage} />
       </div>
