@@ -53,52 +53,37 @@ const AmaliaCornerLayout = () => {
   }, [isSidebarCollapsed]);
 
   useEffect(() => {
+    const savedConversation = sessionStorage.getItem("selectedConversation");
+
     const shouldShowPathway = sessionStorage.getItem("showLeadershipPathway");
     if (shouldShowPathway === "true") {
       setShowPathwayView(true);
+      // We keep this one-time flag removal as it's an entry point from Dashboard
       sessionStorage.removeItem("showLeadershipPathway");
     }
 
-    const shouldShowSession1 = sessionStorage.getItem("showSession1");
-    if (shouldShowSession1 === "true") {
-      setShowSession1(true);
-      setShowSession2(false);
-      setShowSession3(false);
-      setShowSession4(false);
+    const s1 = sessionStorage.getItem("showSession1") === "true";
+    const s2 = sessionStorage.getItem("showSession2") === "true";
+    const s3 = sessionStorage.getItem("showSession3") === "true";
+    const s4 = sessionStorage.getItem("showSession4") === "true";
+
+    if (s1) setShowSession1(true);
+    if (s2) setShowSession2(true);
+    if (s3) setShowSession3(true);
+    if (s4) setShowSession4(true);
+
+    if (savedConversation) {
+      setSelectedConversation(savedConversation);
+    } else if (s4) {
+      setSelectedConversation("session4");
+    } else if (s3) {
+      setSelectedConversation("session3");
+    } else if (s2) {
+      setSelectedConversation("session2");
+    } else if (s1) {
       setSelectedConversation("session1");
-      sessionStorage.removeItem("showSession1");
     } else {
-      const shouldShowSession2 = sessionStorage.getItem("showSession2");
-      if (shouldShowSession2 === "true") {
-        setShowSession1(true);
-        setShowSession2(true);
-        setShowSession3(false);
-        setShowSession4(false);
-        setSelectedConversation("session2");
-        sessionStorage.removeItem("showSession2");
-      } else {
-        const shouldShowSession3 = sessionStorage.getItem("showSession3");
-        if (shouldShowSession3 === "true") {
-          setShowSession1(true);
-          setShowSession2(true);
-          setShowSession3(true);
-          setShowSession4(false);
-          setSelectedConversation("session3");
-          sessionStorage.removeItem("showSession3");
-        } else {
-          const shouldShowSession4 = sessionStorage.getItem("showSession4");
-          if (shouldShowSession4 === "true") {
-            setShowSession1(true);
-            setShowSession2(true);
-            setShowSession3(true);
-            setShowSession4(true);
-            setSelectedConversation("session4");
-            sessionStorage.removeItem("showSession4");
-          } else {
-            setSelectedConversation("diagnostic");
-          }
-        }
-      }
+      setSelectedConversation("diagnostic");
     }
   }, []);
 
@@ -108,7 +93,11 @@ const AmaliaCornerLayout = () => {
   useEffect(() => {
     const detectDomain = async () => {
       const existingDomain = sessionStorage.getItem("currentPathwayDomain");
-      if (!existingDomain || existingDomain === "null" || existingDomain === "undefined") {
+      if (
+        !existingDomain ||
+        existingDomain === "null" ||
+        existingDomain === "undefined"
+      ) {
         try {
           const response = await pathwayService.startPathway();
           if (response && response.domain) {
@@ -142,6 +131,7 @@ const AmaliaCornerLayout = () => {
   }, [showPathwayView]);
 
   const handleConversationSelect = (conversationId) => {
+    sessionStorage.setItem("selectedConversation", conversationId);
     if (conversationId === "cultivating-empathy") {
       if (showSession1) {
         setShowSession1(false);
@@ -149,30 +139,43 @@ const AmaliaCornerLayout = () => {
         setShowSession3(false);
         setShowSession4(false);
         setSelectedConversation("diagnostic");
+        sessionStorage.setItem("selectedConversation", "diagnostic");
       } else {
         setShowSession1(true);
         setSelectedConversation("session1");
+        sessionStorage.setItem("showSession1", "true");
+        sessionStorage.setItem("selectedConversation", "session1");
       }
     } else if (conversationId === "diagnostic") {
       setSelectedConversation("diagnostic");
     } else if (conversationId === "session1") {
       setShowSession1(true);
       setSelectedConversation("session1");
+      sessionStorage.setItem("showSession1", "true");
     } else if (conversationId === "session2") {
       setShowSession1(true);
       setShowSession2(true);
       setSelectedConversation("session2");
+      sessionStorage.setItem("showSession1", "true");
+      sessionStorage.setItem("showSession2", "true");
     } else if (conversationId === "session3") {
       setShowSession1(true);
       setShowSession2(true);
       setShowSession3(true);
       setSelectedConversation("session3");
+      sessionStorage.setItem("showSession1", "true");
+      sessionStorage.setItem("showSession2", "true");
+      sessionStorage.setItem("showSession3", "true");
     } else if (conversationId === "session4") {
       setShowSession1(true);
       setShowSession2(true);
       setShowSession3(true);
       setShowSession4(true);
       setSelectedConversation("session4");
+      sessionStorage.setItem("showSession1", "true");
+      sessionStorage.setItem("showSession2", "true");
+      sessionStorage.setItem("showSession3", "true");
+      sessionStorage.setItem("showSession4", "true");
     }
   };
   const initialMessage = (
@@ -219,7 +222,7 @@ const AmaliaCornerLayout = () => {
   };
 
   const handleSendMessage = async (text) => {
-    const userMsg = { id: Date.now(), type: 'user', content: text };
+    const userMsg = { id: Date.now(), type: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
 
     try {
@@ -227,19 +230,32 @@ const AmaliaCornerLayout = () => {
 
       // Keyword-based domain switching fallback
       const lowerText = text.toLowerCase();
-      if (lowerText.includes("resilience") || lowerText.includes("resilien") || lowerText.includes(" res")) {
+      if (
+        lowerText.includes("resilience") ||
+        lowerText.includes("resilien") ||
+        lowerText.includes(" res")
+      ) {
         domain = "res";
         sessionStorage.setItem("currentPathwayDomain", "res");
       } else if (lowerText.includes("goal")) {
         domain = "goal";
         sessionStorage.setItem("currentPathwayDomain", "goal");
-      } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
+      } else if (
+        lowerText.includes("engagement") ||
+        lowerText.includes("engage")
+      ) {
         domain = "eng";
         sessionStorage.setItem("currentPathwayDomain", "eng");
-      } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
+      } else if (
+        lowerText.includes("self") &&
+        lowerText.includes("awareness")
+      ) {
         domain = "self";
         sessionStorage.setItem("currentPathwayDomain", "self");
-      } else if (lowerText.includes("belonging") || lowerText.includes("belong")) {
+      } else if (
+        lowerText.includes("belonging") ||
+        lowerText.includes("belong")
+      ) {
         domain = "belong";
         sessionStorage.setItem("currentPathwayDomain", "belong");
       }
@@ -266,10 +282,15 @@ const AmaliaCornerLayout = () => {
         historyData = await pathwayService.getEmpathyHistory();
       }
 
-      const formatted = (Array.isArray(historyData) ? historyData : (historyData?.messages || [])).map((msg, idx) => ({
+      const formatted = (
+        Array.isArray(historyData) ? historyData : historyData?.messages || []
+      ).map((msg, idx) => ({
         id: msg.id || idx,
-        type: (msg.sender && msg.sender.toLowerCase().trim() === 'user') ? 'user' : 'amalia',
-        content: msg.text || msg.content
+        type:
+          msg.sender && msg.sender.toLowerCase().trim() === "user"
+            ? "user"
+            : "amalia",
+        content: msg.text || msg.content,
       }));
 
       if (formatted.length > 0) {
@@ -282,9 +303,15 @@ const AmaliaCornerLayout = () => {
 
   const getDomain = () => {
     const rawDomain = sessionStorage.getItem("currentPathwayDomain");
-    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined") return "emp";
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined")
+      return "emp";
     const d = rawDomain.toLowerCase();
-    if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
+    if (
+      d.includes("resilience") ||
+      d.includes("resilien") ||
+      d.includes(" res")
+    )
+      return "res";
     if (d.includes("goal")) return "goal";
     if (d.includes("engagement") || d.includes("engage")) return "eng";
     if (d.includes("self")) return "self";
@@ -303,12 +330,18 @@ const AmaliaCornerLayout = () => {
 
   const getDomainLabel = () => {
     switch (domain) {
-      case "goal": return "Goal Setting";
-      case "res": return "Resilience";
-      case "eng": return "Engagement";
-      case "self": return "Self Awareness";
-      case "belong": return "Belonging";
-      default: return "Empathy";
+      case "goal":
+        return "Goal Setting";
+      case "res":
+        return "Resilience";
+      case "eng":
+        return "Engagement";
+      case "self":
+        return "Self Awareness";
+      case "belong":
+        return "Belonging";
+      default:
+        return "Empathy";
     }
   };
 
@@ -320,36 +353,42 @@ const AmaliaCornerLayout = () => {
 
   const getGrowItems = () => {
     switch (domain) {
-      case "goal": return [
-        { abbreviation: "GOA", label: "Goal Orientation", score: 32 },
-        { abbreviation: "ENG", label: "Engagement", score: 24 },
-        { abbreviation: "SEL", label: "Self-belief", score: 22 },
-      ];
-      case "res": return [
-        { abbreviation: "RES", label: "Resilience", score: 32 },
-        { abbreviation: "ENG", label: "Engagement", score: 24 },
-        { abbreviation: "SEL", label: "Self-belief", score: 22 },
-      ];
-      case "eng": return [
-        { abbreviation: "ENG", label: "Engagement", score: 32 },
-        { abbreviation: "SEL", label: "Self-belief", score: 24 },
-        { abbreviation: "WOR", label: "Workplace Belonging", score: 22 },
-      ];
-      case "self": return [
-        { abbreviation: "SEL", label: "Self Awareness", score: 32 },
-        { abbreviation: "EMOT", label: "Emotional Reg", score: 24 },
-        { abbreviation: "SOC", label: "Social", score: 22 },
-      ];
-      case "belong": return [
-        { abbreviation: "BEL", label: "Belonging", score: 32 },
-        { abbreviation: "INC", label: "Inclusion", score: 24 },
-        { abbreviation: "CON", label: "Connection", score: 22 },
-      ];
-      default: return [
-        { abbreviation: "EMP", label: "Empathy", score: 32 },
-        { abbreviation: "ENG", label: "Engagement", score: 24 },
-        { abbreviation: "SEL", label: "Self-belief", score: 22 },
-      ];
+      case "goal":
+        return [
+          { abbreviation: "GOA", label: "Goal Orientation", score: 32 },
+          { abbreviation: "ENG", label: "Engagement", score: 24 },
+          { abbreviation: "SEL", label: "Self-belief", score: 22 },
+        ];
+      case "res":
+        return [
+          { abbreviation: "RES", label: "Resilience", score: 32 },
+          { abbreviation: "ENG", label: "Engagement", score: 24 },
+          { abbreviation: "SEL", label: "Self-belief", score: 22 },
+        ];
+      case "eng":
+        return [
+          { abbreviation: "ENG", label: "Engagement", score: 32 },
+          { abbreviation: "SEL", label: "Self-belief", score: 24 },
+          { abbreviation: "WOR", label: "Workplace Belonging", score: 22 },
+        ];
+      case "self":
+        return [
+          { abbreviation: "SEL", label: "Self Awareness", score: 32 },
+          { abbreviation: "EMOT", label: "Emotional Reg", score: 24 },
+          { abbreviation: "SOC", label: "Social", score: 22 },
+        ];
+      case "belong":
+        return [
+          { abbreviation: "BEL", label: "Belonging", score: 32 },
+          { abbreviation: "INC", label: "Inclusion", score: 24 },
+          { abbreviation: "CON", label: "Connection", score: 22 },
+        ];
+      default:
+        return [
+          { abbreviation: "EMP", label: "Empathy", score: 32 },
+          { abbreviation: "ENG", label: "Engagement", score: 24 },
+          { abbreviation: "SEL", label: "Self-belief", score: 22 },
+        ];
     }
   };
 
@@ -441,8 +480,8 @@ const AmaliaCornerLayout = () => {
                 <div className="bg-[#F5F5F5] rounded-2xl p-6 md:p-8 mb-8">
                   <p className="text-base md:text-lg text-[#3D3D3D] font-inter mb-6">
                     We'll start with{" "}
-                    <span className="font-semibold">{domainLabel}</span>. For that,
-                    I've scheduled 4 sessions for you:
+                    <span className="font-semibold">{domainLabel}</span>. For
+                    that, I've scheduled 4 sessions for you:
                   </p>
                   <ul className="space-y-3 mb-6">
                     <li className="flex items-start gap-3">
@@ -704,14 +743,19 @@ const AmaliaCornerLayout = () => {
             )}
           </div>
         )}
-        {!showPathwayView && selectedConversation !== "session1" && selectedConversation !== "session2" && selectedConversation !== "session3" && selectedConversation !== "session4" && (
-          <div
-            className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+        {!showPathwayView &&
+          selectedConversation !== "session1" &&
+          selectedConversation !== "session2" &&
+          selectedConversation !== "session3" &&
+          selectedConversation !== "session4" && (
+            <div
+              className={`absolute bottom-0 left-0 right-0 ${
+                isSidebarCollapsed ? "z-50" : ""
               } md:z-50`}
-          >
-            <ChatInputFooter onSend={handleSendMessage} />
-          </div>
-        )}
+            >
+              <ChatInputFooter onSend={handleSendMessage} />
+            </div>
+          )}
       </div>
     </div>
   );

@@ -53,7 +53,8 @@ const Session3Modal = ({ isOpen, onClose, sessionData }) => {
   const defaultSession = {
     sessionNumber: "Session 3",
     title: "The Empathy Toolkit - Practical Applications",
-    description: "Introduce structured exercises for developing empathetic leadership",
+    description:
+      "Introduce structured exercises for developing empathetic leadership",
     duration: "30 minutes",
     icon: "/assets/images/dashboard/session3.webp",
   };
@@ -102,6 +103,7 @@ const Session3Modal = ({ isOpen, onClose, sessionData }) => {
               <button
                 onClick={() => {
                   sessionStorage.setItem("showSession3", "true");
+                  sessionStorage.setItem("selectedConversation", "session3");
                   onClose();
                   navigate("/amalia-corner");
                 }}

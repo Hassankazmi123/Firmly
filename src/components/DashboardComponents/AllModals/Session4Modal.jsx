@@ -53,7 +53,8 @@ const Session4Modal = ({ isOpen, onClose, sessionData }) => {
   const defaultSession = {
     sessionNumber: "Session 4",
     title: "Integration and Forward Movement",
-    description: "Assess progress and create a sustainable empathy development plan",
+    description:
+      "Assess progress and create a sustainable empathy development plan",
     duration: "30 minutes",
     icon: "/assets/images/dashboard/session4.webp",
   };
@@ -102,6 +103,7 @@ const Session4Modal = ({ isOpen, onClose, sessionData }) => {
               <button
                 onClick={() => {
                   sessionStorage.setItem("showSession4", "true");
+                  sessionStorage.setItem("selectedConversation", "session4");
                   onClose();
                   navigate("/amalia-corner");
                 }}
