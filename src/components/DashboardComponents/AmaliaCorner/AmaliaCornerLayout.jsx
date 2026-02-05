@@ -87,9 +87,6 @@ const AmaliaCornerLayout = () => {
     }
   }, []);
 
-  const [nextSessionTitle, setNextSessionTitle] = useState("");
-  const [unlockTime, setUnlockTime] = useState(null);
-
   useEffect(() => {
     const detectDomain = async () => {
       const existingDomain = sessionStorage.getItem("currentPathwayDomain");
@@ -118,9 +115,7 @@ const AmaliaCornerLayout = () => {
           const info = await pathwayService.getNextSessionInfo();
           if (info) {
             console.log("Next session info:", info);
-            // You can use info.unlockTime or similar fields here to update UI
-            setUnlockTime(info.unlockTime);
-            setNextSessionTitle(info.nextSessionTitle);
+            // Info is logged but currently not used in UI to avoid unused-vars
           }
         } catch (error) {
           console.error("Failed to fetch next session info:", error);

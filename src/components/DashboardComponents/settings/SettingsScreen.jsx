@@ -3,6 +3,11 @@ import SettingsSidebar from "./SettingsSidebar";
 import SettingsHeader from "./SettingsHeader";
 import PersonalInformationSection from "./PersonalInformationSection";
 import ChangePasswordSection from "./ChangePasswordSection";
+// API Configuration
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
+const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
+
 export default function SettingsScreen() {
   const [personalInfo, setPersonalInfo] = useState({
     firstName: "",
@@ -21,11 +26,6 @@ export default function SettingsScreen() {
   const [profileImage, setProfileImage] = useState(null);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // API Configuration
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
-  const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -39,9 +39,9 @@ export default function SettingsScreen() {
         const response = await fetch(`${API_AUTH_URL}/profile/`, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-            "Accept": "application/json",
+            Accept: "application/json",
           },
         });
 
@@ -60,7 +60,11 @@ export default function SettingsScreen() {
           if (data.profile_image) {
             // Check if it's a relative path and prepend API URL if needed
             let imageUrl = data.profile_image;
-            if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+            if (
+              imageUrl &&
+              !imageUrl.startsWith("http") &&
+              !imageUrl.startsWith("data:")
+            ) {
               // Remove explicit /api path if it exists in base url to get just the domain for media
               // OR simple convention: if it starts with /, prepend base url
               imageUrl = `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
@@ -115,7 +119,12 @@ export default function SettingsScreen() {
       if (!token) return;
 
       // Basic validation
-      if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.age || !personalInfo.currentJobRole) {
+      if (
+        !personalInfo.firstName ||
+        !personalInfo.lastName ||
+        !personalInfo.age ||
+        !personalInfo.currentJobRole
+      ) {
         alert("Please fill in all required fields (Name, Age, Job Role)");
         return;
       }
@@ -124,7 +133,10 @@ export default function SettingsScreen() {
       formData.append("first_name", personalInfo.firstName);
       formData.append("last_name", personalInfo.lastName);
       formData.append("age", parseInt(personalInfo.age) || 0);
-      formData.append("years_of_experience", parseInt(personalInfo.yearsOfExperience) || 0);
+      formData.append(
+        "years_of_experience",
+        parseInt(personalInfo.yearsOfExperience) || 0,
+      );
       formData.append("job_role", personalInfo.currentJobRole);
       formData.append("organization", personalInfo.organization);
 
@@ -136,7 +148,7 @@ export default function SettingsScreen() {
       const response = await fetch(`${API_AUTH_URL}/profile/`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           // Content-Type must NOT be set when using FormData, browser sets it with boundary
         },
         body: formData,
@@ -154,7 +166,7 @@ export default function SettingsScreen() {
         else if (data.message) errorMessage = data.message;
         else {
           // Check for field-specific errors
-          const fieldErrors = Object.keys(data).map(key => {
+          const fieldErrors = Object.keys(data).map((key) => {
             const err = Array.isArray(data[key]) ? data[key][0] : data[key];
             return `${key}: ${err}`;
           });

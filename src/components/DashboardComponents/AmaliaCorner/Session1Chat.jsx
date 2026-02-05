@@ -13,11 +13,7 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    initializeSession();
-  }, []);
-
-  const processHistoryData = (historyData) => {
+  const processHistoryData = React.useCallback((historyData) => {
     let historyMessages = [];
     if (Array.isArray(historyData)) {
       historyMessages = historyData;
@@ -45,9 +41,9 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
         }));
     }
     return [];
-  };
+  }, []);
 
-  const getDomain = () => {
+  const getDomain = React.useCallback(() => {
     const rawDomain = sessionStorage.getItem("currentPathwayDomain");
     if (!rawDomain || rawDomain === "null" || rawDomain === "undefined")
       return "emp";
@@ -64,43 +60,9 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     if (d.includes("belonging") || d.includes("belong")) return "belong";
     if (d.includes("empathy") || d.includes("emp")) return "emp";
     return "emp";
-  };
+  }, []);
 
-  const initializeSession = async () => {
-    setLoading(true);
-    const domain = getDomain();
-    try {
-      let historyData;
-      if (domain === "goal") {
-        historyData = await pathwayService.getGoalHistorySession1();
-      } else if (domain === "res") {
-        historyData = await pathwayService.getResilienceHistorySession1();
-      } else if (domain === "eng") {
-        historyData = await pathwayService.getEngagementHistorySession1();
-      } else if (domain === "self") {
-        historyData = await pathwayService.getSelfAwarenessHistorySession1();
-      } else if (domain === "belong") {
-        historyData = await pathwayService.getBelongingHistorySession1();
-      } else {
-        historyData = await pathwayService.getEmpathyHistory();
-      }
-
-      const formatted = processHistoryData(historyData);
-
-      if (formatted.length > 0) {
-        setMessages(formatted);
-      } else {
-        await startSession();
-      }
-    } catch (error) {
-      console.error(`Failed to initialize session 1 (${domain}):`, error);
-      await startSession();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const startSession = async () => {
+  const startSession = React.useCallback(async () => {
     const domain = getDomain();
     try {
       let data;
@@ -133,7 +95,45 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     } catch (err) {
       console.error(`Error starting session 1 (${domain}):`, err);
     }
-  };
+  }, [getDomain]);
+
+  const initializeSession = React.useCallback(async () => {
+    setLoading(true);
+    const domain = getDomain();
+    try {
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession1();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession1();
+      } else if (domain === "eng") {
+        historyData = await pathwayService.getEngagementHistorySession1();
+      } else if (domain === "self") {
+        historyData = await pathwayService.getSelfAwarenessHistorySession1();
+      } else if (domain === "belong") {
+        historyData = await pathwayService.getBelongingHistorySession1();
+      } else {
+        historyData = await pathwayService.getEmpathyHistory();
+      }
+
+      const formatted = processHistoryData(historyData);
+
+      if (formatted.length > 0) {
+        setMessages(formatted);
+      } else {
+        await startSession();
+      }
+    } catch (error) {
+      console.error(`Failed to initialize session 1 (${domain}):`, error);
+      await startSession();
+    } finally {
+      setLoading(false);
+    }
+  }, [getDomain, processHistoryData, startSession]);
+
+  useEffect(() => {
+    initializeSession();
+  }, [initializeSession]);
 
   const handleSendMessage = async (text) => {
     const domain = getDomain();
