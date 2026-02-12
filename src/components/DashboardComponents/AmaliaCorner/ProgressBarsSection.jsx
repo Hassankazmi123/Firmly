@@ -2,26 +2,27 @@ import React, { useState, useEffect } from "react";
 import ProgressBar from "./ProgressBar";
 import { assessmentService } from "../../../services/assessment";
 
+const domainConfig = {
+  GOAL: { label: "Goal Orientation", color: "green" },
+  BELONG: { label: "Workplace Belonging", color: "blue" },
+  ENG: { label: "Engagement", color: "purple" },
+  RES: { label: "Resilience", color: "pink" },
+  SELF: { label: "Self-Belief", color: "orange" },
+  EMP: { label: "Empathy", color: "lightBlue" },
+};
+
 const ProgressBarsSection = () => {
   const [progressData, setProgressData] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Domain mapping configuration
-  const domainConfig = {
-    GOAL: { label: "Goal Orientation", color: "green" },
-    BELONG: { label: "Workplace Belonging", color: "blue" },
-    ENG: { label: "Engagement", color: "purple" },
-    RES: { label: "Resilience", color: "pink" },
-    SELF: { label: "Self-Belief", color: "orange" },
-    EMP: { label: "Empathy", color: "lightBlue" },
-  };
 
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
         setLoading(true);
-        // Get assessment ID from localStorage or use default
-        const assessmentId = localStorage.getItem("assessmentId") || "93";
+        const assessmentId = localStorage.getItem("assessmentId");
+        if (!assessmentId) {
+          throw new Error("No assessment run id found");
+        }
         const data = await assessmentService.getResults(assessmentId);
 
         if (data && data.domains) {

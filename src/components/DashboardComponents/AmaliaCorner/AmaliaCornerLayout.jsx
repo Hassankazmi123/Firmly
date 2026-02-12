@@ -114,7 +114,10 @@ const AmaliaCornerLayout = () => {
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
-        const assessmentId = localStorage.getItem("assessmentId") || "93";
+        const assessmentId = localStorage.getItem("assessmentId");
+        if (!assessmentId) {
+          throw new Error("No assessment run id found");
+        }
         const data = await assessmentService.getResults(assessmentId);
 
         if (data && data.domains && data.glow && data.grow) {

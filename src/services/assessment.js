@@ -1,5 +1,8 @@
 import { authenticatedFetch, API_URL } from "./api";
 
+const extractRunId = (payload) =>
+    payload?.id || payload?.run_id || payload?.assessment_id || payload?.assessmentId;
+
 export const assessmentService = {
     // Start or resume assessment
     startAssessment: async (packVersion = "v1") => {
@@ -13,6 +16,10 @@ export const assessmentService = {
             if (response.status === 409) {
                 const data = await response.json();
                 console.warn("Assessment already started (409), resuming:", data);
+                const runId = extractRunId(data);
+                if (runId) {
+                    localStorage.setItem("assessmentId", String(runId));
+                }
                 return data;
             }
 
@@ -24,7 +31,12 @@ export const assessmentService = {
                 }
                 throw new Error(`Failed to start assessment: ${response.status} ${response.statusText}`);
             }
-            return response.json();
+            const data = await response.json();
+            const runId = extractRunId(data);
+            if (runId) {
+                localStorage.setItem("assessmentId", String(runId));
+            }
+            return data;
         } catch (error) {
             console.error("StartAssessment Exception:", error);
             throw error;

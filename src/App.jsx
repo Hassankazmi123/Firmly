@@ -12,26 +12,95 @@ import NormalChat from "./pages/NormalChat";
 import SafeSpaceChat from "./pages/SafeSpaceChat";
 import Feedback from "./pages/Feedback";
 import Diagnostic from "./pages/Diagnostic";
+import NotFound from "./pages/NotFound";
 import DiagnosticModal from "./components/DiagnosticComponents/DiagnosticModal";
 import DiagnosticComplete from "./components/DiagnosticComponents/DiagnosticComplete";
+
+const PrivateRoute = ({ children }) => {
+  const accessToken = localStorage.getItem("accessToken");
+  return accessToken ? children : <Navigate to="/not-found" replace />;
+};
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/amalia-corner" element={<AmaliaCorner />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/amalia-corner"
+          element={
+            <PrivateRoute>
+              <AmaliaCorner />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/dashboard/account-settings"
-          element={<AccountSettings />}
+          element={
+            <PrivateRoute>
+              <AccountSettings />
+            </PrivateRoute>
+          }
         />
-        <Route path="/dashboard/normal-chat" element={<NormalChat />} />
-        <Route path="/dashboard/safe-space-chat" element={<SafeSpaceChat />} />
-        <Route path="/dashboard/feedback" element={<Feedback />} />
-        <Route path="/diagnostic" element={<DiagnosticModal />} />
-        <Route path="/diagnostic/steps" element={<Diagnostic />} />
-        <Route path="/diagnostic/completed" element={<DiagnosticComplete />} />
+        <Route
+          path="/dashboard/normal-chat"
+          element={
+            <PrivateRoute>
+              <NormalChat />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/safe-space-chat"
+          element={
+            <PrivateRoute>
+              <SafeSpaceChat />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/feedback"
+          element={
+            <PrivateRoute>
+              <Feedback />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/diagnostic"
+          element={
+            <PrivateRoute>
+              <DiagnosticModal />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/diagnostic/steps"
+          element={
+            <PrivateRoute>
+              <Diagnostic />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/diagnostic/completed"
+          element={
+            <PrivateRoute>
+              <DiagnosticComplete />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/not-found" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

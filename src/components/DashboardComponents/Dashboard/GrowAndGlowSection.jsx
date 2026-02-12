@@ -11,7 +11,10 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
     const fetchAssessmentData = async () => {
       try {
         setLoading(true);
-        const assessmentId = localStorage.getItem("assessmentId") || "93";
+        const assessmentId = localStorage.getItem("assessmentId");
+        if (!assessmentId) {
+          throw new Error("No assessment run id found");
+        }
         const data = await assessmentService.getResults(assessmentId);
 
         if (data && data.domains && data.glow && data.grow) {

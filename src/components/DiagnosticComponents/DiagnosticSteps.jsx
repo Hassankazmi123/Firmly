@@ -26,7 +26,15 @@ const DiagnosticSteps = () => {
       try {
         setIsLoading(true);
         const startData = await assessmentService.startAssessment("v1");
-        const rId = startData.id;
+        const rId =
+          startData?.id ||
+          startData?.run_id ||
+          startData?.assessment_id ||
+          startData?.assessmentId;
+        if (!rId) {
+          throw new Error("Assessment run id missing from start response.");
+        }
+        localStorage.setItem("assessmentId", String(rId));
         setRunId(rId);
 
         if (startData.questions && Array.isArray(startData.questions)) {
