@@ -1,19 +1,89 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import SummaryCard from "../AmaliaCorner/SummaryCard";
+import { assessmentService } from "../../../services/assessment";
 
 const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
+  const [doingGreatItems, setDoingGreatItems] = useState([]);
+  const [growthAreasItems, setGrowthAreasItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const doingGreatItems = [
-    { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
-    { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
-    { abbreviation: "RES", label: "Resilience", score: 87 },
-  ];
+  useEffect(() => {
+    const fetchAssessmentData = async () => {
+      try {
+        setLoading(true);
+        const assessmentId = localStorage.getItem("assessmentId") || "93";
+        const data = await assessmentService.getResults(assessmentId);
 
-  const growthAreasItems = [
-    { abbreviation: "EMP", label: "Empathy", score: 32 },
-    { abbreviation: "ENG", label: "Engagement", score: 24 },
-    { abbreviation: "SEL", label: "Self-belief", score: 22 },
-  ];
+        if (data && data.domains && data.glow && data.grow) {
+          const domainLabels = {
+            GOAL: "Goal Orientation",
+            BELONG: "Workplace Belonging",
+            ENG: "Engagement",
+            RES: "Resilience",
+            SELF: "Self-belief",
+            EMP: "Empathy",
+          };
+
+          const domainAbbreviations = {
+            GOAL: "GOA",
+            BELONG: "WOR",
+            ENG: "ENG",
+            RES: "RES",
+            SELF: "SEL",
+            EMP: "EMP",
+          };
+
+          // Map glow items (Doing Great)
+          const glowData = data.glow.map((domainCode) => {
+            const domainData = data.domains.find((d) => d.domain === domainCode);
+            return {
+              abbreviation: domainAbbreviations[domainCode] || domainCode,
+              label: domainLabels[domainCode] || domainCode,
+              score: domainData
+                ? Math.round(parseFloat(domainData.percent_0_100))
+                : 0,
+            };
+          });
+
+          // Map grow items (Growth Areas)
+          const growData = data.grow.map((domainCode) => {
+            const domainData = data.domains.find((d) => d.domain === domainCode);
+            return {
+              abbreviation: domainAbbreviations[domainCode] || domainCode,
+              label: domainLabels[domainCode] || domainCode,
+              score: domainData
+                ? Math.round(parseFloat(domainData.percent_0_100))
+                : 0,
+            };
+          });
+
+          setDoingGreatItems(glowData);
+          setGrowthAreasItems(growData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch assessment data for GrowAndGlow:", error);
+        // Fallback to default data
+        setDoingGreatItems([
+          { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
+          { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
+          { abbreviation: "RES", label: "Resilience", score: 87 },
+        ]);
+        setGrowthAreasItems([
+          { abbreviation: "EMP", label: "Empathy", score: 32 },
+          { abbreviation: "ENG", label: "Engagement", score: 24 },
+          { abbreviation: "SEL", label: "Self-belief", score: 22 },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (hasVisitedAmaliaCorner) {
+      fetchAssessmentData();
+    } else {
+      setLoading(false);
+    }
+  }, [hasVisitedAmaliaCorner]);
 
   return (
     <section data-tour="grow-glow" className="py-8 lg:py-12">
@@ -33,22 +103,33 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
         )}
       </div>
       {hasVisitedAmaliaCorner ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          <SummaryCard
-            title="Doing great"
-            subtitle="Your female talent is thriving in the following domains."
-            items={doingGreatItems}
-            bgColor="bg-[#378C78]"
-            iconImage="/assets/images/dashboard/doing.webp"
-          />
-          <SummaryCard
-            title="Growth areas"
-            subtitle="These areas need your immediate attention to balance workplace wellbeing."
-            items={growthAreasItems}
-            bgColor="bg-[#C56A55]"
-            iconImage="/assets/images/dashboard/growth.webp"
-          />
-        </div>
+        loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            <div className="border border-[#0000000A] bg-gray-100 rounded-2xl p-6 min-h-[250px] flex items-center justify-center">
+              <p className="text-gray-500">Loading...</p>
+            </div>
+            <div className="border border-[#0000000A] bg-gray-100 rounded-2xl p-6 min-h-[250px] flex items-center justify-center">
+              <p className="text-gray-500">Loading...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            <SummaryCard
+              title="Doing great"
+              subtitle="Your female talent is thriving in the following domains."
+              items={doingGreatItems}
+              bgColor="bg-[#378C78]"
+              iconImage="/assets/images/dashboard/doing.webp"
+            />
+            <SummaryCard
+              title="Growth areas"
+              subtitle="These areas need your immediate attention to balance workplace wellbeing."
+              items={growthAreasItems}
+              bgColor="bg-[#C56A55]"
+              iconImage="/assets/images/dashboard/growth.webp"
+            />
+          </div>
+        )
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           <div

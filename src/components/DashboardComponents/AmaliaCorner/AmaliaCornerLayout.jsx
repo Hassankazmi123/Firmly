@@ -12,6 +12,7 @@ import Session3Chat from "./Session3Chat";
 import Session4Chat from "./Session4Chat";
 import { Clock, Lock } from "lucide-react";
 import { pathwayService } from "../../../services/pathway";
+import { assessmentService } from "../../../services/assessment";
 const AmaliaCornerLayout = () => {
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
@@ -22,6 +23,8 @@ const AmaliaCornerLayout = () => {
   const [showSession3, setShowSession3] = useState(false);
   const [showSession4, setShowSession4] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [glowItems, setGlowItems] = useState([]);
+  const [growItems, setGrowItems] = useState([]);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -106,6 +109,73 @@ const AmaliaCornerLayout = () => {
       }
     };
     detectDomain();
+  }, []);
+
+  useEffect(() => {
+    const fetchAssessmentData = async () => {
+      try {
+        const assessmentId = localStorage.getItem("assessmentId") || "93";
+        const data = await assessmentService.getResults(assessmentId);
+
+        if (data && data.domains && data.glow && data.grow) {
+          const domainLabels = {
+            GOAL: "Goal Orientation",
+            BELONG: "Workplace Belonging",
+            ENG: "Engagement",
+            RES: "Resilience",
+            SELF: "Self-belief",
+            EMP: "Empathy",
+          };
+
+          const domainAbbreviations = {
+            GOAL: "GOA",
+            BELONG: "WOR",
+            ENG: "ENG",
+            RES: "RES",
+            SELF: "SEL",
+            EMP: "EMP",
+          };
+
+          // Map glow items
+          const glowData = data.glow.map((domainCode) => {
+            const domainData = data.domains.find((d) => d.domain === domainCode);
+            return {
+              abbreviation: domainAbbreviations[domainCode] || domainCode,
+              label: domainLabels[domainCode] || domainCode,
+              score: domainData ? Math.round(parseFloat(domainData.percent_0_100)) : 0,
+            };
+          });
+
+          // Map grow items
+          const growData = data.grow.map((domainCode) => {
+            const domainData = data.domains.find((d) => d.domain === domainCode);
+            return {
+              abbreviation: domainAbbreviations[domainCode] || domainCode,
+              label: domainLabels[domainCode] || domainCode,
+              score: domainData ? Math.round(parseFloat(domainData.percent_0_100)) : 0,
+            };
+          });
+
+          setGlowItems(glowData);
+          setGrowItems(growData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch assessment data for glow/grow:", error);
+        // Fallback to default data
+        setGlowItems([
+          { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
+          { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
+          { abbreviation: "RES", label: "Resilience", score: 87 },
+        ]);
+        setGrowItems([
+          { abbreviation: "EMP", label: "Empathy", score: 32 },
+          { abbreviation: "ENG", label: "Engagement", score: 24 },
+          { abbreviation: "SEL", label: "Self-belief", score: 22 },
+        ]);
+      }
+    };
+
+    fetchAssessmentData();
   }, []);
 
   useEffect(() => {
@@ -340,52 +410,6 @@ const AmaliaCornerLayout = () => {
     }
   };
 
-  const glowItems = [
-    { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
-    { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
-    { abbreviation: "RES", label: "Resilience", score: 87 },
-  ];
-
-  const getGrowItems = () => {
-    switch (domain) {
-      case "goal":
-        return [
-          { abbreviation: "GOA", label: "Goal Orientation", score: 32 },
-          { abbreviation: "ENG", label: "Engagement", score: 24 },
-          { abbreviation: "SEL", label: "Self-belief", score: 22 },
-        ];
-      case "res":
-        return [
-          { abbreviation: "RES", label: "Resilience", score: 32 },
-          { abbreviation: "ENG", label: "Engagement", score: 24 },
-          { abbreviation: "SEL", label: "Self-belief", score: 22 },
-        ];
-      case "eng":
-        return [
-          { abbreviation: "ENG", label: "Engagement", score: 32 },
-          { abbreviation: "SEL", label: "Self-belief", score: 24 },
-          { abbreviation: "WOR", label: "Workplace Belonging", score: 22 },
-        ];
-      case "self":
-        return [
-          { abbreviation: "SEL", label: "Self Awareness", score: 32 },
-          { abbreviation: "EMOT", label: "Emotional Reg", score: 24 },
-          { abbreviation: "SOC", label: "Social", score: 22 },
-        ];
-      case "belong":
-        return [
-          { abbreviation: "BEL", label: "Belonging", score: 32 },
-          { abbreviation: "INC", label: "Inclusion", score: 24 },
-          { abbreviation: "CON", label: "Connection", score: 22 },
-        ];
-      default:
-        return [
-          { abbreviation: "EMP", label: "Empathy", score: 32 },
-          { abbreviation: "ENG", label: "Engagement", score: 24 },
-          { abbreviation: "SEL", label: "Self-belief", score: 22 },
-        ];
-    }
-  };
 
   const getSessionTitle = (num) => {
     switch (domain) {
@@ -429,7 +453,6 @@ const AmaliaCornerLayout = () => {
   };
 
   const domainLabel = getDomainLabel();
-  const growItems = getGrowItems();
   return (
     <div className="flex flex-col md:flex-row h-full overflow-hidden">
       <Sidebar
