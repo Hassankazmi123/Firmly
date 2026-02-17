@@ -76,7 +76,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
       setError("Job Role should contain characters and numbers only");
       return;
     }
-    s
+
     if (!authTokens || !authTokens.access) {
       setError("Authentication required. Please log in again.");
       return;
