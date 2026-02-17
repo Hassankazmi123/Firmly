@@ -48,13 +48,32 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
       return;
     }
 
-    if (isNaN(age) || age < 18 || age > 100) {
-      setError("Please enter a valid age between 18 and 100");
+    // Name validation (Characters only)
+    if (!/^[A-Za-z\s]+$/.test(firstName) || !/^[A-Za-z\s]+$/.test(lastName)) {
+      setError("First and Last name should contain characters only");
       return;
     }
 
-    if (isNaN(experience) || experience < 0 || experience > 50) {
-      setError("Please enter valid years of experience (0-50)");
+    // Age validation (Numbers only)
+    if (!/^\d+$/.test(age) || age < 18 || age > 100) {
+      setError("Please enter a valid age (numbers only, 18-100)");
+      return;
+    }
+
+    // Experience validation (Numbers only)
+    if (!/^\d+$/.test(experience) || experience < 0 || experience > 50) {
+      setError("Please enter valid years of experience (numbers only, 0-50)");
+      return;
+    }
+
+    // Organization and Job Role validation (Characters and Numbers)
+    if (!/^[A-Za-z0-9\s]+$/.test(organization)) {
+      setError("Organization should contain characters and numbers only");
+      return;
+    }
+
+    if (!/^[A-Za-z0-9\s]+$/.test(jobRole)) {
+      setError("Job Role should contain characters and numbers only");
       return;
     }
 
