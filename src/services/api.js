@@ -127,3 +127,6 @@ export const authenticatedFetch = async (url, options = {}) => {
         throw error;
     }
 };
+export const getUserProfile = async () => {
+    return await authenticatedFetch(`${API_AUTH_URL}/profile/`);
+};

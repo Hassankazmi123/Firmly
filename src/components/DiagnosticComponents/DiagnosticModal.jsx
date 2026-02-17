@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPopup from "../DashboardComponents/notification/Notification";
+import { getUserProfile } from "../../services/api";
 
 const DiagnosticModal = () => {
   const navigate = useNavigate();
+  const [userInitials, setUserInitials] = useState("U");
 
   // Inlined Header2 state and behavior so header markup can be edited here
   const location = useLocation();
@@ -15,6 +17,21 @@ const DiagnosticModal = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile && profile.first_name && profile.last_name) {
+          const initials = `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
+          setUserInitials(initials);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
   const menuRef = useRef(null);
   const ltDropdownRef = useRef(null);
   const mobileToggleRef = useRef(null);
@@ -135,12 +152,11 @@ const DiagnosticModal = () => {
                 type="button"
               >
                 <span className="text-sm lg:text-lg font-semibold bg-[#ababab] border border-white/20 text-white/70 px-3 py-2 rounded-2xl">
-                  LT
+                  {userInitials}
                 </span>
                 <svg
-                  className={`w-4 h-4 transition-transform ${
-                    isLTDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transition-transform ${isLTDropdownOpen ? "rotate-180" : ""
+                    }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -219,22 +235,20 @@ const DiagnosticModal = () => {
                 >
                   <button
                     onClick={() => goTo("/dashboard", "Dashboard")}
-                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
-                      selectedTab === "Dashboard"
-                        ? "text-[#6664D3]"
-                        : "text-gray-700 "
-                    }`}
+                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${selectedTab === "Dashboard"
+                      ? "text-[#6664D3]"
+                      : "text-gray-700 "
+                      }`}
                     type="button"
                   >
                     Dashboard
                   </button>
                   <button
                     onClick={() => goTo("/amalia-corner", "Amalia Corner")}
-                    className={`w-full text-left px-4 py-3 text-sm font-medium border-t transition-colors ${
-                      selectedTab === "Amalia Corner"
-                        ? "text-[#6664D3]"
-                        : "text-gray-700"
-                    }`}
+                    className={`w-full text-left px-4 py-3 text-sm font-medium border-t transition-colors ${selectedTab === "Amalia Corner"
+                      ? "text-[#6664D3]"
+                      : "text-gray-700"
+                      }`}
                     type="button"
                   >
                     Amalia Corner

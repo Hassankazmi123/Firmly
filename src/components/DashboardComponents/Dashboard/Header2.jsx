@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPopup from "../notification/Notification";
+import { getUserProfile } from "../../../services/api";
+
 const Header2 = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [userInitials, setUserInitials] = useState("U");
   const [selectedTab, setSelectedTab] = useState(() => {
     if (location.pathname === "/amalia-corner") return "Amalia Corner";
     if (location.pathname === "/dashboard") return "Dashboard";
@@ -12,6 +15,21 @@ const Header2 = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile && profile.first_name && profile.last_name) {
+          const initials = `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
+          setUserInitials(initials);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
   const menuRef = useRef(null);
   const ltDropdownRef = useRef(null);
   const mobileToggleRef = useRef(null);
@@ -75,11 +93,10 @@ const Header2 = () => {
         <nav className="hidden md:flex items-center space-x-4">
           <button
             onClick={() => goTo("/dashboard", "Dashboard")}
-            className={`px-5 py-2 rounded-xl transition-colors ${
-              selectedTab === "Dashboard"
-                ? "bg-[#7d7cd9] border border-white/20 text-white"
-                : "text-white/70 hover:text-white"
-            }`}
+            className={`px-5 py-2 rounded-xl transition-colors ${selectedTab === "Dashboard"
+              ? "bg-[#7d7cd9] border border-white/20 text-white"
+              : "text-white/70 hover:text-white"
+              }`}
             type="button"
             aria-current={selectedTab === "Dashboard" ? "page" : undefined}
           >
@@ -87,11 +104,10 @@ const Header2 = () => {
           </button>
           <button
             onClick={() => goTo("/amalia-corner", "Amalia Corner")}
-            className={`px-5 py-2 rounded-xl transition-colors ${
-              selectedTab === "Amalia Corner"
-                ? "bg-[#7d7cd9] border border-white/20 text-white"
-                : "text-white/70 hover:text-white"
-            }`}
+            className={`px-5 py-2 rounded-xl transition-colors ${selectedTab === "Amalia Corner"
+              ? "bg-[#7d7cd9] border border-white/20 text-white"
+              : "text-white/70 hover:text-white"
+              }`}
             type="button"
             aria-current={selectedTab === "Amalia Corner" ? "page" : undefined}
           >
@@ -146,12 +162,11 @@ const Header2 = () => {
               type="button"
             >
               <span className="text-sm lg:text-lg font-semibold bg-[#7d7cd9] border border-white/20 text-white/70 px-4 py-3 rounded-2xl">
-                LT
+                {userInitials}
               </span>
               <svg
-                className={`w-4 h-4 transition-transform ${
-                  isLTDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform ${isLTDropdownOpen ? "rotate-180" : ""
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -230,22 +245,20 @@ const Header2 = () => {
               >
                 <button
                   onClick={() => goTo("/dashboard", "Dashboard")}
-                  className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
-                    selectedTab === "Dashboard"
-                      ? "text-[#6664D3]"
-                      : "text-gray-700 "
-                  }`}
+                  className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${selectedTab === "Dashboard"
+                    ? "text-[#6664D3]"
+                    : "text-gray-700 "
+                    }`}
                   type="button"
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={() => goTo("/amalia-corner", "Amalia Corner")}
-                  className={`w-full text-left px-4 py-3 text-sm font-medium border-t transition-colors ${
-                    selectedTab === "Amalia Corner"
-                      ? "text-[#6664D3]"
-                      : "text-gray-700"
-                  }`}
+                  className={`w-full text-left px-4 py-3 text-sm font-medium border-t transition-colors ${selectedTab === "Amalia Corner"
+                    ? "text-[#6664D3]"
+                    : "text-gray-700"
+                    }`}
                   type="button"
                 >
                   Amalia Corner
