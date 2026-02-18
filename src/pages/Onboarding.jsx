@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OnboardingLayout from "../components/OnboardingComponents/OnboardingLayout";
 import IntroCard from "../components/OnboardingComponents/IntroCard";
 import PathwayCard from "../components/OnboardingComponents/PathwayCard";
 import Screen3Card from "../components/OnboardingComponents/Screen3Card";
 import Screen4Card from "../components/OnboardingComponents/Screen4Card";
+import clearAppCache from "../utils/cache";
 
 const Onboarding = () => {
   const [currentScreen, setCurrentScreen] = useState(0);
+
+  useEffect(() => {
+    clearAppCache().catch((e) => console.warn("clearAppCache error:", e));
+  }, []);
 
   const handleSetScreen = (screenIndex) => {
     setCurrentScreen(screenIndex);

@@ -4,8 +4,6 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { useEffect } from "react";
-import clearAppCache from "./utils/cache";
 import Dashboard from "./pages/Dashboard";
 import AmaliaCorner from "./pages/AmaliaCorner";
 import AccountSettings from "./pages/AccountSettings";
@@ -24,20 +22,6 @@ const PrivateRoute = ({ children }) => {
 };
 
 function App() {
-  useEffect(() => {
-    clearAppCache().catch((e) => console.warn("clearAppCache error:", e));
-
-    const handleBeforeUnload = () => {
-      try {
-        localStorage.clear && localStorage.clear();
-        sessionStorage.clear && sessionStorage.clear();
-      } catch (e) {
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, []);
   return (
     <Router>
       <Routes>
