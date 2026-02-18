@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import CreateAccountModal from "./CreateAccountModal";
 
 const Screen3Card = ({ onPrevious, onNext, onLogin }) => {
-  const [showCreateAccount, setShowCreateAccount] = useState(false);
+  const [showCreateAccount, setShowCreateAccount] = useState(() => {
+    return localStorage.getItem("onboardingShowCreateAccount") === "true";
+  });
 
   const handleExistingAccount = () => {
     if (typeof onLogin === "function") {
@@ -17,6 +19,7 @@ const Screen3Card = ({ onPrevious, onNext, onLogin }) => {
 
   const handleCreateAccount = () => {
     setShowCreateAccount(true);
+    localStorage.setItem("onboardingShowCreateAccount", "true");
   };
 
   // Show create account modal if requested
@@ -26,6 +29,7 @@ const Screen3Card = ({ onPrevious, onNext, onLogin }) => {
         isOpen={true}
         onClose={() => {
           setShowCreateAccount(false);
+          localStorage.removeItem("onboardingShowCreateAccount");
         }}
       />
     );

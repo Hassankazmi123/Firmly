@@ -3,7 +3,8 @@ import OnboardingLayout from "./OnboardingLayout";
 import CompleteProfileModal from "./CompleteProfileModal";
 
 // API Configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
 const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
 
 const CreateAccountModal = ({ isOpen, onClose }) => {
@@ -15,8 +16,13 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showCompleteProfile, setShowCompleteProfile] = useState(false);
-  const [authTokens, setAuthTokens] = useState(null);
+  const [showCompleteProfile, setShowCompleteProfile] = useState(() => {
+    return localStorage.getItem("onboardingShowCompleteProfile") === "true";
+  });
+  const [authTokens, setAuthTokens] = useState(() => {
+    const saved = localStorage.getItem("onboardingAuthTokens");
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +46,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
       setError(
-        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number",
       );
       return;
     }
@@ -58,7 +64,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           email: email,
@@ -72,9 +78,17 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
       if (!registerResponse.ok) {
         // Handle various error response formats
         if (registerData.email) {
-          setError(Array.isArray(registerData.email) ? registerData.email[0] : registerData.email);
+          setError(
+            Array.isArray(registerData.email)
+              ? registerData.email[0]
+              : registerData.email,
+          );
         } else if (registerData.password) {
-          setError(Array.isArray(registerData.password) ? registerData.password[0] : registerData.password);
+          setError(
+            Array.isArray(registerData.password)
+              ? registerData.password[0]
+              : registerData.password,
+          );
         } else if (registerData.error) {
           setError(registerData.error);
         } else if (registerData.detail) {
@@ -93,7 +107,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           email: email,
@@ -104,7 +118,9 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
       const loginData = await loginResponse.json();
 
       if (!loginResponse.ok) {
-        setError("Account created but login failed. Please try logging in manually");
+        setError(
+          "Account created but login failed. Please try logging in manually",
+        );
         setIsLoading(false);
         return;
       }
@@ -115,15 +131,24 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
       if (loginData.tokens) {
         accessToken = loginData.tokens.access || loginData.tokens.access_token;
-        refreshToken = loginData.tokens.refresh || loginData.tokens.refresh_token;
+        refreshToken =
+          loginData.tokens.refresh || loginData.tokens.refresh_token;
       } else {
-        accessToken = loginData.access || loginData.access_token || loginData.token || loginData.key;
+        accessToken =
+          loginData.access ||
+          loginData.access_token ||
+          loginData.token ||
+          loginData.key;
         refreshToken = loginData.refresh || loginData.refresh_token;
       }
 
       if (!accessToken) {
-        console.error("Login response missing access token. Response keys:", Object.keys(loginData));
-        if (loginData.tokens) console.error("Tokens object keys:", Object.keys(loginData.tokens));
+        console.error(
+          "Login response missing access token. Response keys:",
+          Object.keys(loginData),
+        );
+        if (loginData.tokens)
+          console.error("Tokens object keys:", Object.keys(loginData.tokens));
         setError("Login failed: Invalid server response structure");
         setIsLoading(false);
         return;
@@ -138,14 +163,16 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
       setAuthTokens(tokens);
+      localStorage.setItem("onboardingAuthTokens", JSON.stringify(tokens));
+      localStorage.setItem("onboardingShowCompleteProfile", "true");
 
       // Get user profile to check if profile is complete
       const profileResponse = await fetch(`${API_AUTH_URL}/profile/`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
       });
 
@@ -153,20 +180,26 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         const profileData = await profileResponse.json();
 
         // Check if profile needs to be completed
-        const needsProfileCompletion = !profileData.first_name ||
+        const needsProfileCompletion =
+          !profileData.first_name ||
           !profileData.last_name ||
           !profileData.age ||
           !profileData.job_role;
 
         if (needsProfileCompletion) {
           setShowCompleteProfile(true);
+          localStorage.setItem("onboardingShowCompleteProfile", "true");
         } else {
           // Profile already complete, close modal
+          localStorage.removeItem("onboardingShowCompleteProfile");
+          localStorage.removeItem("onboardingShowCreateAccount");
+          localStorage.removeItem("onboardingAuthTokens");
           onClose();
         }
       } else {
         // Assume profile needs completion if we can't fetch it
         setShowCompleteProfile(true);
+        localStorage.setItem("onboardingShowCompleteProfile", "true");
       }
 
       setIsLoading(false);
@@ -187,6 +220,9 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         authTokens={authTokens}
         onClose={() => {
           setShowCompleteProfile(false);
+          localStorage.removeItem("onboardingShowCompleteProfile");
+          localStorage.removeItem("onboardingShowCreateAccount");
+          localStorage.removeItem("onboardingAuthTokens");
           onClose();
         }}
       />
@@ -199,7 +235,10 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         <div className="w-full min-h-full flex items-center justify-center px-4 sm:px-6 py-8 sm:py-10">
           {/* Back button */}
           <button
-            onClick={onClose}
+            onClick={() => {
+              localStorage.removeItem("onboardingShowCreateAccount");
+              onClose();
+            }}
             className="absolute top-16 sm:top-20 left-4 sm:left-6 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-all z-30"
           >
             <svg

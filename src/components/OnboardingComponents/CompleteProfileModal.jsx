@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import OnboardingLayout from "./OnboardingLayout";
 import AccountCreatedModal from "./AccountCreatedModal";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
 const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
 
 const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
@@ -19,7 +20,9 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
   const [firstNameError, setFirstNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
   const [jobRoleError, setJobRoleError] = useState("");
-  const [showAccountCreated, setShowAccountCreated] = useState(false);
+  const [showAccountCreated, setShowAccountCreated] = useState(() => {
+    return localStorage.getItem("onboardingShowAccountCreated") === "true";
+  });
 
   const handleLettersOnly = (setter, setErr) => (e) => {
     const raw = e.target.value;
@@ -110,7 +113,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
       const response = await fetch(`${API_AUTH_URL}/complete-profile/`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${authTokens.access}`,
+          Authorization: `Bearer ${authTokens.access}`,
           // Content-Type is not set for FormData
         },
         body: formData,
@@ -120,17 +123,33 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
 
       if (!response.ok) {
         if (data.first_name) {
-          setError(Array.isArray(data.first_name) ? data.first_name[0] : data.first_name);
+          setError(
+            Array.isArray(data.first_name)
+              ? data.first_name[0]
+              : data.first_name,
+          );
         } else if (data.last_name) {
-          setError(Array.isArray(data.last_name) ? data.last_name[0] : data.last_name);
+          setError(
+            Array.isArray(data.last_name) ? data.last_name[0] : data.last_name,
+          );
         } else if (data.age) {
           setError(Array.isArray(data.age) ? data.age[0] : data.age);
         } else if (data.years_of_experience) {
-          setError(Array.isArray(data.years_of_experience) ? data.years_of_experience[0] : data.years_of_experience);
+          setError(
+            Array.isArray(data.years_of_experience)
+              ? data.years_of_experience[0]
+              : data.years_of_experience,
+          );
         } else if (data.job_role) {
-          setError(Array.isArray(data.job_role) ? data.job_role[0] : data.job_role);
+          setError(
+            Array.isArray(data.job_role) ? data.job_role[0] : data.job_role,
+          );
         } else if (data.organization) {
-          setError(Array.isArray(data.organization) ? data.organization[0] : data.organization);
+          setError(
+            Array.isArray(data.organization)
+              ? data.organization[0]
+              : data.organization,
+          );
         } else if (data.error) {
           setError(data.error);
         } else if (data.detail) {
@@ -146,6 +165,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
 
       setIsLoading(false);
       setShowAccountCreated(true);
+      localStorage.setItem("onboardingShowAccountCreated", "true");
     } catch (err) {
       console.error("Profile completion error:", err);
       setError("Network error. Please check your connection and try again.");
@@ -260,14 +280,19 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                     <input
                       type="text"
                       value={firstName}
-                      onChange={handleLettersOnly(setFirstName, setFirstNameError)}
+                      onChange={handleLettersOnly(
+                        setFirstName,
+                        setFirstNameError,
+                      )}
                       placeholder="First name"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
                       disabled={isLoading}
                     />
                     {firstNameError && (
-                      <p className="text-red-300 text-xs mt-1 font-inter">{firstNameError}</p>
+                      <p className="text-red-300 text-xs mt-1 font-inter">
+                        {firstNameError}
+                      </p>
                     )}
                   </div>
                   <div className="text-left">
@@ -277,14 +302,19 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                     <input
                       type="text"
                       value={lastName}
-                      onChange={handleLettersOnly(setLastName, setLastNameError)}
+                      onChange={handleLettersOnly(
+                        setLastName,
+                        setLastNameError,
+                      )}
                       placeholder="Last name"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
                       disabled={isLoading}
                     />
                     {lastNameError && (
-                      <p className="text-red-300 text-xs mt-1 font-inter">{lastNameError}</p>
+                      <p className="text-red-300 text-xs mt-1 font-inter">
+                        {lastNameError}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -356,7 +386,9 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                     disabled={isLoading}
                   />
                   {jobRoleError && (
-                    <p className="text-red-300 text-xs mt-1 font-inter">{jobRoleError}</p>
+                    <p className="text-red-300 text-xs mt-1 font-inter">
+                      {jobRoleError}
+                    </p>
                   )}
                 </div>
 
@@ -386,7 +418,9 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                   {isLoading && (
                     <span className="inline-block w-4 h-4 border-2 border-[#7C3AED]/60 border-t-transparent rounded-full animate-spin" />
                   )}
-                  <span>{isLoading ? "Completing Profile..." : "Complete Profile"}</span>
+                  <span>
+                    {isLoading ? "Completing Profile..." : "Complete Profile"}
+                  </span>
                 </button>
               </div>
             </div>
@@ -398,6 +432,11 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
         isOpen={showAccountCreated}
         onClose={() => {
           setShowAccountCreated(false);
+          localStorage.removeItem("onboardingShowAccountCreated");
+          localStorage.removeItem("onboardingShowCompleteProfile");
+          localStorage.removeItem("onboardingShowCreateAccount");
+          localStorage.removeItem("onboardingScreen");
+          localStorage.removeItem("onboardingAuthTokens");
           onClose();
         }}
       />
