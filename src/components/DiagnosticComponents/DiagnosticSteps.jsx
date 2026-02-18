@@ -57,6 +57,9 @@ const DiagnosticSteps = () => {
             console.warn("Could not fetch progress", ignore);
           }
         } else {
+          localStorage.removeItem("diagnosticStep");
+          localStorage.removeItem("diagnosticHistory");
+          localStorage.removeItem("assessmentId");
           navigate("/diagnostic/completed", { state: { runId: rId } });
         }
 
@@ -205,6 +208,11 @@ const DiagnosticSteps = () => {
       // currentStepIndex is 0-based. If we are at 25 (26th Q) and total is 26, we are done.
       const maxQuestions = totalQuestions || 26;
       if (currentStepIndex >= maxQuestions - 1) {
+        localStorage.removeItem("diagnosticStep");
+        localStorage.removeItem("diagnosticHistory");
+        localStorage.removeItem("assessmentId");
+        localStorage.removeItem("diagnosticQuestion");
+        localStorage.removeItem("diagnosticTotalQuestions");
         navigate("/diagnostic/completed", { state: { runId } });
         setIsLoading(false);
         return;
@@ -228,6 +236,11 @@ const DiagnosticSteps = () => {
         setCurrentStepIndex(prev => prev + 1);
       } else {
         // Finished if nextQ is null OR if it doesn't look like a question
+        localStorage.removeItem("diagnosticStep");
+        localStorage.removeItem("diagnosticHistory");
+        localStorage.removeItem("assessmentId");
+        localStorage.removeItem("diagnosticQuestion");
+        localStorage.removeItem("diagnosticTotalQuestions");
         navigate("/diagnostic/completed", { state: { runId } });
       }
       setIsLoading(false);

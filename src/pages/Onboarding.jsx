@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import OnboardingLayout from "../components/OnboardingComponents/OnboardingLayout";
 import IntroCard from "../components/OnboardingComponents/IntroCard";
 import PathwayCard from "../components/OnboardingComponents/PathwayCard";
@@ -6,6 +7,16 @@ import Screen3Card from "../components/OnboardingComponents/Screen3Card";
 import Screen4Card from "../components/OnboardingComponents/Screen4Card";
 
 const Onboarding = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    const onboardingComplete =
+      localStorage.getItem("onboardingComplete") === "true";
+    if (accessToken && onboardingComplete) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   const [currentScreen, setCurrentScreen] = useState(() => {
     const saved = localStorage.getItem("onboardingScreen");
     return saved ? parseInt(saved) : 0;

@@ -17,7 +17,8 @@ const Screen4Card = ({ onBack }) => {
     setIsLoading(true);
 
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
+      const API_URL =
+        process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
       const response = await fetch(`${API_URL}/api/auth/login/`, {
         method: "POST",
         headers: {
@@ -29,7 +30,9 @@ const Screen4Card = ({ onBack }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || "Login failed. Please check your credentials.");
+        throw new Error(
+          data.detail || "Login failed. Please check your credentials.",
+        );
       }
 
       // Handle different token response structures
@@ -40,13 +43,15 @@ const Screen4Card = ({ onBack }) => {
         accessToken = data.tokens.access || data.tokens.access_token;
         refreshToken = data.tokens.refresh || data.tokens.refresh_token;
       } else {
-        accessToken = data.access || data.access_token || data.token || data.key;
+        accessToken =
+          data.access || data.access_token || data.token || data.key;
         refreshToken = data.refresh || data.refresh_token;
       }
 
       if (accessToken) {
         localStorage.setItem("accessToken", accessToken);
         if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("onboardingComplete", "true");
         navigate("/dashboard");
       } else {
         throw new Error("Invalid server response: missing access token");
@@ -54,7 +59,10 @@ const Screen4Card = ({ onBack }) => {
     } catch (err) {
       console.error("Login error:", err);
       // Fallback for demo account if API fails (optional, but good for stability during dev if API is flaky)
-      if (email.trim().toLowerCase() === "maya@firmly.com" && password === "123456789") {
+      if (
+        email.trim().toLowerCase() === "maya@firmly.com" &&
+        password === "123456789"
+      ) {
         // Mock token for demo
         console.warn("Using fallback demo login");
         navigate("/dashboard");
@@ -131,10 +139,11 @@ const Screen4Card = ({ onBack }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full mt-1 sm:mt-2 px-6 py-3 sm:py-3.5 font-medium rounded-full shadow-sm font-inter text-sm sm:text-base transition-all flex items-center justify-center gap-2 min-h-[48px] ${isLoading
+              className={`w-full mt-1 sm:mt-2 px-6 py-3 sm:py-3.5 font-medium rounded-full shadow-sm font-inter text-sm sm:text-base transition-all flex items-center justify-center gap-2 min-h-[48px] ${
+                isLoading
                   ? "bg-white/70 text-[#6b4bff]/70 cursor-not-allowed"
                   : "bg-white text-[#6b4bff] hover:bg-white/95 active:scale-95"
-                }`}
+              }`}
             >
               {isLoading && (
                 <span className="inline-block w-4 h-4 border-2 border-[#6b4bff]/60 border-t-transparent rounded-full animate-spin" />

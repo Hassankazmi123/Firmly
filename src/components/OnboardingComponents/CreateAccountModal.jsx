@@ -191,6 +191,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
           localStorage.setItem("onboardingShowCompleteProfile", "true");
         } else {
           // Profile already complete, close modal
+          localStorage.setItem("onboardingComplete", "true");
           localStorage.removeItem("onboardingShowCompleteProfile");
           localStorage.removeItem("onboardingShowCreateAccount");
           localStorage.removeItem("onboardingAuthTokens");

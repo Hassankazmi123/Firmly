@@ -23,7 +23,8 @@ const DiagnosticModal = () => {
       try {
         const profile = await getUserProfile();
         if (profile && profile.first_name && profile.last_name) {
-          const initials = `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
+          const initials =
+            `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
           setUserInitials(initials);
         }
       } catch (error) {
@@ -32,6 +33,15 @@ const DiagnosticModal = () => {
     };
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    const diagnosticComplete =
+      localStorage.getItem("diagnosticComplete") === "true";
+    if (diagnosticComplete) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   const menuRef = useRef(null);
   const ltDropdownRef = useRef(null);
   const mobileToggleRef = useRef(null);
@@ -155,8 +165,9 @@ const DiagnosticModal = () => {
                   {userInitials}
                 </span>
                 <svg
-                  className={`w-4 h-4 transition-transform ${isLTDropdownOpen ? "rotate-180" : ""
-                    }`}
+                  className={`w-4 h-4 transition-transform ${
+                    isLTDropdownOpen ? "rotate-180" : ""
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -235,20 +246,22 @@ const DiagnosticModal = () => {
                 >
                   <button
                     onClick={() => goTo("/dashboard", "Dashboard")}
-                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${selectedTab === "Dashboard"
-                      ? "text-[#6664D3]"
-                      : "text-gray-700 "
-                      }`}
+                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
+                      selectedTab === "Dashboard"
+                        ? "text-[#6664D3]"
+                        : "text-gray-700 "
+                    }`}
                     type="button"
                   >
                     Dashboard
                   </button>
                   <button
                     onClick={() => goTo("/amalia-corner", "Amalia Corner")}
-                    className={`w-full text-left px-4 py-3 text-sm font-medium border-t transition-colors ${selectedTab === "Amalia Corner"
-                      ? "text-[#6664D3]"
-                      : "text-gray-700"
-                      }`}
+                    className={`w-full text-left px-4 py-3 text-sm font-medium border-t transition-colors ${
+                      selectedTab === "Amalia Corner"
+                        ? "text-[#6664D3]"
+                        : "text-gray-700"
+                    }`}
                     type="button"
                   >
                     Amalia Corner
