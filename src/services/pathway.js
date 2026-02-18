@@ -2,9 +2,32 @@ import { authenticatedFetch, API_PATHWAY_URL } from "./api";
 
 export const pathwayService = {
     startPathway: async () => {
-        return await authenticatedFetch(`${API_PATHWAY_URL}/start`, {
-            method: "POST",
-        });
+        try {
+            const response = await authenticatedFetch(`${API_PATHWAY_URL}/start`, {
+                method: "POST",
+                returnRawResponse: true,
+            });
+
+            if (response.status === 409) {
+                const data = await response.json().catch(() => null);
+                console.warn("Pathway already exists (409), resuming:", data);
+                return data;
+            }
+
+            if (!response.ok) {
+                const text = await response.text().catch(() => "");
+                console.error("Start Pathway Error:", response.status, text);
+                if (response.status === 401) {
+                    throw new Error("Unauthorized: Please log in again.");
+                }
+                throw new Error(`Failed to start pathway: ${response.status} ${response.statusText}`);
+            }
+
+            return await response.json().catch(() => null);
+        } catch (error) {
+            console.error("startPathway Exception:", error);
+            throw error;
+        }
     },
 
     startEmpathySession1: async () => {

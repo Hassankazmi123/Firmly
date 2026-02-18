@@ -114,11 +114,30 @@ const AmaliaCornerLayout = () => {
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
-        const assessmentId = localStorage.getItem("assessmentId");
+        let assessmentId = localStorage.getItem("assessmentId");
         if (!assessmentId) {
           throw new Error("No assessment run id found");
         }
-        const data = await assessmentService.getResults(assessmentId);
+
+        let data;
+        try {
+          data = await assessmentService.getResults(assessmentId);
+        } catch (err) {
+          console.warn("Fetching assessment results failed, attempting to start a new assessment:", err);
+          // Try to start or resume an assessment when results are forbidden or missing
+          try {
+            const startData = await assessmentService.startAssessment("v1");
+            const newId = startData?.id || startData?.run_id || startData?.assessment_id || startData?.assessmentId;
+            if (newId) {
+              localStorage.setItem("assessmentId", String(newId));
+              assessmentId = String(newId);
+            }
+            data = await assessmentService.getResults(assessmentId);
+          } catch (startErr) {
+            console.error("Failed to start or fetch new assessment:", startErr);
+            throw startErr;
+          }
+        }
 
         if (data && data.domains && data.glow && data.grow) {
           const domainLabels = {
