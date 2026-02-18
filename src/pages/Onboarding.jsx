@@ -6,31 +6,39 @@ import Screen3Card from "../components/OnboardingComponents/Screen3Card";
 import Screen4Card from "../components/OnboardingComponents/Screen4Card";
 
 const Onboarding = () => {
-  const [currentScreen, setCurrentScreen] = useState(0);
+  const [currentScreen, setCurrentScreen] = useState(() => {
+    const saved = localStorage.getItem("onboardingScreen");
+    return saved ? parseInt(saved) : 0;
+  });
+
+  const handleSetScreen = (screenIndex) => {
+    setCurrentScreen(screenIndex);
+    localStorage.setItem("onboardingScreen", String(screenIndex));
+  };
 
   const screens = [
     {
-      component: <IntroCard onNext={() => setCurrentScreen(1)} />,
+      component: <IntroCard onNext={() => handleSetScreen(1)} />,
     },
     {
       component: (
         <PathwayCard
-          onPrevious={() => setCurrentScreen(0)}
-          onNext={() => setCurrentScreen(2)}
+          onPrevious={() => handleSetScreen(0)}
+          onNext={() => handleSetScreen(2)}
         />
       ),
     },
     {
       component: (
         <Screen3Card
-          onPrevious={() => setCurrentScreen(1)}
-          onNext={() => setCurrentScreen(3)}
-          onLogin={() => setCurrentScreen(3)}
+          onPrevious={() => handleSetScreen(1)}
+          onNext={() => handleSetScreen(3)}
+          onLogin={() => handleSetScreen(3)}
         />
       ),
     },
     {
-      component: <Screen4Card onBack={() => setCurrentScreen(2)} />,
+      component: <Screen4Card onBack={() => handleSetScreen(2)} />,
     },
   ];
 
