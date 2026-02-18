@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import OnboardingLayout from "./OnboardingLayout";
 import AccountCreatedModal from "./AccountCreatedModal";
 
-// API Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
 const API_AUTH_URL = `${API_BASE_URL}/api/auth`;
 
@@ -17,7 +16,20 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
   const [jobRole, setJobRole] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [firstNameError, setFirstNameError] = useState("");
+  const [lastNameError, setLastNameError] = useState("");
+  const [jobRoleError, setJobRoleError] = useState("");
   const [showAccountCreated, setShowAccountCreated] = useState(false);
+
+  const handleLettersOnly = (setter, setErr) => (e) => {
+    const raw = e.target.value;
+    if (/[0-9]/.test(raw)) {
+      setErr("Numbers are not allowed in this field");
+    } else {
+      setErr("");
+    }
+    setter(raw.replace(/[0-9]/g, ""));
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -35,7 +47,6 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
     e.preventDefault();
     setError("");
 
-    // Client-side validations
     if (
       !firstName ||
       !lastName ||
@@ -48,7 +59,6 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
       return;
     }
 
-    // Name validation (Characters only)
     if (!/^[A-Za-z\s]+$/.test(firstName) || !/^[A-Za-z\s]+$/.test(lastName)) {
       setError("First and Last name should contain characters only");
       return;
@@ -109,7 +119,6 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        // Handle error responses
         if (data.first_name) {
           setError(Array.isArray(data.first_name) ? data.first_name[0] : data.first_name);
         } else if (data.last_name) {
@@ -135,7 +144,6 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
         return;
       }
 
-      // Success - show account created modal
       setIsLoading(false);
       setShowAccountCreated(true);
     } catch (err) {
@@ -252,12 +260,15 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                     <input
                       type="text"
                       value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      onChange={handleLettersOnly(setFirstName, setFirstNameError)}
                       placeholder="First name"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
                       disabled={isLoading}
                     />
+                    {firstNameError && (
+                      <p className="text-red-300 text-xs mt-1 font-inter">{firstNameError}</p>
+                    )}
                   </div>
                   <div className="text-left">
                     <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
@@ -266,12 +277,15 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                     <input
                       type="text"
                       value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      onChange={handleLettersOnly(setLastName, setLastNameError)}
                       placeholder="Last name"
                       className="w-full px-3 sm:px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                       required
                       disabled={isLoading}
                     />
+                    {lastNameError && (
+                      <p className="text-red-300 text-xs mt-1 font-inter">{lastNameError}</p>
+                    )}
                   </div>
                 </div>
 
@@ -335,12 +349,15 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                   <input
                     type="text"
                     value={jobRole}
-                    onChange={(e) => setJobRole(e.target.value)}
+                    onChange={handleLettersOnly(setJobRole, setJobRoleError)}
                     placeholder="Enter job role"
                     className="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:bg-white/15 transition text-sm min-h-[48px]"
                     required
                     disabled={isLoading}
                   />
+                  {jobRoleError && (
+                    <p className="text-red-300 text-xs mt-1 font-inter">{jobRoleError}</p>
+                  )}
                 </div>
 
                 {error && (
