@@ -62,6 +62,19 @@ const Onboarding = () => {
     const savedStep = localStorage.getItem("onboardingStep");
     return savedStep ? Number(savedStep) : 0;
   });
+  useEffect(() => {
+    const onboardingStep = localStorage.getItem("onboardingStep"); // save it temporarily
+
+    // Clear everything
+    localStorage.clear();
+
+    // Restore onboardingStep
+    if (onboardingStep !== null) {
+      localStorage.setItem("onboardingStep", onboardingStep);
+    }
+
+    console.log("LocalStorage cleared except onboardingStep");
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("onboardingStep", currentScreen);
@@ -88,7 +101,9 @@ const Onboarding = () => {
         <Screen3Card
           onPrevious={() => handleSetScreen(1)}
           onNext={() => handleSetScreen(3)}
-          onLogin={() => handleSetScreen(3)}
+          onLogin={() => {
+            handleSetScreen(3);
+          }}
         />
       ),
     },

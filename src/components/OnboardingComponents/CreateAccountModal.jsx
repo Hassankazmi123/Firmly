@@ -204,6 +204,8 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
       }
 
       setIsLoading(false);
+      localStorage.setItem("onboardingStep", 1);
+      localStorage.removeItem("onboardingShowCreateAccount");
     } catch (err) {
       console.error("Registration error:", err);
       setError("Network error. Please check your connection and try again");
