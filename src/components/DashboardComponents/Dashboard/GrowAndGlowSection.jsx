@@ -38,7 +38,9 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
 
           // Map glow items (Doing Great)
           const glowData = data.glow.map((domainCode) => {
-            const domainData = data.domains.find((d) => d.domain === domainCode);
+            const domainData = data.domains.find(
+              (d) => d.domain === domainCode,
+            );
             return {
               abbreviation: domainAbbreviations[domainCode] || domainCode,
               label: domainLabels[domainCode] || domainCode,
@@ -50,7 +52,9 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
 
           // Map grow items (Growth Areas)
           const growData = data.grow.map((domainCode) => {
-            const domainData = data.domains.find((d) => d.domain === domainCode);
+            const domainData = data.domains.find(
+              (d) => d.domain === domainCode,
+            );
             return {
               abbreviation: domainAbbreviations[domainCode] || domainCode,
               label: domainLabels[domainCode] || domainCode,
@@ -64,7 +68,10 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
           setGrowthAreasItems(growData);
         }
       } catch (error) {
-        console.error("Failed to fetch assessment data for GrowAndGlow:", error);
+        console.error(
+          "Failed to fetch assessment data for GrowAndGlow:",
+          error,
+        );
         // Fallback to default data
         setDoingGreatItems([
           { abbreviation: "GOA", label: "Goal Orientation", score: 96 },

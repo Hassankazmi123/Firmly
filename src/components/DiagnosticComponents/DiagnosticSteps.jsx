@@ -5,30 +5,16 @@ import { assessmentService } from "../../services/assessment";
 const DiagnosticSteps = () => {
   const navigate = useNavigate();
   // State for assessment flow
-  const [runId, setRunId] = useState(() =>
-    localStorage.getItem("assessmentId"),
-  );
-  const [currentQuestion, setCurrentQuestion] = useState(() => {
-    const saved = localStorage.getItem("diagnosticQuestion");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [runId, setRunId] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [totalQuestions, setTotalQuestions] = useState(() => {
-    const saved = localStorage.getItem("diagnosticTotalQuestions");
-    return saved ? parseInt(saved) : 0;
-  }); // If available
-  const [currentStepIndex, setCurrentStepIndex] = useState(() => {
-    const saved = localStorage.getItem("diagnosticStep");
-    return saved ? parseInt(saved) : 0;
-  }); // For progress bar/counter
+  const [totalQuestions, setTotalQuestions] = useState(0); // If available
+  const [currentStepIndex, setCurrentStepIndex] = useState(0); // For progress bar/counter
 
   const [currentResponse, setCurrentResponse] = useState(3);
 
-  const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem("diagnosticHistory");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [history, setHistory] = useState([]);
 
   const highlightRun = useRef(false);
 
@@ -53,10 +39,6 @@ const DiagnosticSteps = () => {
 
         if (startData.questions && Array.isArray(startData.questions)) {
           setTotalQuestions(startData.questions.length);
-          localStorage.setItem(
-            "diagnosticTotalQuestions",
-            String(startData.questions.length),
-          );
         }
 
         const nextQ = await assessmentService.getNextQuestion(rId);
@@ -65,7 +47,6 @@ const DiagnosticSteps = () => {
 
         if (nextQ) {
           setCurrentQuestion(nextQ);
-          localStorage.setItem("diagnosticQuestion", JSON.stringify(nextQ));
 
           try {
             const progressData = await assessmentService.getProgress(rId);
@@ -74,18 +55,11 @@ const DiagnosticSteps = () => {
               typeof progressData.answered_count === "number"
             ) {
               setCurrentStepIndex(progressData.answered_count);
-              localStorage.setItem(
-                "diagnosticStep",
-                String(progressData.answered_count),
-              );
             }
           } catch (ignore) {
             console.warn("Could not fetch progress", ignore);
           }
         } else {
-          localStorage.removeItem("diagnosticStep");
-          localStorage.removeItem("diagnosticHistory");
-          localStorage.removeItem("assessmentId");
           navigate("/diagnostic/completed", { state: { runId: rId } });
         }
 
@@ -207,11 +181,9 @@ const DiagnosticSteps = () => {
       const newHistory = history.slice(0, -1);
 
       setHistory(newHistory);
-      localStorage.setItem("diagnosticHistory", JSON.stringify(newHistory));
       setCurrentQuestion(prev.question);
       setCurrentResponse(prev.response);
       setCurrentStepIndex(prev.stepIndex);
-      localStorage.setItem("diagnosticStep", String(prev.stepIndex));
     }
   };
 
@@ -244,19 +216,12 @@ const DiagnosticSteps = () => {
       await assessmentService.submitAnswer(runId, qId, finalChoice);
 
       // Add to history now that it's submitted (or optimistically)
-      const newHistory = [...history, historyItem];
-      setHistory(newHistory);
-      localStorage.setItem("diagnosticHistory", JSON.stringify(newHistory));
+      setHistory([...history, historyItem]);
 
       // Optimize: If we know this is the last question, skip validation fetch to avoid 410 errors
       // currentStepIndex is 0-based. If we are at 25 (26th Q) and total is 26, we are done.
       const maxQuestions = totalQuestions || 26;
       if (currentStepIndex >= maxQuestions - 1) {
-        localStorage.removeItem("diagnosticStep");
-        localStorage.removeItem("diagnosticHistory");
-        localStorage.removeItem("assessmentId");
-        localStorage.removeItem("diagnosticQuestion");
-        localStorage.removeItem("diagnosticTotalQuestions");
         navigate("/diagnostic/completed", { state: { runId } });
         setIsLoading(false);
         return;
@@ -279,18 +244,10 @@ const DiagnosticSteps = () => {
       // Sometimes backend might return a success message object
       if (nextQ && (nextQ.id || nextQ.question_id || nextQ.pk)) {
         setCurrentQuestion(nextQ);
-        localStorage.setItem("diagnosticQuestion", JSON.stringify(nextQ));
         setCurrentResponse(3); // Reset to neutral for new question
-        const nextIndex = currentStepIndex + 1;
-        setCurrentStepIndex(nextIndex);
-        localStorage.setItem("diagnosticStep", String(nextIndex));
+        setCurrentStepIndex((prev) => prev + 1);
       } else {
         // Finished if nextQ is null OR if it doesn't look like a question
-        localStorage.removeItem("diagnosticStep");
-        localStorage.removeItem("diagnosticHistory");
-        localStorage.removeItem("assessmentId");
-        localStorage.removeItem("diagnosticQuestion");
-        localStorage.removeItem("diagnosticTotalQuestions");
         navigate("/diagnostic/completed", { state: { runId } });
       }
       setIsLoading(false);

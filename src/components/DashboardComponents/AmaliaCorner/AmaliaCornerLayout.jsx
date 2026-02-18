@@ -141,21 +141,29 @@ const AmaliaCornerLayout = () => {
 
           // Map glow items
           const glowData = data.glow.map((domainCode) => {
-            const domainData = data.domains.find((d) => d.domain === domainCode);
+            const domainData = data.domains.find(
+              (d) => d.domain === domainCode,
+            );
             return {
               abbreviation: domainAbbreviations[domainCode] || domainCode,
               label: domainLabels[domainCode] || domainCode,
-              score: domainData ? Math.round(parseFloat(domainData.percent_0_100)) : 0,
+              score: domainData
+                ? Math.round(parseFloat(domainData.percent_0_100))
+                : 0,
             };
           });
 
           // Map grow items
           const growData = data.grow.map((domainCode) => {
-            const domainData = data.domains.find((d) => d.domain === domainCode);
+            const domainData = data.domains.find(
+              (d) => d.domain === domainCode,
+            );
             return {
               abbreviation: domainAbbreviations[domainCode] || domainCode,
               label: domainLabels[domainCode] || domainCode,
-              score: domainData ? Math.round(parseFloat(domainData.percent_0_100)) : 0,
+              score: domainData
+                ? Math.round(parseFloat(domainData.percent_0_100))
+                : 0,
             };
           });
 
@@ -412,7 +420,6 @@ const AmaliaCornerLayout = () => {
         return "Empathy";
     }
   };
-
 
   const getSessionTitle = (num) => {
     switch (domain) {
@@ -770,8 +777,9 @@ const AmaliaCornerLayout = () => {
           selectedConversation !== "session3" &&
           selectedConversation !== "session4" && (
             <div
-              className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
-                } md:z-50`}
+              className={`absolute bottom-0 left-0 right-0 ${
+                isSidebarCollapsed ? "z-50" : ""
+              } md:z-50`}
             >
               <ChatInputFooter onSend={handleSendMessage} />
             </div>
