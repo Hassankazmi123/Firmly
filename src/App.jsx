@@ -16,22 +16,9 @@ import NotFound from "./pages/NotFound";
 import DiagnosticModal from "./components/DiagnosticComponents/DiagnosticModal";
 import DiagnosticComplete from "./components/DiagnosticComponents/DiagnosticComplete";
 
-const PrivateRoute = ({ children, requireDiagnostic = true }) => {
+const PrivateRoute = ({ children }) => {
   const accessToken = localStorage.getItem("accessToken");
-  const onboardingComplete =
-    localStorage.getItem("onboardingComplete") === "true";
-  const diagnosticComplete =
-    localStorage.getItem("diagnosticComplete") === "true";
-
-  if (!accessToken || !onboardingComplete) {
-    return <Navigate to="/onboarding" replace />;
-  }
-
-  if (requireDiagnostic && !diagnosticComplete) {
-    return <Navigate to="/diagnostic" replace />;
-  }
-
-  return children;
+  return accessToken ? children : <Navigate to="/not-found" replace />;
 };
 
 function App() {
@@ -43,7 +30,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <PrivateRoute requireDiagnostic={true}>
+            <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
           }
@@ -51,7 +38,7 @@ function App() {
         <Route
           path="/amalia-corner"
           element={
-            <PrivateRoute requireDiagnostic={true}>
+            <PrivateRoute>
               <AmaliaCorner />
             </PrivateRoute>
           }
@@ -59,7 +46,7 @@ function App() {
         <Route
           path="/dashboard/account-settings"
           element={
-            <PrivateRoute requireDiagnostic={true}>
+            <PrivateRoute>
               <AccountSettings />
             </PrivateRoute>
           }
@@ -67,7 +54,7 @@ function App() {
         <Route
           path="/dashboard/normal-chat"
           element={
-            <PrivateRoute requireDiagnostic={true}>
+            <PrivateRoute>
               <NormalChat />
             </PrivateRoute>
           }
@@ -75,7 +62,7 @@ function App() {
         <Route
           path="/dashboard/safe-space-chat"
           element={
-            <PrivateRoute requireDiagnostic={true}>
+            <PrivateRoute>
               <SafeSpaceChat />
             </PrivateRoute>
           }
@@ -83,7 +70,7 @@ function App() {
         <Route
           path="/dashboard/feedback"
           element={
-            <PrivateRoute requireDiagnostic={true}>
+            <PrivateRoute>
               <Feedback />
             </PrivateRoute>
           }
@@ -91,7 +78,7 @@ function App() {
         <Route
           path="/diagnostic"
           element={
-            <PrivateRoute requireDiagnostic={false}>
+            <PrivateRoute>
               <DiagnosticModal />
             </PrivateRoute>
           }
@@ -99,7 +86,7 @@ function App() {
         <Route
           path="/diagnostic/steps"
           element={
-            <PrivateRoute requireDiagnostic={false}>
+            <PrivateRoute>
               <Diagnostic />
             </PrivateRoute>
           }
@@ -107,7 +94,7 @@ function App() {
         <Route
           path="/diagnostic/completed"
           element={
-            <PrivateRoute requireDiagnostic={false}>
+            <PrivateRoute>
               <DiagnosticComplete />
             </PrivateRoute>
           }
