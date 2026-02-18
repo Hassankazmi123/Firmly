@@ -31,7 +31,7 @@ const ProgressBarsSection = () => {
               label: domain.domain,
               color: "green",
             };
-            
+
             return {
               label: config.label,
               score: Math.round(parseFloat(domain.percent_0_100)),
