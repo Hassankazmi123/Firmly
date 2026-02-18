@@ -86,6 +86,7 @@ const DiagnosticSteps = () => {
           localStorage.removeItem("diagnosticStep");
           localStorage.removeItem("diagnosticHistory");
           localStorage.removeItem("assessmentId");
+          localStorage.setItem("diagnosticComplete", "true");
           navigate("/diagnostic/completed", { state: { runId: rId } });
         }
 
@@ -257,6 +258,7 @@ const DiagnosticSteps = () => {
         localStorage.removeItem("assessmentId");
         localStorage.removeItem("diagnosticQuestion");
         localStorage.removeItem("diagnosticTotalQuestions");
+        localStorage.setItem("diagnosticComplete", "true");
         navigate("/diagnostic/completed", { state: { runId } });
         setIsLoading(false);
         return;
@@ -291,6 +293,7 @@ const DiagnosticSteps = () => {
         localStorage.removeItem("assessmentId");
         localStorage.removeItem("diagnosticQuestion");
         localStorage.removeItem("diagnosticTotalQuestions");
+        localStorage.setItem("diagnosticComplete", "true");
         navigate("/diagnostic/completed", { state: { runId } });
       }
       setIsLoading(false);
