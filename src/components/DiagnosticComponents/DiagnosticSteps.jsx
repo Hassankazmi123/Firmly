@@ -5,16 +5,30 @@ import { assessmentService } from "../../services/assessment";
 const DiagnosticSteps = () => {
   const navigate = useNavigate();
   // State for assessment flow
-  const [runId, setRunId] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [runId, setRunId] = useState(() =>
+    localStorage.getItem("assessmentId"),
+  );
+  const [currentQuestion, setCurrentQuestion] = useState(() => {
+    const saved = localStorage.getItem("diagnosticQuestion");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [totalQuestions, setTotalQuestions] = useState(0); // If available
-  const [currentStepIndex, setCurrentStepIndex] = useState(0); // For progress bar/counter
+  const [totalQuestions, setTotalQuestions] = useState(() => {
+    const saved = localStorage.getItem("diagnosticTotalQuestions");
+    return saved ? parseInt(saved) : 0;
+  }); // If available
+  const [currentStepIndex, setCurrentStepIndex] = useState(() => {
+    const saved = localStorage.getItem("diagnosticStep");
+    return saved ? parseInt(saved) : 0;
+  }); // For progress bar/counter
 
   const [currentResponse, setCurrentResponse] = useState(3);
 
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem("diagnosticHistory");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const highlightRun = useRef(false);
 
@@ -39,6 +53,10 @@ const DiagnosticSteps = () => {
 
         if (startData.questions && Array.isArray(startData.questions)) {
           setTotalQuestions(startData.questions.length);
+          localStorage.setItem(
+            "diagnosticTotalQuestions",
+            String(startData.questions.length),
+          );
         }
 
         const nextQ = await assessmentService.getNextQuestion(rId);
@@ -47,11 +65,19 @@ const DiagnosticSteps = () => {
 
         if (nextQ) {
           setCurrentQuestion(nextQ);
+          localStorage.setItem("diagnosticQuestion", JSON.stringify(nextQ));
 
           try {
             const progressData = await assessmentService.getProgress(rId);
-            if (progressData && typeof progressData.answered_count === 'number') {
+            if (
+              progressData &&
+              typeof progressData.answered_count === "number"
+            ) {
               setCurrentStepIndex(progressData.answered_count);
+              localStorage.setItem(
+                "diagnosticStep",
+                String(progressData.answered_count),
+              );
             }
           } catch (ignore) {
             console.warn("Could not fetch progress", ignore);
@@ -75,16 +101,30 @@ const DiagnosticSteps = () => {
   }, [navigate]);
 
   if (error) {
-    const isAuthError = error.toLowerCase().includes("unauthorized") || error.toLowerCase().includes("log in");
+    const isAuthError =
+      error.toLowerCase().includes("unauthorized") ||
+      error.toLowerCase().includes("log in");
     return (
       <div className="h-full w-full flex items-center justify-center bg-[#ebebeb]">
         <div className="text-center px-6 py-8 bg-white rounded-2xl shadow-lg max-w-sm mx-4">
           <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="w-6 h-6 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-gray-800 mb-2 font-cormorant">Error Occurred</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-2 font-cormorant">
+            Error Occurred
+          </h3>
           <p className="text-gray-600 mb-6 font-inter text-sm">{error}</p>
           {isAuthError ? (
             <button
@@ -107,7 +147,6 @@ const DiagnosticSteps = () => {
   }
 
   const getColorScheme = (step) => {
-
     if (step < 5) {
       return {
         background: "#378c78", // Green
@@ -168,9 +207,11 @@ const DiagnosticSteps = () => {
       const newHistory = history.slice(0, -1);
 
       setHistory(newHistory);
+      localStorage.setItem("diagnosticHistory", JSON.stringify(newHistory));
       setCurrentQuestion(prev.question);
       setCurrentResponse(prev.response);
       setCurrentStepIndex(prev.stepIndex);
+      localStorage.setItem("diagnosticStep", String(prev.stepIndex));
     }
   };
 
@@ -181,20 +222,21 @@ const DiagnosticSteps = () => {
     const historyItem = {
       question: currentQuestion,
       response: currentResponse,
-      stepIndex: currentStepIndex
+      stepIndex: currentStepIndex,
     };
 
     try {
       setIsLoading(true);
 
-      const qId = currentQuestion.id || currentQuestion.question_id || currentQuestion.pk;
+      const qId =
+        currentQuestion.id || currentQuestion.question_id || currentQuestion.pk;
       if (!qId) {
         throw new Error("Invalid question data: Missing ID");
       }
 
       // Submit answer (backend expects 1-7 range, UI is 0-6)
       const rawVal = currentResponse;
-      const safeVal = (typeof rawVal === 'number' && !isNaN(rawVal)) ? rawVal : 3;
+      const safeVal = typeof rawVal === "number" && !isNaN(rawVal) ? rawVal : 3;
       const finalChoice = safeVal + 1;
 
       console.log("Processing Answer:", { rawVal, safeVal, finalChoice });
@@ -202,7 +244,9 @@ const DiagnosticSteps = () => {
       await assessmentService.submitAnswer(runId, qId, finalChoice);
 
       // Add to history now that it's submitted (or optimistically)
-      setHistory([...history, historyItem]);
+      const newHistory = [...history, historyItem];
+      setHistory(newHistory);
+      localStorage.setItem("diagnosticHistory", JSON.stringify(newHistory));
 
       // Optimize: If we know this is the last question, skip validation fetch to avoid 410 errors
       // currentStepIndex is 0-based. If we are at 25 (26th Q) and total is 26, we are done.
@@ -224,16 +268,22 @@ const DiagnosticSteps = () => {
         nextQ = await assessmentService.getNextQuestion(runId);
         console.log("Next Question Received:", nextQ);
       } catch (fetchErr) {
-        console.warn("Failed to fetch next question. Assuming assessment complete.", fetchErr);
+        console.warn(
+          "Failed to fetch next question. Assuming assessment complete.",
+          fetchErr,
+        );
         nextQ = null;
       }
 
       // Validating nextQ structure to ensure it's a real question
-      // Sometimes backend might return a success message object 
+      // Sometimes backend might return a success message object
       if (nextQ && (nextQ.id || nextQ.question_id || nextQ.pk)) {
         setCurrentQuestion(nextQ);
+        localStorage.setItem("diagnosticQuestion", JSON.stringify(nextQ));
         setCurrentResponse(3); // Reset to neutral for new question
-        setCurrentStepIndex(prev => prev + 1);
+        const nextIndex = currentStepIndex + 1;
+        setCurrentStepIndex(nextIndex);
+        localStorage.setItem("diagnosticStep", String(nextIndex));
       } else {
         // Finished if nextQ is null OR if it doesn't look like a question
         localStorage.removeItem("diagnosticStep");
@@ -247,14 +297,16 @@ const DiagnosticSteps = () => {
     } catch (err) {
       console.error("Error submitting answer:", err);
       // Detailed logging for debugging
-      console.log("Failed Payload:", { runId, questionId: currentQuestion?.id, response: currentResponse });
+      console.log("Failed Payload:", {
+        runId,
+        questionId: currentQuestion?.id,
+        response: currentResponse,
+      });
 
       setError(err.message || "Failed to submit answer. Please try again.");
       setIsLoading(false);
     }
   };
-
-
 
   if (isLoading && !currentQuestion) {
     return (
@@ -310,19 +362,27 @@ const DiagnosticSteps = () => {
     "I think I can achieve outcomes that are important to me.",
     "I believe I can succeed in anything I set my mind to.",
     "I am confident in my ability to perform tasks at work effectively.",
-    "I am capable of doing most tasks very well compared to others."
+    "I am capable of doing most tasks very well compared to others.",
   ];
 
   // Fallback if no question yet
   if (!currentQuestion) return null;
 
   // Use local corrected text if available, otherwise fallback to API text
-  const questionText = CORRECTED_QUESTIONS[currentStepIndex] || currentQuestion.text || currentQuestion.content || currentQuestion.question || "Question text missing";
+  const questionText =
+    CORRECTED_QUESTIONS[currentStepIndex] ||
+    currentQuestion.text ||
+    currentQuestion.content ||
+    currentQuestion.question ||
+    "Question text missing";
 
   // Calculate progress %
   // If totalQuestions is known (e.g. 26), use it. Else estimate or show just step count.
   const totalSteps = totalQuestions || 26;
-  const progressPercent = Math.min(((currentStepIndex + 1) / totalSteps) * 100, 100);
+  const progressPercent = Math.min(
+    ((currentStepIndex + 1) / totalSteps) * 100,
+    100,
+  );
 
   return (
     <div
@@ -379,14 +439,15 @@ const DiagnosticSteps = () => {
               )}
 
               <div className="relative z-10 text-[10px] sm:text-xs md:text-sm lg:text-base text-[#FFF]/80 font-inter font-medium whitespace-nowrap px-1">
-                {currentStepIndex + 1} of {Math.max(totalQuestions, currentStepIndex + 1)}
+                {currentStepIndex + 1} of{" "}
+                {Math.max(totalQuestions, currentStepIndex + 1)}
               </div>
 
               <div className="relative z-10 flex items-center flex-shrink-0">
                 {/* We don't know exact end unless totalQuestions is accurate. 
                     If we are at last step, button might say Finish. 
                     Optimistically show Next unless we are sure. */}
-                {(currentStepIndex >= totalSteps - 1) ? (
+                {currentStepIndex >= totalSteps - 1 ? (
                   <button
                     onClick={handleNext}
                     className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl bg-white text-gray-700 hover:bg-gray-50 active:scale-95 transition-all font-inter font-medium text-[10px] sm:text-xs md:text-sm shadow-sm whitespace-nowrap"
