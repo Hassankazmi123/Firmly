@@ -8,10 +8,17 @@ export const pathwayService = {
                 returnRawResponse: true,
             });
 
+            // 409 Conflict: Pathway already exists - this is OK, return existing data
             if (response.status === 409) {
-                const data = await response.json().catch(() => null);
-                console.warn("Pathway already exists (409), resuming:", data);
-                return data;
+                try {
+                    const data = await response.json();
+                    console.warn("Pathway already exists (409), using existing pathway", data);
+                    // Mark it as already existing so caller can handle appropriately
+                    return { ...data, isExisting: true, statusCode: 409 };
+                } catch (parseErr) {
+                    console.warn("409 response could not be parsed");
+                    return { isExisting: true, statusCode: 409 };
+                }
             }
 
             if (!response.ok) {
@@ -20,10 +27,13 @@ export const pathwayService = {
                 if (response.status === 401) {
                     throw new Error("Unauthorized: Please log in again.");
                 }
-                throw new Error(`Failed to start pathway: ${response.status} ${response.statusText}`);
+                const error = new Error(`Failed to start pathway: ${response.status}`);
+                error.statusCode = response.status;
+                throw error;
             }
 
-            return await response.json().catch(() => null);
+            const data = await response.json().catch(() => ({}));
+            return { ...data, isExisting: false, statusCode: 200 };
         } catch (error) {
             console.error("startPathway Exception:", error);
             throw error;

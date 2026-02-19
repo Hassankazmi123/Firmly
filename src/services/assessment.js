@@ -98,12 +98,44 @@ export const assessmentService = {
 
   // Get results
   getResults: async (runId) => {
-    return await authenticatedFetch(
-      `${API_URL}/api/auth/assessment/${runId}/results/`,
-      {
-        method: "GET",
-      },
-    );
+    try {
+      const response = await authenticatedFetch(
+        `${API_URL}/api/auth/assessment/${runId}/results/`,
+        {
+          method: "GET",
+          returnRawResponse: true,
+        },
+      );
+
+      // Handle 403 Forbidden - user doesn't have permission to view these results
+      if (response.status === 403) {
+        console.warn("Assessment results forbidden (403), assessment may need to be restarted");
+        const error = new Error("Assessment results not accessible (403 Forbidden)");
+        error.statusCode = 403;
+        throw error;
+      }
+
+      // Handle 404 or 410 - results not found
+      if (response.status === 404 || response.status === 410) {
+        console.warn("Assessment results not found");
+        const error = new Error("Assessment not found");
+        error.statusCode = response.status;
+        throw error;
+      }
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Get Results Error:", response.status, text);
+        const error = new Error(`Failed to fetch results: ${response.status}`);
+        error.statusCode = response.status;
+        throw error;
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("GetResults Exception:", error);
+      throw error;
+    }
   },
 
   // Generate diagnostic brief

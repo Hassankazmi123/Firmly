@@ -100,11 +100,24 @@ const AmaliaCornerLayout = () => {
       ) {
         try {
           const response = await pathwayService.startPathway();
+          // Handle both new pathway (200) and existing pathway (409)
           if (response && response.domain) {
             sessionStorage.setItem("currentPathwayDomain", response.domain);
+            console.log("Pathway domain set to:", response.domain);
+          } else if (response && response.statusCode === 409) {
+            console.log("Using existing pathway, attempting to fetch domain info");
+            // Pathway exists but no domain in response, try to fetch next session info
+            try {
+              const nextSessionInfo = await pathwayService.getNextSessionInfo();
+              if (nextSessionInfo && nextSessionInfo.domain) {
+                sessionStorage.setItem("currentPathwayDomain", nextSessionInfo.domain);
+              }
+            } catch (infoErr) {
+              console.warn("Could not fetch next session info:", infoErr.message);
+            }
           }
         } catch (e) {
-          console.error("Auto domain detection failed:", e);
+          console.error("Auto domain detection failed:", e.message);
         }
       }
     };
@@ -115,27 +128,54 @@ const AmaliaCornerLayout = () => {
     const fetchAssessmentData = async () => {
       try {
         let assessmentId = localStorage.getItem("assessmentId");
-        if (!assessmentId) {
-          throw new Error("No assessment run id found");
-        }
+        let data = null;
+        let retryCount = 0;
+        const maxRetries = 2;
 
-        let data;
-        try {
-          data = await assessmentService.getResults(assessmentId);
-        } catch (err) {
-          console.warn("Fetching assessment results failed, attempting to start a new assessment:", err);
-          // Try to start or resume an assessment when results are forbidden or missing
+        // Retry loop to handle 403 and other transient errors
+        while (retryCount < maxRetries && !data) {
           try {
-            const startData = await assessmentService.startAssessment("v1");
-            const newId = startData?.id || startData?.run_id || startData?.assessment_id || startData?.assessmentId;
-            if (newId) {
-              localStorage.setItem("assessmentId", String(newId));
-              assessmentId = String(newId);
+            // If no assessment ID or failed to get results, start/resume assessment
+            if (!assessmentId) {
+              console.log("No assessment ID, starting new assessment...");
+              const startData = await assessmentService.startAssessment("v1");
+              assessmentId = startData?.id || startData?.run_id || startData?.assessment_id || startData?.assessmentId;
+              if (assessmentId) {
+                localStorage.setItem("assessmentId", String(assessmentId));
+              }
             }
-            data = await assessmentService.getResults(assessmentId);
-          } catch (startErr) {
-            console.error("Failed to start or fetch new assessment:", startErr);
-            throw startErr;
+
+            if (assessmentId) {
+              data = await assessmentService.getResults(assessmentId);
+            } else {
+              throw new Error("Could not obtain assessment ID");
+            }
+          } catch (err) {
+            retryCount++;
+            console.warn(`Attempt ${retryCount}: ${err.message}`);
+            
+            // If 403 Forbidden or 404 Not Found, try starting a fresh assessment
+            if ((err.statusCode === 403 || err.statusCode === 404) && retryCount < maxRetries) {
+              try {
+                console.log("Attempting to start a fresh assessment due to error...");
+                const startData = await assessmentService.startAssessment("v1");
+                const newId = startData?.id || startData?.run_id || startData?.assessment_id || startData?.assessmentId;
+                if (newId) {
+                  localStorage.setItem("assessmentId", String(newId));
+                  assessmentId = String(newId);
+                  console.log("Fresh assessment started with ID:", assessmentId);
+                  // Continue loop to retry getResults with new ID
+                  continue;
+                }
+              } catch (startErr) {
+                console.error("Failed to start fresh assessment:", startErr.message);
+                throw startErr;
+              }
+            }
+            
+            if (retryCount >= maxRetries) {
+              throw err;
+            }
           }
         }
 
@@ -290,11 +330,16 @@ const AmaliaCornerLayout = () => {
   const handleGeneratePathway = async () => {
     try {
       const response = await pathwayService.startPathway();
+      // Handle both new pathway (200) and existing pathway (409)
       if (response && response.domain) {
         sessionStorage.setItem("currentPathwayDomain", response.domain);
+        console.log("Pathway domain set:", response.domain);
+      } else if (response && response.statusCode === 409) {
+        console.log("Pathway already exists, will use existing one");
+        // Pathway exists, continue without error
       }
     } catch (e) {
-      console.error("Failed to start pathway from layout:", e);
+      console.error("Failed to start pathway from layout:", e.message);
     }
 
     const pathwayMessage = (
