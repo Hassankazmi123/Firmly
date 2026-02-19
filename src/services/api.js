@@ -5,13 +5,14 @@ export const API_URL = API_BASE_URL;
 
 export const getAuthHeaders = () => {
     const token = localStorage.getItem("accessToken");
+    const headers = { "Content-Type": "application/json" };
     if (!token) {
         console.warn("No access token found in localStorage");
+    } else {
+        headers["Authorization"] = `Bearer ${token}`;
     }
-    return {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-    };
+
+    return headers;
 };
 
 export const refreshAccessToken = async () => {
@@ -98,8 +99,12 @@ export const authenticatedFetch = async (url, options = {}) => {
             headers: { ...headers, ...fetchOptions.headers }
         });
 
-        if (response.status === 401) {
-            console.warn("401 Unauthorized, attempting to refresh token...");
+        // If unauthorized, or forbidden but a refresh token exists, try refreshing once
+        const hasRefresh = !!localStorage.getItem("refreshToken");
+        const shouldAttemptRefresh = response.status === 401 || (response.status === 403 && hasRefresh);
+
+        if (shouldAttemptRefresh) {
+            console.warn("Auth failed, attempting to refresh token...");
             try {
                 const newToken = await refreshAccessToken();
 
