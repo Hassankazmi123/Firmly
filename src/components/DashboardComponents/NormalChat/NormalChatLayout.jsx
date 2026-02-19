@@ -6,13 +6,29 @@ import NormalChatInput from "./NormalChatInput";
 import { chatService } from "../../../services/chat";
 
 const NormalChatLayout = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = sessionStorage.getItem("normalChatSidebarCollapsed");
+    return saved ? JSON.parse(saved) : false;
+  });
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [threads, setThreads] = useState([]);
-  const [currentThread, setCurrentThread] = useState(null);
+  const [currentThread, setCurrentThread] = useState(() => {
+    const saved = sessionStorage.getItem("normalChatCurrentThread");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [isLoadingThreads, setIsLoadingThreads] = useState(true);
   const [error, setError] = useState(null);
+
+  // Save sidebar state
+  useEffect(() => {
+    sessionStorage.setItem("normalChatSidebarCollapsed", JSON.stringify(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
+
+  // Save current thread state
+  useEffect(() => {
+    sessionStorage.setItem("normalChatCurrentThread", JSON.stringify(currentThread));
+  }, [currentThread]);
 
   // Fetch threads on mount
   useEffect(() => {

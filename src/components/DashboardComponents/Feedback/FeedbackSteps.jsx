@@ -10,9 +10,33 @@ const questions = [
 
 const FeedbackSteps = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [responses, setResponses] = useState([3, 3, 3, 3]);
-  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState(() => {
+    const saved = sessionStorage.getItem("feedbackCurrentStep");
+    return saved ? Number(saved) : 0;
+  });
+  const [responses, setResponses] = useState(() => {
+    const saved = sessionStorage.getItem("feedbackResponses");
+    return saved ? JSON.parse(saved) : [3, 3, 3, 3];
+  });
+  const [showCompletionModal, setShowCompletionModal] = useState(() => {
+    const saved = sessionStorage.getItem("feedbackShowCompletionModal");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Save currentStep to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("feedbackCurrentStep", String(currentStep));
+  }, [currentStep]);
+
+  // Save responses to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("feedbackResponses", JSON.stringify(responses));
+  }, [responses]);
+
+  // Save completion modal state to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("feedbackShowCompletionModal", JSON.stringify(showCompletionModal));
+  }, [showCompletionModal]);
 
   const handleSliderChange = (value) => {
     const newResponses = [...responses];

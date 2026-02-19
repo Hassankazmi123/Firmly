@@ -59,30 +59,54 @@ import Screen4Card from "../components/OnboardingComponents/Screen4Card";
 import clearAppCache from "../utils/cache";
 
 const Onboarding = () => {
+  // Check if we're refreshing while ON onboarding page, or navigating TO onboarding page
   const [currentScreen, setCurrentScreen] = useState(() => {
-    const isInitialized = localStorage.getItem("appInitialized") === "true";
-    if (isInitialized) {
+    const appInitialized = localStorage.getItem("appInitialized");
+    const isInOnboardingFlow = sessionStorage.getItem("isInOnboardingFlow") === "true";
+    
+    // If first load - start at screen 0
+    if (!appInitialized) {
+      return 0;
+    }
+    
+    // If we're refreshing while ON onboarding page, restore the screen
+    if (isInOnboardingFlow) {
       const saved = localStorage.getItem("onboardingStep");
       return saved ? Number(saved) : 0;
     }
+    
+    // If navigating FROM another page TO onboarding, always show Screen 1
     return 0;
   });
 
   useEffect(() => {
-    const isFirstLoad = !localStorage.getItem("appInitialized");
+    const appInitialized = localStorage.getItem("appInitialized");
     const hasLoggedOut = localStorage.getItem("hasLoggedOut") === "true";
 
-    if (isFirstLoad || hasLoggedOut) {
+    // Only clear on FIRST load (no appInitialized yet) or after logout
+    if (!appInitialized || hasLoggedOut) {
+      // Clear everything
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Set flags for next load
+      localStorage.setItem("appInitialized", "true");
+      localStorage.setItem("onboardingStep", "0");
+      localStorage.removeItem("hasLoggedOut");
+
+      // Clear cache
       clearAppCache().catch((e) => console.warn("clearAppCache error:", e));
 
-      localStorage.clear();
-      
-      localStorage.setItem("appInitialized", "true");
-      
-      localStorage.setItem("onboardingStep", "0");
-
-      console.log("Cache cleared and reset to Onboarding Screen 1 (first load or logout)");
+      console.log("First load: Cache cleared, reset to Screen 1");
     }
+    
+    // Mark that we're IN the onboarding flow (for refresh detection)
+    sessionStorage.setItem("isInOnboardingFlow", "true");
+    
+    // Clean up when leaving onboarding
+    return () => {
+      sessionStorage.removeItem("isInOnboardingFlow");
+    };
   }, []);
 
   useEffect(() => {

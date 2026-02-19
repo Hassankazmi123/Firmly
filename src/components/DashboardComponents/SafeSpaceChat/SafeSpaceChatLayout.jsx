@@ -4,9 +4,25 @@ import SafeSpaceChatHeader from "./SafeSpaceChatHeader";
 import SafeSpaceChatInput from "./SafeSpaceChatInput";
 
 const SafeSpaceChatLayout = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = sessionStorage.getItem("safeSpaceChatSidebarCollapsed");
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [messages, setMessages] = useState(() => {
+    const saved = sessionStorage.getItem("safeSpaceChatMessages");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isTyping, setIsTyping] = useState(false);
+
+  // Save sidebar state
+  useEffect(() => {
+    sessionStorage.setItem("safeSpaceChatSidebarCollapsed", JSON.stringify(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
+
+  // Save messages state
+  useEffect(() => {
+    sessionStorage.setItem("safeSpaceChatMessages", JSON.stringify(messages));
+  }, [messages]);
 
   useEffect(() => {
     const handleResize = () => {
