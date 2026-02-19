@@ -530,31 +530,84 @@ const DiagnosticSteps = () => {
   const navigate = useNavigate();
 
   // State for assessment flow
-  const [runId, setRunId] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [runId, setRunId] = useState(() => {
+    const saved = sessionStorage.getItem("diagnosticRunId");
+    return saved || null;
+  });
+  
+  const [currentQuestion, setCurrentQuestion] = useState(() => {
+    const saved = sessionStorage.getItem("diagnosticCurrentQuestion");
+    return saved ? JSON.parse(saved) : null;
+  });
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-
-  const [currentStepIndex, setCurrentStepIndex] = useState(() => {
-    // Restore from localStorage on first render
-    const savedIndex = localStorage.getItem("currentStepIndex");
-    return savedIndex ? parseInt(savedIndex, 10) : 0;
+  const [totalQuestions, setTotalQuestions] = useState(() => {
+    const saved = sessionStorage.getItem("diagnosticTotalQuestions");
+    return saved ? parseInt(saved, 10) : 0;
   });
 
-  const [currentResponse, setCurrentResponse] = useState(3);
-  const [history, setHistory] = useState([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(() => {
+    // Restore from sessionStorage on first render
+    const saved = sessionStorage.getItem("diagnosticCurrentStep");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  const [currentResponse, setCurrentResponse] = useState(() => {
+    const saved = sessionStorage.getItem("diagnosticCurrentResponse");
+    return saved ? parseInt(saved, 10) : 3;
+  });
+  
+  const [history, setHistory] = useState(() => {
+    // Restore history from sessionStorage
+    const saved = sessionStorage.getItem("diagnosticHistory");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const highlightRun = useRef(false);
 
-  // Save currentStepIndex to localStorage whenever it changes
+  // Save state to sessionStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("currentStepIndex", currentStepIndex.toString());
+    sessionStorage.setItem("diagnosticCurrentStep", currentStepIndex.toString());
   }, [currentStepIndex]);
+
+  useEffect(() => {
+    sessionStorage.setItem("diagnosticCurrentResponse", currentResponse.toString());
+  }, [currentResponse]);
+
+  useEffect(() => {
+    if (currentQuestion) {
+      sessionStorage.setItem("diagnosticCurrentQuestion", JSON.stringify(currentQuestion));
+    }
+  }, [currentQuestion]);
+
+  useEffect(() => {
+    sessionStorage.setItem("diagnosticHistory", JSON.stringify(history));
+  }, [history]);
+
+  useEffect(() => {
+    if (runId) {
+      sessionStorage.setItem("diagnosticRunId", runId);
+    }
+  }, [runId]);
+
+  useEffect(() => {
+    if (totalQuestions) {
+      sessionStorage.setItem("diagnosticTotalQuestions", totalQuestions.toString());
+    }
+  }, [totalQuestions]);
 
   useEffect(() => {
     const initAssessment = async () => {
       if (highlightRun.current) return;
+      
+      // If we have a saved state with currentQuestion and runId, we're resuming
+      if (currentQuestion && runId) {
+        highlightRun.current = true;
+        setIsLoading(false);
+        return;
+      }
+
       highlightRun.current = true;
 
       try {
@@ -608,7 +661,7 @@ const DiagnosticSteps = () => {
     };
 
     initAssessment();
-  }, [navigate]);
+  }, [navigate, currentQuestion, runId]);
 
   const getColorScheme = (step) => {
     if (step < 5)
@@ -696,6 +749,14 @@ const DiagnosticSteps = () => {
 
       const maxQuestions = totalQuestions || 26;
       if (currentStepIndex >= maxQuestions - 1) {
+        // Clear diagnostic session before navigating away
+        sessionStorage.removeItem("diagnosticRunId");
+        sessionStorage.removeItem("diagnosticCurrentQuestion");
+        sessionStorage.removeItem("diagnosticCurrentStep");
+        sessionStorage.removeItem("diagnosticCurrentResponse");
+        sessionStorage.removeItem("diagnosticHistory");
+        sessionStorage.removeItem("diagnosticTotalQuestions");
+        
         navigate("/diagnostic/completed", { state: { runId } });
         setIsLoading(false);
         return;
@@ -716,6 +777,14 @@ const DiagnosticSteps = () => {
         setCurrentResponse(3);
         setCurrentStepIndex((prev) => prev + 1);
       } else {
+        // Clear diagnostic session before navigating away
+        sessionStorage.removeItem("diagnosticRunId");
+        sessionStorage.removeItem("diagnosticCurrentQuestion");
+        sessionStorage.removeItem("diagnosticCurrentStep");
+        sessionStorage.removeItem("diagnosticCurrentResponse");
+        sessionStorage.removeItem("diagnosticHistory");
+        sessionStorage.removeItem("diagnosticTotalQuestions");
+        
         navigate("/diagnostic/completed", { state: { runId } });
       }
 

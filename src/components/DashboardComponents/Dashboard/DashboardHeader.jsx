@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getUserProfile } from "../../../services/api";
+import logout from "../../../utils/logout";
 import Hero from "./Hero";
 import NotificationPopup from "../notification/Notification";
 const PortalDropdown = ({
@@ -279,6 +280,16 @@ const DashboardHeader = () => {
                   type="button"
                 >
                   Account settings
+                </button>
+                <button
+                  onClick={() => {
+                    setIsLTDropdownOpen(false);
+                    logout();
+                  }}
+                  className="block w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border-t border-gray-200"
+                  type="button"
+                >
+                  Logout
                 </button>
               </div>
             </PortalDropdown>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPopup from "../notification/Notification";
+import logout from "../../../utils/logout";
 import { getUserProfile } from "../../../services/api";
 
 const Header2 = () => {
@@ -191,6 +192,16 @@ const Header2 = () => {
                   type="button"
                 >
                   Account settings
+                </button>
+                <button
+                  onClick={() => {
+                    setIsLTDropdownOpen(false);
+                    logout();
+                  }}
+                  className="block w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border-t border-gray-200"
+                  type="button"
+                >
+                  Logout
                 </button>
               </div>
             )}
