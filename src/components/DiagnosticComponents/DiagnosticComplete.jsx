@@ -6,19 +6,31 @@ import { assessmentService } from "../../services/assessment";
 const DiagnosticComplete = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { runId } = location.state || {};
+  const { runId: stateRunId } = location.state || {};
+  const runId = stateRunId || localStorage.getItem("assessmentId");
   const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
 
   useEffect(() => {
-    const completeAssessment = async () => {
+    const completeAssessment = async (retryCount = 0) => {
       if (runId) {
         try {
+          // Add a small initial delay to ensure backend consistency
+          if (retryCount === 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+
           // 2. Get assessment results
           await assessmentService.getResults(runId);
           // 3. Generate diagnostic brief
           await assessmentService.generateBrief(runId);
         } catch (error) {
-          console.error("Error completing assessment flow:", error);
+          console.error(`Error completing assessment flow (Attempt ${retryCount + 1}):`, error);
+
+          // Retry on 403/Forbidden or 404 (Not Found yet) once
+          if ((error.statusCode === 403 || error.statusCode === 404) && retryCount < 2) {
+            console.log("Retrying assessment completion in 2s...");
+            setTimeout(() => completeAssessment(retryCount + 1), 2000);
+          }
         }
       }
     };

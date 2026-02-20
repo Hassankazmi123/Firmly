@@ -3,7 +3,11 @@ import CreateAccountModal from "./CreateAccountModal";
 
 const Screen3Card = ({ onPrevious, onNext, onLogin }) => {
   const [showCreateAccount, setShowCreateAccount] = useState(() => {
-    return localStorage.getItem("onboardingShowCreateAccount") === "true";
+    return (
+      localStorage.getItem("onboardingShowCreateAccount") === "true" ||
+      localStorage.getItem("onboardingShowCompleteProfile") === "true" ||
+      localStorage.getItem("onboardingShowAccountCreated") === "true"
+    );
   });
 
   const handleExistingAccount = () => {

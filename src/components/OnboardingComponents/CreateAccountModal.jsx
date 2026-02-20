@@ -17,7 +17,10 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showCompleteProfile, setShowCompleteProfile] = useState(() => {
-    return localStorage.getItem("onboardingShowCompleteProfile") === "true";
+    return (
+      localStorage.getItem("onboardingShowCompleteProfile") === "true" ||
+      localStorage.getItem("onboardingShowAccountCreated") === "true"
+    );
   });
   const [authTokens, setAuthTokens] = useState(() => {
     const saved = localStorage.getItem("onboardingAuthTokens");
@@ -204,7 +207,6 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
       }
 
       setIsLoading(false);
-      localStorage.setItem("onboardingStep", 1);
       localStorage.removeItem("onboardingShowCreateAccount");
     } catch (err) {
       console.error("Registration error:", err);

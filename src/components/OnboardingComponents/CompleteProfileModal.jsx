@@ -435,7 +435,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
           localStorage.removeItem("onboardingShowAccountCreated");
           localStorage.removeItem("onboardingShowCompleteProfile");
           localStorage.removeItem("onboardingShowCreateAccount");
-          localStorage.removeItem("onboardingScreen");
+          localStorage.removeItem("onboardingStep");
           localStorage.removeItem("onboardingAuthTokens");
           localStorage.setItem("onboardingComplete", "true");
           onClose();
