@@ -13,6 +13,7 @@ import Session4Chat from "./Session4Chat";
 import { Clock, Lock } from "lucide-react";
 import { pathwayService } from "../../../services/pathway";
 import { assessmentService } from "../../../services/assessment";
+import { getUserProfile } from "../../../services/api";
 const AmaliaCornerLayout = () => {
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
@@ -25,6 +26,20 @@ const AmaliaCornerLayout = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [glowItems, setGlowItems] = useState([]);
   const [growItems, setGrowItems] = useState([]);
+  const [firstName, setFirstName] = useState("");
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getUserProfile();
+        if (data && data.first_name) {
+          setFirstName(data.first_name);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+      }
+    };
+    fetchUser();
+  }, []);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -153,7 +168,7 @@ const AmaliaCornerLayout = () => {
           } catch (err) {
             retryCount++;
             console.warn(`Attempt ${retryCount}: ${err.message}`);
-            
+
             // If 403 Forbidden or 404 Not Found, try starting a fresh assessment
             if ((err.statusCode === 403 || err.statusCode === 404) && retryCount < maxRetries) {
               try {
@@ -172,7 +187,7 @@ const AmaliaCornerLayout = () => {
                 throw startErr;
               }
             }
-            
+
             if (retryCount >= maxRetries) {
               throw err;
             }
@@ -315,7 +330,7 @@ const AmaliaCornerLayout = () => {
   };
   const initialMessage = (
     <>
-      Hi, Lily, <br /> I'm so glad you decided to dive deeper into your results
+      Hi, {firstName}, <br /> I'm so glad you decided to dive deeper into your results
       with me. What I see in your diagnostic is really quite insightful - it
       paints a clear picture of who you are as a leader right now and where your
       greatest opportunities lie. Let's start by looking at your overall profile
@@ -841,9 +856,8 @@ const AmaliaCornerLayout = () => {
           selectedConversation !== "session3" &&
           selectedConversation !== "session4" && (
             <div
-              className={`absolute bottom-0 left-0 right-0 ${
-                isSidebarCollapsed ? "z-50" : ""
-              } md:z-50`}
+              className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+                } md:z-50`}
             >
               <ChatInputFooter onSend={handleSendMessage} />
             </div>

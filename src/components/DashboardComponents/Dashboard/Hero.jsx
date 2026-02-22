@@ -1,6 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getUserProfile } from "../../../services/api";
 const Hero = () => {
   const [currentMetric, setCurrentMetric] = useState(0);
+  const [firstName, setFirstName] = useState("");
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getUserProfile();
+        if (data && data.first_name) {
+          setFirstName(data.first_name);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+      }
+    };
+    fetchUser();
+  }, []);
   const metrics = [
     {
       name: "Goal Orientation",
@@ -41,7 +56,7 @@ const Hero = () => {
     <section className="relative lg:py-8 py-4 overflow-visible">
       <div className="text-white">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-white font-cormorant">
-          Welcome, Lily
+          Welcome, {firstName}
         </h1>
         <p className="text-base lg:text-lg text-white/70 mb-4  font-inter max-w-2xl ">
           This visual summary displays your scores across six research-backed
