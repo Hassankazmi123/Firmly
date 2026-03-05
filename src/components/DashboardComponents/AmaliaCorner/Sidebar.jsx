@@ -9,7 +9,23 @@ const Sidebar = ({
   onConversationSelect,
   selectedConversation,
 }) => {
+
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Get current system date and time
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    // Format: MAR 05, 2026 - 03:52 pm
+    const month = now.toLocaleString("en-US", { month: "short" }).toUpperCase();
+    const day = String(now.getDate()).padStart(2, "0");
+    const year = now.getFullYear();
+    let hour = now.getHours();
+    const minute = String(now.getMinutes()).padStart(2, "0");
+    const ampm = hour >= 12 ? "pm" : "am";
+    hour = hour % 12;
+    if (hour === 0) hour = 12;
+    return `${month} ${day}, ${year} - ${hour}:${minute} ${ampm}`;
+  };
 
   const getDomain = () => {
     const rawDomain = sessionStorage.getItem("currentPathwayDomain");
@@ -133,7 +149,7 @@ const Sidebar = ({
                 }`}
               >
                 <p className="text-xs text-[#3D3D3D]/60 mb-1">
-                  JUN 09, 2025 - 11:18 am
+                  {getCurrentDateTime()}
                 </p>
                 <p className="text-sm md:text-lg font-medium text-[#3D3D3D] font-inter">
                   {getPathwayLabel()}
@@ -214,7 +230,7 @@ const Sidebar = ({
             }`}
           >
             <p className="text-xs text-[#3D3D3D]/60 mb-1">
-              JUN 08, 2025 - 03:52 pm
+              {getCurrentDateTime()}
             </p>
             <p className="text-sm md:text-lg font-medium text-[#3D3D3D] font-inter">
               Diagnostic Debrief
