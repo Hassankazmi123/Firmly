@@ -330,7 +330,7 @@ const AmaliaCornerLayout = () => {
   };
   const initialMessage = (
     <>
-      Hi, {firstName}, <br /> I'm so glad you decided to dive deeper into your results
+      Hi, {firstName}, <br />I'm so glad you decided to dive deeper into your results
       with me. What I see in your diagnostic is really quite insightful - it
       paints a clear picture of who you are as a leader right now and where your
       greatest opportunities lie. Let's start by looking at your overall profile
@@ -382,41 +382,26 @@ const AmaliaCornerLayout = () => {
 
     try {
       let domain = getDomain();
-
       // Keyword-based domain switching fallback
       const lowerText = text.toLowerCase();
-      if (
-        lowerText.includes("resilience") ||
-        lowerText.includes("resilien") ||
-        lowerText.includes(" res")
-      ) {
+      if (lowerText.includes("resilience") || lowerText.includes("resilien") || lowerText.includes(" res")) {
         domain = "res";
         sessionStorage.setItem("currentPathwayDomain", "res");
       } else if (lowerText.includes("goal")) {
         domain = "goal";
         sessionStorage.setItem("currentPathwayDomain", "goal");
-      } else if (
-        lowerText.includes("engagement") ||
-        lowerText.includes("engage")
-      ) {
+      } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
         domain = "eng";
         sessionStorage.setItem("currentPathwayDomain", "eng");
-      } else if (
-        lowerText.includes("self") &&
-        lowerText.includes("awareness")
-      ) {
+      } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
         domain = "self";
         sessionStorage.setItem("currentPathwayDomain", "self");
-      } else if (
-        lowerText.includes("belonging") ||
-        lowerText.includes("belong")
-      ) {
+      } else if (lowerText.includes("belonging") || lowerText.includes("belong")) {
         domain = "belong";
         sessionStorage.setItem("currentPathwayDomain", "belong");
       }
 
       let historyData;
-
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession1(text, "CORE");
         historyData = await pathwayService.getGoalHistorySession1();
@@ -437,19 +422,20 @@ const AmaliaCornerLayout = () => {
         historyData = await pathwayService.getEmpathyHistory();
       }
 
-      const formatted = (
-        Array.isArray(historyData) ? historyData : historyData?.messages || []
-      ).map((msg, idx) => ({
-        id: msg.id || idx,
-        type:
-          msg.sender && msg.sender.toLowerCase().trim() === "user"
-            ? "user"
-            : "amalia",
-        content: msg.text || msg.content,
-      }));
-
-      if (formatted.length > 0) {
-        setMessages(formatted);
+      // Only append the latest bot response
+      const historyMessages = Array.isArray(historyData) ? historyData : historyData?.messages || [];
+      const latestBotMsg = historyMessages
+        .filter((msg) => !msg.sender || msg.sender.toLowerCase().trim() !== "user")
+        .slice(-1)[0];
+      if (latestBotMsg) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: latestBotMsg.id || Date.now(),
+            type: "amalia",
+            content: latestBotMsg.text || latestBotMsg.content,
+          },
+        ]);
       }
     } catch (error) {
       console.error("Failed to send message in diagnostic view:", error);
@@ -476,9 +462,51 @@ const AmaliaCornerLayout = () => {
   };
 
   const handleStartSession = () => {
-    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    sessionStorage.setItem("fromStartSession", "true");
-    navigate("/dashboard");
+    // Start pathway and show feedback in chat
+    const startPathwayAndShowFeedback = async () => {
+      try {
+        const response = await pathwayService.startPathway();
+        // Handle both new pathway (200) and existing pathway (409)
+        if (response && response.domain) {
+          sessionStorage.setItem("currentPathwayDomain", response.domain);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              type: "amalia",
+              content:
+                `Pathway started! Your growth area is: ${response.domain.toUpperCase()}. Let's begin your personalized sessions.`,
+            },
+          ]);
+        } else if (response && response.statusCode === 409) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              type: "amalia",
+              content:
+                "You already have an active pathway. Continuing with your existing sessions.",
+            },
+          ]);
+        }
+      } catch (e) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "amalia",
+            content: "Failed to start pathway. Please try again later.",
+          },
+        ]);
+      }
+      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+      sessionStorage.setItem("fromStartSession", "true");
+      // Optionally, navigate to dashboard after a short delay
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1200);
+    };
+    startPathwayAndShowFeedback();
   };
 
   const domain = getDomain();
