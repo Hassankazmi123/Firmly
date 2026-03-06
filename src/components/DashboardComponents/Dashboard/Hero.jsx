@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { getUserProfile } from "../../../services/api";
 const Hero = () => {
+  const location = useLocation();
+  const isFromAmalia = location.state?.fromAmaliaCorner || sessionStorage.getItem("hasVisitedAmaliaCorner") === "true";
   const [currentMetric, setCurrentMetric] = useState(0);
   const [firstName, setFirstName] = useState("");
   useEffect(() => {
@@ -112,7 +115,7 @@ const Hero = () => {
                     alt="star icon"
                     className="h-5 w-5"
                   />
-                  <span className="text-[#6664D3]">Start a Debrief</span>
+                  <span className="text-[#6664D3]">{isFromAmalia ? "Amalia Debrief" : "Start a Debrief"}</span>
                 </button>
               </div>
               <div className="max-w-md">

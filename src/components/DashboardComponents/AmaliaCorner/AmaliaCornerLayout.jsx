@@ -394,7 +394,7 @@ const AmaliaCornerLayout = () => {
   };
   const handleGoToDashboard = () => {
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    navigate("/dashboard");
+    navigate("/dashboard", { state: { fromAmaliaCorner: true } });
   };
 
   const handleSendMessage = async (text) => {
