@@ -18,6 +18,7 @@ const AmaliaCornerLayout = () => {
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [messages, setMessages] = useState([]);
+  const [userId, setUserId] = useState("");
   const [showPathwayView, setShowPathwayView] = useState(false);
   const [showSession1, setShowSession1] = useState(false);
   const [showSession2, setShowSession2] = useState(false);
@@ -34,12 +35,32 @@ const AmaliaCornerLayout = () => {
         if (data && data.first_name) {
           setFirstName(data.first_name);
         }
+        if (data && data.id) {
+          setUserId(data.id);
+        } else if (data && data.email) {
+          setUserId(data.email);
+        }
       } catch (err) {
         console.error("Failed to fetch user profile:", err);
       }
     };
     fetchUser();
   }, []);
+
+  // Load chat history for user on mount or when userId changes
+  useEffect(() => {
+    if (!userId) return;
+    const saved = localStorage.getItem(`amaliaChat_${userId}`);
+    if (saved) {
+      setMessages(JSON.parse(saved));
+    }
+  }, [userId]);
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    if (!userId) return;
+    localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(messages));
+  }, [messages, userId]);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -330,7 +351,7 @@ const AmaliaCornerLayout = () => {
   };
   const initialMessage = (
     <>
-      Hi, {firstName}, <br />I'm so glad you decided to dive deeper into your results
+      Hi {firstName}, <br />I'm so glad you decided to dive deeper into your results
       with me. What I see in your diagnostic is really quite insightful - it
       paints a clear picture of who you are as a leader right now and where your
       greatest opportunities lie. Let's start by looking at your overall profile
@@ -378,7 +399,14 @@ const AmaliaCornerLayout = () => {
 
   const handleSendMessage = async (text) => {
     const userMsg = { id: Date.now(), type: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => {
+      const updated = [...prev, userMsg];
+      // Save immediately for responsiveness
+      if (userId) {
+        localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+      }
+      return updated;
+    });
 
     try {
       let domain = getDomain();
@@ -428,14 +456,20 @@ const AmaliaCornerLayout = () => {
         .filter((msg) => !msg.sender || msg.sender.toLowerCase().trim() !== "user")
         .slice(-1)[0];
       if (latestBotMsg) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: latestBotMsg.id || Date.now(),
-            type: "amalia",
-            content: latestBotMsg.text || latestBotMsg.content,
-          },
-        ]);
+        setMessages((prev) => {
+          const updated = [
+            ...prev,
+            {
+              id: latestBotMsg.id || Date.now(),
+              type: "amalia",
+              content: latestBotMsg.text || latestBotMsg.content,
+            },
+          ];
+          if (userId) {
+            localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+          }
+          return updated;
+        });
       }
     } catch (error) {
       console.error("Failed to send message in diagnostic view:", error);
@@ -469,35 +503,53 @@ const AmaliaCornerLayout = () => {
         // Handle both new pathway (200) and existing pathway (409)
         if (response && response.domain) {
           sessionStorage.setItem("currentPathwayDomain", response.domain);
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              type: "amalia",
-              content:
-                `Pathway started! Your growth area is: ${response.domain.toUpperCase()}. Let's begin your personalized sessions.`,
-            },
-          ]);
+          setMessages((prev) => {
+            const updated = [
+              ...prev,
+              {
+                id: Date.now(),
+                type: "amalia",
+                content:
+                  `Pathway started! Your growth area is: ${response.domain.toUpperCase()}. Let's begin your personalized sessions.`,
+              },
+            ];
+            if (userId) {
+              localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+            }
+            return updated;
+          });
         } else if (response && response.statusCode === 409) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              type: "amalia",
-              content:
-                "You already have an active pathway. Continuing with your existing sessions.",
-            },
-          ]);
+          setMessages((prev) => {
+            const updated = [
+              ...prev,
+              {
+                id: Date.now(),
+                type: "amalia",
+                content:
+                  "You already have an active pathway. Continuing with your existing sessions.",
+              },
+            ];
+            if (userId) {
+              localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+            }
+            return updated;
+          });
         }
       } catch (e) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now(),
-            type: "amalia",
-            content: "Failed to start pathway. Please try again later.",
-          },
-        ]);
+        setMessages((prev) => {
+          const updated = [
+            ...prev,
+            {
+              id: Date.now(),
+              type: "amalia",
+              content: "Failed to start pathway. Please try again later.",
+            },
+          ];
+          if (userId) {
+            localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+          }
+          return updated;
+        });
       }
       sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
       sessionStorage.setItem("fromStartSession", "true");
