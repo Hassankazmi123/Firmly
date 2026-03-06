@@ -1,14 +1,54 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPopup from "../DashboardComponents/notification/Notification";
 import { assessmentService } from "../../services/assessment";
+import { getUserProfile } from "../../services/api";
+import logout from "../../utils/logout";
 
 const DiagnosticComplete = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { runId: stateRunId } = location.state || {};
   const runId = stateRunId || localStorage.getItem("assessmentId");
-  const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [userInitials, setUserInitials] = useState("U");
+  const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
+  const ltDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile && profile.first_name && profile.last_name) {
+          const initials =
+            `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
+          setUserInitials(initials);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        ltDropdownRef.current &&
+        !ltDropdownRef.current.contains(event.target)
+      ) {
+        setIsLTDropdownOpen(false);
+      }
+    };
+    if (isLTDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isLTDropdownOpen]);
 
   useEffect(() => {
     const completeAssessment = async (retryCount = 0) => {
@@ -16,7 +56,7 @@ const DiagnosticComplete = () => {
         try {
           // Add a small initial delay to ensure backend consistency
           if (retryCount === 0) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           }
 
           // 2. Get assessment results
@@ -24,10 +64,16 @@ const DiagnosticComplete = () => {
           // 3. Generate diagnostic brief
           await assessmentService.generateBrief(runId);
         } catch (error) {
-          console.error(`Error completing assessment flow (Attempt ${retryCount + 1}):`, error);
+          console.error(
+            `Error completing assessment flow (Attempt ${retryCount + 1}):`,
+            error,
+          );
 
           // Retry on 403/Forbidden or 404 (Not Found yet) once
-          if ((error.statusCode === 403 || error.statusCode === 404) && retryCount < 2) {
+          if (
+            (error.statusCode === 403 || error.statusCode === 404) &&
+            retryCount < 2
+          ) {
             console.log("Retrying assessment completion in 2s...");
             setTimeout(() => completeAssessment(retryCount + 1), 2000);
           }
@@ -94,6 +140,57 @@ const DiagnosticComplete = () => {
                 </svg>
                 <span className="absolute top-1 right-2 h-2.5 w-2.5 bg-[#D46FA8] rounded-full" />
               </button>
+            </div>
+            <div className="relative" ref={ltDropdownRef}>
+              <button
+                onClick={() => setIsLTDropdownOpen((s) => !s)}
+                className="flex items-center space-x-2 text-white px-3 py-2 rounded-lg transition-colors"
+                aria-expanded={isLTDropdownOpen}
+                aria-haspopup="true"
+                type="button"
+              >
+                <span className="text-sm lg:text-lg font-semibold bg-[#ababab] border border-white/20 text-white/70 px-3 py-2 rounded-2xl">
+                  {userInitials}
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isLTDropdownOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              {isLTDropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-40 overflow-hidden">
+                  <button
+                    onClick={() => {
+                      setIsLTDropdownOpen(false);
+                      navigate("/dashboard/account-settings");
+                    }}
+                    className="block w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                    type="button"
+                  >
+                    Account settings
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsLTDropdownOpen(false);
+                      logout();
+                    }}
+                    className="block w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border-t border-gray-200"
+                    type="button"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
