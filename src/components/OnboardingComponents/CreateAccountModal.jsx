@@ -279,7 +279,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <div className="text-left">
                 <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                  Email Address
+                  Email Address <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="email"
@@ -294,7 +294,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
               <div className="text-left">
                 <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                  Password
+                  Password <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -353,7 +353,7 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
               <div className="text-left">
                 <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                  Confirm Password
+                  Confirm Password <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -454,7 +454,8 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
                     disabled={isLoading}
                   >
                     Privacy Policy
-                  </button>
+                  </button>{" "}
+                  <span className="text-red-400">*</span>
                 </label>
               </div>
 
@@ -477,7 +478,13 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={
+                  isLoading ||
+                  !email.trim() ||
+                  !password ||
+                  !confirmPassword ||
+                  !agreeToTerms
+                }
                 className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 active:scale-95 transition-all font-inter text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px]"
               >
                 {isLoading && (

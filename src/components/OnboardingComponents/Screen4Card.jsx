@@ -92,7 +92,7 @@ const Screen4Card = ({ onBack }) => {
             className="w-full flex flex-col gap-4 sm:gap-5"
           >
             <label className="flex flex-col gap-2 text-left font-inter text-sm text-white/80">
-              <span className="sr-only">Email Address</span>
+              <span>Email Address <span className="text-red-400">*</span></span>
               <input
                 type="email"
                 name="email"
@@ -104,7 +104,7 @@ const Screen4Card = ({ onBack }) => {
             </label>
 
             <label className="flex flex-col gap-2 text-left font-inter text-sm text-white/80">
-              <span className="sr-only">Password</span>
+              <span>Password <span className="text-red-400">*</span></span>
               <input
                 type="password"
                 name="password"

@@ -26,6 +26,7 @@ export default function SettingsScreen() {
   const [profileImage, setProfileImage] = useState(null);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSavedModal, setShowSavedModal] = useState(false);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -144,9 +145,8 @@ export default function SettingsScreen() {
         formData.append("profile_image", selectedImageFile);
       }
 
-      // Try PATCH to /profile/ first as it is the standard update endpoint
-      const response = await fetch(`${API_AUTH_URL}/profile/`, {
-        method: "PATCH",
+      const response = await fetch(`${API_AUTH_URL}/complete-profile/`, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           // Content-Type must NOT be set when using FormData, browser sets it with boundary
@@ -155,9 +155,7 @@ export default function SettingsScreen() {
       });
 
       if (response.ok) {
-        alert("Changes saved successfully!");
-        // Refresh profile data to ensure everything is in sync (like image URL)
-        // Optionally trigger a re-fetch here if needed
+        setShowSavedModal(true);
       } else {
         const data = await response.json();
         // Construct a more detailed error message
@@ -214,6 +212,34 @@ export default function SettingsScreen() {
           />
         </div>
       </main>
+
+      {/* Saved Success Modal */}
+      {showSavedModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowSavedModal(false)} />
+          <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full mx-auto p-6 sm:p-8 md:p-10 text-center">
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <img
+                src="/assets/images/onboarding/Swal_Icon.webp"
+                alt="Success"
+                className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+              />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4 font-cormorant px-2">
+              Changes Saved Successfully
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-inter leading-relaxed px-2">
+              Your profile has been updated successfully.
+            </p>
+            <button
+              onClick={() => setShowSavedModal(false)}
+              className="w-full sm:w-auto bg-[#374151] text-white px-8 py-3 rounded-full font-medium hover:bg-[#4B5563] active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[48px]"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

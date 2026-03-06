@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+
 const NotificationPopup = ({ isOpen, onClose }) => {
   const [filter, setFilter] = useState("All");
   const [imageError, setImageError] = useState(false);
@@ -84,13 +85,15 @@ const NotificationPopup = ({ isOpen, onClose }) => {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [isOpen, onClose]);
+
   if (!isOpen) return null;
+
   return (
     <>
-      <div className="fixed inset-0 z-[299] " onClick={onClose}></div>
-      <div className="fixed z-[300] top-20   right-0 sm:right-8 md:right-12 lg:right-16">
+      <div className="fixed inset-0 z-[99998] bg-transparent" onClick={onClose} aria-hidden="true" />
+      <div className="fixed z-[99999] top-20 right-0 sm:right-8 md:right-12 lg:right-16">
         <div
-          className=" shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden"
+          className="shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden rounded-lg bg-white"
           ref={popupRef}
         >
           <div className="px-4 py-4 bg-[#ededed] flex items-center justify-between relative overflow-hidden">

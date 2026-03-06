@@ -275,7 +275,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                 <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3 sm:gap-4">
                   <div className="text-left">
                     <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                      First name
+                      First name <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
@@ -297,7 +297,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                   </div>
                   <div className="text-left">
                     <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                      Last name
+                      Last name <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
@@ -323,7 +323,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                 <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3 sm:gap-4">
                   <div className="text-left">
                     <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                      Age
+                      Age <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="number"
@@ -339,7 +339,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                   </div>
                   <div className="text-left">
                     <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                      Years Experience
+                      Years Experience <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="number"
@@ -358,7 +358,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                 {/* Organization */}
                 <div className="text-left">
                   <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                    Current Organization
+                    Current Organization <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -374,7 +374,7 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                 {/* Job Role */}
                 <div className="text-left">
                   <label className="block text-white/80 text-xs sm:text-sm font-inter mb-2">
-                    Current Job Role
+                    Current Job Role <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -412,7 +412,15 @@ const CompleteProfileModal = ({ isOpen, onClose, authTokens }) => {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={isLoading}
+                  disabled={
+                    isLoading ||
+                    !firstName.trim() ||
+                    !lastName.trim() ||
+                    !age.trim() ||
+                    !experience.trim() ||
+                    !organization.trim() ||
+                    !jobRole.trim()
+                  }
                   className="w-full py-3 bg-white text-[#7C3AED] font-medium rounded-full hover:bg-white/95 active:scale-95 transition-all font-inter text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px]"
                 >
                   {isLoading && (
