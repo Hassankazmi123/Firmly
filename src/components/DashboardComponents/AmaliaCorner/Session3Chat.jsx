@@ -1,23 +1,38 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import ChatInputFooter from "./ChatInputFooter";
 import { useNavigate } from "react-router-dom";
 import { pathwayService } from "../../../services/pathway";
 
-const Session3Chat = ({ isSidebarCollapsed = true }) => {
+const Session3Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
+  const getDomain = useCallback(() => {
+    const rawDomain = sessionStorage.getItem("currentPathwayDomain");
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined")
+      return "emp";
+    const d = rawDomain.toLowerCase();
+    if (
+      d.includes("resilience") ||
+      d.includes("resilien") ||
+      d.includes(" res")
+    )
+      return "res";
+    if (d.includes("goal")) return "goal";
+    if (d.includes("engagement") || d.includes("engage")) return "eng";
+    if (d.includes("self")) return "self";
+    if (d.includes("belonging") || d.includes("belong")) return "belong";
+    if (d.includes("empathy") || d.includes("emp")) return "emp";
+    return "emp";
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    initializeSession();
-  }, []);
-
-  const processHistoryData = (historyData) => {
+  const processHistoryData = useCallback((historyData) => {
     let historyMessages = [];
     if (Array.isArray(historyData)) {
       historyMessages = historyData;
@@ -28,27 +43,50 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
     if (historyMessages.length > 0) {
       return historyMessages.map((msg, idx) => ({
         id: msg.id || idx,
-        type: (msg.sender && msg.sender.toLowerCase().trim() === 'user') ? 'user' : 'amalia',
-        content: msg.text || msg.content
+        type:
+          msg.sender && msg.sender.toLowerCase().trim() === "user"
+            ? "user"
+            : "amalia",
+        content: msg.text || msg.content,
       }));
     }
     return [];
-  };
+  }, []);
 
-  const getDomain = () => {
-    const rawDomain = sessionStorage.getItem("currentPathwayDomain");
-    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined") return "emp";
-    const d = rawDomain.toLowerCase();
-    if (d.includes("resilience") || d.includes("resilien") || d.includes(" res")) return "res";
-    if (d.includes("goal")) return "goal";
-    if (d.includes("engagement") || d.includes("engage")) return "eng";
-    if (d.includes("self")) return "self";
-    if (d.includes("belonging") || d.includes("belong")) return "belong";
-    if (d.includes("empathy") || d.includes("emp")) return "emp";
-    return "emp";
-  };
+  const startSession = useCallback(async () => {
+    const domain = getDomain();
+    try {
+      let data;
+      if (domain === "goal") {
+        data = await pathwayService.startGoalSession3();
+      } else if (domain === "res") {
+        data = await pathwayService.startResilienceSession3();
+      } else if (domain === "eng") {
+        data = await pathwayService.startEngagementSession3();
+      } else if (domain === "self") {
+        data = await pathwayService.startSelfAwarenessSession3();
+      } else if (domain === "belong") {
+        data = await pathwayService.startBelongingSession3();
+      } else {
+        data = await pathwayService.startEmpathySession3();
+      }
 
-  const initializeSession = async () => {
+      if (data) {
+        const content = data.message || data.text || data.response;
+        if (content) {
+          setMessages([{
+            id: Date.now(),
+            type: 'amalia',
+            content: content
+          }]);
+        }
+      }
+    } catch (err) {
+      console.error(`Error starting session 3 (${domain}):`, err);
+    }
+  }, [getDomain]);
+
+  const initializeSession = useCallback(async () => {
     setLoading(true);
     const domain = getDomain();
     try {
@@ -80,40 +118,11 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getDomain, processHistoryData, startSession]);
 
-  const startSession = async () => {
-    const domain = getDomain();
-    try {
-      let data;
-      if (domain === "goal") {
-        data = await pathwayService.startGoalSession3();
-      } else if (domain === "res") {
-        data = await pathwayService.startResilienceSession3();
-      } else if (domain === "eng") {
-        data = await pathwayService.startEngagementSession3();
-      } else if (domain === "self") {
-        data = await pathwayService.startSelfAwarenessSession3();
-      } else if (domain === "belong") {
-        data = await pathwayService.startBelongingSession3();
-      } else {
-        data = await pathwayService.startEmpathySession3();
-      }
-
-      if (data) {
-        const content = data.message || data.text || data.response;
-        if (content) {
-          setMessages([{
-            id: Date.now(),
-            type: 'amalia',
-            content: content
-          }]);
-        }
-      }
-    } catch (err) {
-      console.error(`Error starting session 3 (${domain}):`, err);
-    }
-  };
+  useEffect(() => {
+    initializeSession();
+  }, [initializeSession]);
 
   const handleSendMessage = async (text) => {
     const domain = getDomain();
@@ -121,36 +130,36 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      let domain = getDomain();
+      let currentDomain = getDomain();
 
       // Keyword-based domain switching fallback
       const lowerText = text.toLowerCase();
       if (lowerText.includes("resilience") || lowerText.includes("resilien") || lowerText.includes(" res")) {
-        domain = "res";
+        currentDomain = "res";
         sessionStorage.setItem("currentPathwayDomain", "res");
       } else if (lowerText.includes("goal")) {
-        domain = "goal";
+        currentDomain = "goal";
         sessionStorage.setItem("currentPathwayDomain", "goal");
       } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
-        domain = "eng";
+        currentDomain = "eng";
         sessionStorage.setItem("currentPathwayDomain", "eng");
       } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
-        domain = "self";
+        currentDomain = "self";
         sessionStorage.setItem("currentPathwayDomain", "self");
       } else if (lowerText.includes("belonging") || lowerText.includes("belong")) {
-        domain = "belong";
+        currentDomain = "belong";
         sessionStorage.setItem("currentPathwayDomain", "belong");
       }
 
-      if (domain === "goal") {
+      if (currentDomain === "goal") {
         await pathwayService.sendGoalMessageSession3(text, "CORE");
-      } else if (domain === "res") {
+      } else if (currentDomain === "res") {
         await pathwayService.sendResilienceMessageSession3(text, "CORE");
-      } else if (domain === "eng") {
+      } else if (currentDomain === "eng") {
         await pathwayService.sendEngagementMessageSession3(text, "CORE");
-      } else if (domain === "self") {
+      } else if (currentDomain === "self") {
         await pathwayService.sendSelfAwarenessMessageSession3(text, "CORE");
-      } else if (domain === "belong") {
+      } else if (currentDomain === "belong") {
         await pathwayService.sendBelongingMessageSession3(text, "CORE");
       } else {
         await pathwayService.sendEmpathyMessageSession3(text, "CORE");
@@ -158,15 +167,15 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
 
       // Fetch fresh history to get the bot response and sync state
       let historyData;
-      if (domain === "goal") {
+      if (currentDomain === "goal") {
         historyData = await pathwayService.getGoalHistorySession3();
-      } else if (domain === "res") {
+      } else if (currentDomain === "res") {
         historyData = await pathwayService.getResilienceHistorySession3();
-      } else if (domain === "eng") {
+      } else if (currentDomain === "eng") {
         historyData = await pathwayService.getEngagementHistorySession3();
-      } else if (domain === "self") {
+      } else if (currentDomain === "self") {
         historyData = await pathwayService.getSelfAwarenessHistorySession3();
-      } else if (domain === "belong") {
+      } else if (currentDomain === "belong") {
         historyData = await pathwayService.getBelongingHistorySession3();
       } else {
         historyData = await pathwayService.getEmpathyHistorySession3();
@@ -202,10 +211,14 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
       console.error(`Error ending session 3 (${domain}):`, error);
     }
 
-    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    sessionStorage.setItem("fromStartSession", "true");
-    sessionStorage.setItem("fromSession3Next", "true");
-    navigate("/dashboard");
+    if (onNextSession) {
+      onNextSession();
+    } else {
+      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+      sessionStorage.setItem("fromStartSession", "true");
+      sessionStorage.setItem("fromSession3Next", "true");
+      navigate("/dashboard");
+    }
   };
 
   const handleGoToDashboard = () => {
@@ -216,7 +229,7 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto w-full px-4 pb-32 max-w-5xl mx-auto">
         {loading && messages.length === 0 && (
-          <div className="p-4 text-center text-gray-500">Loading session...</div>
+          <div className="p-4 text-center text-gray-500 font-inter">Loading session...</div>
         )}
 
         {messages.map((message) => (
@@ -239,12 +252,7 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
         <div ref={messagesEndRef} />
 
         <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
-          <button
-            onClick={handleNextSession}
-            className="flex-1 px-5  py-3.5  bg-[#F5F5F5] lg:max-w-fit text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
-          >
-            Next Session
-          </button>
+          {/* Next Session button hidden for session 3 as requested */}
           <button
             onClick={handleGoToDashboard}
             className="flex-1   py-3.5 px-5  bg-[#3D3D3D] lg:max-w-fit text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"

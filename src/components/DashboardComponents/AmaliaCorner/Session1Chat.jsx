@@ -3,7 +3,7 @@ import ChatInputFooter from "./ChatInputFooter";
 import { useNavigate } from "react-router-dom";
 import { pathwayService } from "../../../services/pathway";
 
-const Session1Chat = ({ isSidebarCollapsed = true }) => {
+const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
@@ -22,23 +22,14 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
     }
 
     if (historyMessages.length > 0) {
-      // Filter out the initial "Hello" message if it comes from Amalia
-      return historyMessages
-        .filter((msg) => {
-          const content = msg.text || msg.content || "";
-          const isHello = content.trim() === "Hello";
-          const isAmalia =
-            !msg.sender || msg.sender.toLowerCase().trim() !== "user";
-          return !(isHello && isAmalia);
-        })
-        .map((msg, idx) => ({
-          id: msg.id || idx,
-          type:
-            msg.sender && msg.sender.toLowerCase().trim() === "user"
-              ? "user"
-              : "amalia",
-          content: msg.text || msg.content,
-        }));
+      return historyMessages.map((msg, idx) => ({
+        id: msg.id || idx,
+        type:
+          msg.sender && msg.sender.toLowerCase().trim() === "user"
+            ? "user"
+            : "amalia",
+        content: msg.text || msg.content,
+      }));
     }
     return [];
   }, []);
@@ -83,13 +74,11 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
       if (data) {
         const content = data.message || data.text || data.response;
         if (content) {
-          setMessages([
-            {
-              id: Date.now(),
-              type: "amalia",
-              content: content,
-            },
-          ]);
+          setMessages([{
+            id: Date.now(),
+            type: 'amalia',
+            content: content
+          }]);
         }
       }
     } catch (err) {
@@ -236,10 +225,14 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
       console.error(`Error ending session 1 (${domain}):`, error);
     }
 
-    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    sessionStorage.setItem("fromStartSession", "true");
-    sessionStorage.setItem("fromNextSession", "true");
-    navigate("/dashboard");
+    if (onNextSession) {
+      onNextSession();
+    } else {
+      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+      sessionStorage.setItem("fromStartSession", "true");
+      sessionStorage.setItem("fromNextSession", "true");
+      navigate("/dashboard");
+    }
   };
 
   const handleGoToDashboard = () => {

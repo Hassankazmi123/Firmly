@@ -28,6 +28,10 @@ const AmaliaCornerLayout = () => {
   const [glowItems, setGlowItems] = useState([]);
   const [growItems, setGrowItems] = useState([]);
   const [firstName, setFirstName] = useState("");
+  const [completedSessions, setCompletedSessions] = useState(() => {
+    const saved = localStorage.getItem("amalia_completed_sessions");
+    return saved ? JSON.parse(saved) : [];
+  });
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -61,6 +65,10 @@ const AmaliaCornerLayout = () => {
     if (!userId) return;
     localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(messages));
   }, [messages, userId]);
+
+  useEffect(() => {
+    localStorage.setItem("amalia_completed_sessions", JSON.stringify(completedSessions));
+  }, [completedSessions]);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -301,22 +309,13 @@ const AmaliaCornerLayout = () => {
     }
   }, [showPathwayView]);
 
-  const handleConversationSelect = (conversationId) => {
+  const handleConversationSelect = React.useCallback((conversationId) => {
     sessionStorage.setItem("selectedConversation", conversationId);
     if (conversationId === "cultivating-empathy") {
-      if (showSession1) {
-        setShowSession1(false);
-        setShowSession2(false);
-        setShowSession3(false);
-        setShowSession4(false);
-        setSelectedConversation("diagnostic");
-        sessionStorage.setItem("selectedConversation", "diagnostic");
-      } else {
-        setShowSession1(true);
-        setSelectedConversation("session1");
-        sessionStorage.setItem("showSession1", "true");
-        sessionStorage.setItem("selectedConversation", "session1");
-      }
+      setShowSession1(true);
+      setSelectedConversation("session1");
+      sessionStorage.setItem("showSession1", "true");
+      sessionStorage.setItem("selectedConversation", "session1");
     } else if (conversationId === "diagnostic") {
       setSelectedConversation("diagnostic");
     } else if (conversationId === "session1") {
@@ -348,7 +347,22 @@ const AmaliaCornerLayout = () => {
       sessionStorage.setItem("showSession3", "true");
       sessionStorage.setItem("showSession4", "true");
     }
-  };
+  }, [showSession1, showSession2, showSession3, showSession4]);
+
+  const handleNextSession = React.useCallback((sessionNum) => {
+    setCompletedSessions((prev) => {
+      const next = prev.includes(sessionNum) ? prev : [...prev, sessionNum];
+      return next;
+    });
+
+    if (sessionNum === 1) {
+      handleConversationSelect("session2");
+    } else if (sessionNum === 2) {
+      handleConversationSelect("session3");
+    }
+    // Session 3 is the last one in this flow, so no next session switch manually here
+  }, [handleConversationSelect]);
+
   const initialMessage = (
     <>
       Hi {firstName}, <br />I'm so glad you decided to dive deeper into your results
@@ -640,15 +654,24 @@ const AmaliaCornerLayout = () => {
         />
         {selectedConversation === "session1" ? (
           <div className="flex-1 overflow-hidden relative">
-            <Session1Chat isSidebarCollapsed={isSidebarCollapsed} />
+            <Session1Chat
+              isSidebarCollapsed={isSidebarCollapsed}
+              onNextSession={() => handleNextSession(1)}
+            />
           </div>
         ) : selectedConversation === "session2" ? (
           <div className="flex-1 overflow-hidden relative">
-            <Session2Chat isSidebarCollapsed={isSidebarCollapsed} />
+            <Session2Chat
+              isSidebarCollapsed={isSidebarCollapsed}
+              onNextSession={() => handleNextSession(2)}
+            />
           </div>
         ) : selectedConversation === "session3" ? (
           <div className="flex-1 overflow-hidden relative">
-            <Session3Chat isSidebarCollapsed={isSidebarCollapsed} />
+            <Session3Chat
+              isSidebarCollapsed={isSidebarCollapsed}
+              onNextSession={() => handleNextSession(3)}
+            />
           </div>
         ) : selectedConversation === "session4" ? (
           <div className="flex-1 overflow-hidden relative">
@@ -799,11 +822,14 @@ const AmaliaCornerLayout = () => {
                       Introducing ideas that matter to women and their place at
                       work, based on research and industry reporting.
                     </p>
-                    <button className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors">
+                    <button
+                      onClick={() => handleConversationSelect("session1")}
+                      className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors"
+                    >
                       Start element
                     </button>
                   </div>
-                  <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 opacity-60">
+                  <div className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(1) ? "opacity-60" : ""}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -812,7 +838,7 @@ const AmaliaCornerLayout = () => {
                           className="w-6 h-6"
                         />
                         <div>
-                          <p className="text-xs font-inter-medium text-[#9CA3AF]">
+                          <p className={`text-xs font-inter-medium ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
                             Workbook
                           </p>
                         </div>
@@ -824,19 +850,28 @@ const AmaliaCornerLayout = () => {
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-lg md:text-xl font-cormorant font-bold text-[#9CA3AF] mb-3">
+                    <h3 className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
                       Reflective Practice
                     </h3>
-                    <p className="text-sm text-[#9CA3AF] font-inter mb-6 leading-relaxed">
+                    <p className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}>
                       Small description about the element contents. Lorem ipsum
                       sit dolor amet avec consect.
                     </p>
-                    <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                      <Lock className="w-4 h-4" />
-                      Locked
-                    </button>
+                    {completedSessions.includes(1) ? (
+                      <button
+                        onClick={() => handleConversationSelect("session2")}
+                        className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                      >
+                        Start element
+                      </button>
+                    ) : (
+                      <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                        <Lock className="w-4 h-4" />
+                        Locked
+                      </button>
+                    )}
                   </div>
-                  <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 opacity-60">
+                  <div className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(2) ? "opacity-60" : ""}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -845,7 +880,7 @@ const AmaliaCornerLayout = () => {
                           className="w-6 h-6"
                         />
                         <div>
-                          <p className="text-xs font-inter-medium text-[#9CA3AF]">
+                          <p className={`text-xs font-inter-medium ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
                             Workbook
                           </p>
                         </div>
@@ -857,17 +892,26 @@ const AmaliaCornerLayout = () => {
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-lg md:text-xl font-cormorant font-bold text-[#9CA3AF] mb-3">
+                    <h3 className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
                       Application
                     </h3>
-                    <p className="text-sm text-[#9CA3AF] font-inter mb-6 leading-relaxed">
+                    <p className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}>
                       Small description about the element contents. Lorem ipsum
                       sit dolor amet avec consect.
                     </p>
-                    <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                      <Lock className="w-4 h-4" />
-                      Locked
-                    </button>
+                    {completedSessions.includes(2) ? (
+                      <button
+                        onClick={() => handleConversationSelect("session3")}
+                        className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                      >
+                        Start element
+                      </button>
+                    ) : (
+                      <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                        <Lock className="w-4 h-4" />
+                        Locked
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="bg-[#F5F5FF] rounded-xl p-4  mb-4 md:mb-6">
