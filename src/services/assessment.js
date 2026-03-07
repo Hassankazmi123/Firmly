@@ -107,26 +107,19 @@ export const assessmentService = {
         },
       );
 
-      // Handle 403 Forbidden - user doesn't have permission to view these results
       if (response.status === 403) {
-        // Prompt user to re-login or check permissions
-        alert("You do not have access to these assessment results. Please log in again or check your permissions.");
         const error = new Error("Assessment results not accessible (403 Forbidden)");
         error.statusCode = 403;
         throw error;
       }
 
-      // Handle 404 or 410 - results not found
       if (response.status === 404 || response.status === 410) {
-        console.warn("Assessment results not found");
         const error = new Error("Assessment not found");
         error.statusCode = response.status;
         throw error;
       }
 
       if (!response.ok) {
-        const text = await response.text();
-        console.error("Get Results Error:", response.status, text);
         const error = new Error(`Failed to fetch results: ${response.status}`);
         error.statusCode = response.status;
         throw error;
@@ -169,22 +162,19 @@ export const assessmentService = {
           returnRawResponse: true,
         },
       );
+
       if (response.status === 403) {
-        alert("You do not have access to these assessment results. Please log in again or check your permissions.");
-       
         const error = new Error("Assessment results not accessible (403 Forbidden)");
         error.statusCode = 403;
         throw error;
       }
+
       if (response.status === 404 || response.status === 410) {
-        console.warn("Assessment results not found");
         const error = new Error("Assessment not found");
         error.statusCode = response.status;
         throw error;
       }
       if (!response.ok) {
-        const text = await response.text();
-        console.error("Get Results Error:", response.status, text);
         const error = new Error(`Failed to fetch results: ${response.status}`);
         error.statusCode = response.status;
         throw error;

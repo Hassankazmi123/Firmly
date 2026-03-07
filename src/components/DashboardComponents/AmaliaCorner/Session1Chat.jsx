@@ -261,11 +261,10 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
             className={`mb-6 flex w-full ${message.type === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`p-4 rounded-xl max-w-[85%] ${
-                message.type === "amalia"
-                  ? "bg-[#F5F5FF]"
-                  : "bg-[#f5f5f5] ml-auto"
-              }`}
+              className={`p-4 rounded-xl max-w-[85%] ${message.type === "amalia"
+                ? "bg-[#F5F5FF]"
+                : "bg-[#f5f5f5] ml-auto"
+                }`}
             >
               <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
                 {message.content}
@@ -291,9 +290,8 @@ const Session1Chat = ({ isSidebarCollapsed = true }) => {
         </div>
       </div>
       <div
-        className={`absolute bottom-0 left-0 right-0 ${
-          isSidebarCollapsed ? "z-50" : ""
-        } md:z-50`}
+        className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+          } md:z-50`}
       >
         <ChatInputFooter onSend={handleSendMessage} />
       </div>

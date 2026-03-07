@@ -47,7 +47,6 @@ const AmaliaCornerLayout = () => {
     fetchUser();
   }, []);
 
-  // Load chat history for user on mount or when userId changes
   useEffect(() => {
     if (!userId) return;
     const saved = localStorage.getItem(`amaliaChat_${userId}`);
@@ -113,6 +112,9 @@ const AmaliaCornerLayout = () => {
 
     if (savedConversation) {
       setSelectedConversation(savedConversation);
+      if (savedConversation === "cultivating-empathy") {
+        setShowPathwayView(true);
+      }
     } else if (s4) {
       setSelectedConversation("session4");
     } else if (s3) {
@@ -136,13 +138,11 @@ const AmaliaCornerLayout = () => {
       ) {
         try {
           const response = await pathwayService.startPathway();
-          // Handle both new pathway (200) and existing pathway (409)
           if (response && response.domain) {
             sessionStorage.setItem("currentPathwayDomain", response.domain);
             console.log("Pathway domain set to:", response.domain);
           } else if (response && response.statusCode === 409) {
             console.log("Using existing pathway, attempting to fetch domain info");
-            // Pathway exists but no domain in response, try to fetch next session info
             try {
               const nextSessionInfo = await pathwayService.getNextSessionInfo();
               if (nextSessionInfo && nextSessionInfo.domain) {
@@ -304,32 +304,25 @@ const AmaliaCornerLayout = () => {
   const handleConversationSelect = (conversationId) => {
     sessionStorage.setItem("selectedConversation", conversationId);
     if (conversationId === "cultivating-empathy") {
-      if (showSession1) {
-        setShowSession1(false);
-        setShowSession2(false);
-        setShowSession3(false);
-        setShowSession4(false);
-        setSelectedConversation("diagnostic");
-        sessionStorage.setItem("selectedConversation", "diagnostic");
-      } else {
-        setShowSession1(true);
-        setSelectedConversation("session1");
-        sessionStorage.setItem("showSession1", "true");
-        sessionStorage.setItem("selectedConversation", "session1");
-      }
+      setShowPathwayView(true);
+      setSelectedConversation("cultivating-empathy");
     } else if (conversationId === "diagnostic") {
+      setShowPathwayView(false);
       setSelectedConversation("diagnostic");
     } else if (conversationId === "session1") {
+      setShowPathwayView(false);
       setShowSession1(true);
       setSelectedConversation("session1");
       sessionStorage.setItem("showSession1", "true");
     } else if (conversationId === "session2") {
+      setShowPathwayView(false);
       setShowSession1(true);
       setShowSession2(true);
       setSelectedConversation("session2");
       sessionStorage.setItem("showSession1", "true");
       sessionStorage.setItem("showSession2", "true");
     } else if (conversationId === "session3") {
+      setShowPathwayView(false);
       setShowSession1(true);
       setShowSession2(true);
       setShowSession3(true);
@@ -338,6 +331,7 @@ const AmaliaCornerLayout = () => {
       sessionStorage.setItem("showSession2", "true");
       sessionStorage.setItem("showSession3", "true");
     } else if (conversationId === "session4") {
+      setShowPathwayView(false);
       setShowSession1(true);
       setShowSession2(true);
       setShowSession3(true);
@@ -799,11 +793,14 @@ const AmaliaCornerLayout = () => {
                       Introducing ideas that matter to women and their place at
                       work, based on research and industry reporting.
                     </p>
-                    <button className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors">
+                    <button
+                      onClick={() => handleConversationSelect("session1")}
+                      className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors hover:bg-[#2D2D2D] active:scale-95"
+                    >
                       Start element
                     </button>
                   </div>
-                  <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 opacity-60">
+                  <div className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!showSession1 ? "opacity-60" : ""}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -812,7 +809,7 @@ const AmaliaCornerLayout = () => {
                           className="w-6 h-6"
                         />
                         <div>
-                          <p className="text-xs font-inter-medium text-[#9CA3AF]">
+                          <p className={`text-xs font-inter-medium ${showSession1 ? "text-[#3D3D3D]" : "text-[#9CA3AF]"}`}>
                             Workbook
                           </p>
                         </div>
@@ -824,19 +821,28 @@ const AmaliaCornerLayout = () => {
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-lg md:text-xl font-cormorant font-bold text-[#9CA3AF] mb-3">
+                    <h3 className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${showSession1 ? "text-[#3D3D3D]" : "text-[#9CA3AF]"}`}>
                       Reflective Practice
                     </h3>
-                    <p className="text-sm text-[#9CA3AF] font-inter mb-6 leading-relaxed">
+                    <p className={`text-sm font-inter mb-6 leading-relaxed ${showSession1 ? "text-[#3D3D3D]/70" : "text-[#9CA3AF]"}`}>
                       Small description about the element contents. Lorem ipsum
                       sit dolor amet avec consect.
                     </p>
-                    <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                      <Lock className="w-4 h-4" />
-                      Locked
-                    </button>
+                    {showSession1 ? (
+                      <button
+                        onClick={() => handleConversationSelect("session2")}
+                        className="px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors hover:bg-[#2D2D2D] active:scale-95"
+                      >
+                        Start element
+                      </button>
+                    ) : (
+                      <button className="px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed" disabled>
+                        <Lock className="w-4 h-4" />
+                        Locked
+                      </button>
+                    )}
                   </div>
-                  <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 opacity-60">
+                  <div className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!showSession2 ? "opacity-60" : ""}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -845,7 +851,7 @@ const AmaliaCornerLayout = () => {
                           className="w-6 h-6"
                         />
                         <div>
-                          <p className="text-xs font-inter-medium text-[#9CA3AF]">
+                          <p className={`text-xs font-inter-medium ${showSession2 ? "text-[#3D3D3D]" : "text-[#9CA3AF]"}`}>
                             Workbook
                           </p>
                         </div>
@@ -857,17 +863,26 @@ const AmaliaCornerLayout = () => {
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-lg md:text-xl font-cormorant font-bold text-[#9CA3AF] mb-3">
+                    <h3 className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${showSession2 ? "text-[#3D3D3D]" : "text-[#9CA3AF]"}`}>
                       Application
                     </h3>
-                    <p className="text-sm text-[#9CA3AF] font-inter mb-6 leading-relaxed">
+                    <p className={`text-sm font-inter mb-6 leading-relaxed ${showSession2 ? "text-[#3D3D3D]/70" : "text-[#9CA3AF]"}`}>
                       Small description about the element contents. Lorem ipsum
                       sit dolor amet avec consect.
                     </p>
-                    <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                      <Lock className="w-4 h-4" />
-                      Locked
-                    </button>
+                    {showSession2 ? (
+                      <button
+                        onClick={() => handleConversationSelect("session3")}
+                        className="px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors hover:bg-[#2D2D2D] active:scale-95"
+                      >
+                        Start element
+                      </button>
+                    ) : (
+                      <button className="px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed" disabled>
+                        <Lock className="w-4 h-4" />
+                        Locked
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="bg-[#F5F5FF] rounded-xl p-4  mb-4 md:mb-6">

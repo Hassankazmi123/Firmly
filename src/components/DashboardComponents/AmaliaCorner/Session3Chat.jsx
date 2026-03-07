@@ -182,32 +182,6 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
     }
   };
 
-  const handleNextSession = async () => {
-    const domain = getDomain();
-    try {
-      if (domain === "goal") {
-        await pathwayService.sendGoalMessageSession3("", "GOODBYE");
-      } else if (domain === "res") {
-        await pathwayService.sendResilienceMessageSession3("", "GOODBYE");
-      } else if (domain === "eng") {
-        await pathwayService.sendEngagementMessageSession3("", "GOODBYE");
-      } else if (domain === "self") {
-        await pathwayService.sendSelfAwarenessMessageSession3("", "GOODBYE");
-      } else if (domain === "belong") {
-        await pathwayService.sendBelongingMessageSession3("", "GOODBYE");
-      } else {
-        await pathwayService.sendEmpathyMessageSession3("", "GOODBYE");
-      }
-    } catch (error) {
-      console.error(`Error ending session 3 (${domain}):`, error);
-    }
-
-    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    sessionStorage.setItem("fromStartSession", "true");
-    sessionStorage.setItem("fromSession3Next", "true");
-    navigate("/dashboard");
-  };
-
   const handleGoToDashboard = () => {
     navigate("/dashboard");
   };
@@ -238,16 +212,10 @@ const Session3Chat = ({ isSidebarCollapsed = true }) => {
         ))}
         <div ref={messagesEndRef} />
 
-        <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
-          <button
-            onClick={handleNextSession}
-            className="flex-1 px-5  py-3.5  bg-[#F5F5F5] lg:max-w-fit text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
-          >
-            Next Session
-          </button>
+        <div className="flex justify-center mt-8 mb-4">
           <button
             onClick={handleGoToDashboard}
-            className="flex-1   py-3.5 px-5  bg-[#3D3D3D] lg:max-w-fit text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+            className="py-3.5 px-8 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
           >
             Go to Dashboard
           </button>
