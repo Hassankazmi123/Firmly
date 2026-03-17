@@ -415,6 +415,12 @@ const AmaliaCornerLayout = () => {
       </>
     );
     setMessages([...messages, pathwayMessage]);
+
+    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+    sessionStorage.setItem("fromStartSession", "true");
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1200);
   };
   const handleGoToDashboard = () => {
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
