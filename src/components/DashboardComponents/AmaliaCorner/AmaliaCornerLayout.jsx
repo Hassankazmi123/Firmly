@@ -356,22 +356,12 @@ const AmaliaCornerLayout = () => {
       return next;
     });
 
-    if (sessionNum === 1) {
-      handleConversationSelect("session2");
-    } else if (sessionNum === 2) {
-      handleConversationSelect("session3");
-    } else if (sessionNum === 3) {
-      // Session 3 is completed, go back to dashboard to start session 4
-      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-      sessionStorage.setItem("fromStartSession", "true");
-      navigate("/dashboard");
-    } else if (sessionNum === 4) {
-      // Session 4 is the last in Amalia Corner flow — go back to dashboard
-      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-      sessionStorage.setItem("fromStartSession", "true");
-      navigate("/dashboard");
-    }
-  }, [handleConversationSelect, navigate]);
+    // After every session, go back to dashboard so the user can start the next session from there
+    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+    sessionStorage.setItem("fromStartSession", "true");
+    sessionStorage.setItem("completedSessionNum", String(sessionNum));
+    navigate("/dashboard");
+  }, [navigate]);
 
   const initialMessage = (
     <>
