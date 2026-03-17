@@ -41,14 +41,19 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
     }
 
     if (historyMessages.length > 0) {
-      return historyMessages.map((msg, idx) => ({
-        id: msg.id || idx,
-        type:
-          msg.sender && msg.sender.toLowerCase().trim() === "user"
-            ? "user"
-            : "amalia",
-        content: msg.text || msg.content,
-      }));
+      return historyMessages
+        .map((msg, idx) => ({
+          id: msg.id || idx,
+          type:
+            msg.sender && msg.sender.toLowerCase().trim() === "user"
+              ? "user"
+              : "amalia",
+          content: msg.text || msg.content,
+        }))
+        .filter((msg) => {
+          const c = (msg.content || "").trim().toLowerCase();
+          return c !== "hello" && c !== "";
+        });
     }
     return [];
   }, []);

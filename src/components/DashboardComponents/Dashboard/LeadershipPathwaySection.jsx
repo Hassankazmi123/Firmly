@@ -13,10 +13,30 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   const [isSession2ModalOpen, setIsSession2ModalOpen] = useState(false);
   const [isSession3ModalOpen, setIsSession3ModalOpen] = useState(false);
   const [isSession4ModalOpen, setIsSession4ModalOpen] = useState(false);
-  const [showPathwayDesign, setShowPathwayDesign] = useState(false);
-  const [fromNextSession, setFromNextSession] = useState(false);
-  const [fromSession2Next, setFromSession2Next] = useState(false);
-  const [fromSession3Next, setFromSession3Next] = useState(false);
+  const [showPathwayDesign, setShowPathwayDesign] = useState(() => {
+    try {
+      const fromStart = sessionStorage.getItem("fromStartSession");
+      if (fromStart === "true") return true;
+      const saved = localStorage.getItem("amalia_completed_sessions");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) && parsed.length > 0;
+      }
+    } catch {
+      // ignore
+    }
+    return false;
+  });
+
+  // Read persisted completed sessions from localStorage (saved by AmaliaCornerLayout)
+  const [completedSessions, setCompletedSessions] = useState(() => {
+    try {
+      const saved = localStorage.getItem("amalia_completed_sessions");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     const fromStartSession = sessionStorage.getItem("fromStartSession");
@@ -24,27 +44,19 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       setShowPathwayDesign(true);
     }
 
-    const fromNext = sessionStorage.getItem("fromNextSession");
-    if (fromNext === "true") {
-      setShowPathwayDesign(true);
-      setFromNextSession(true);
-      sessionStorage.removeItem("fromNextSession");
-    }
-
-    const fromSession2 = sessionStorage.getItem("fromSession2Next");
-    if (fromSession2 === "true") {
-      setShowPathwayDesign(true);
-      setFromSession2Next(true);
-      sessionStorage.removeItem("fromSession2Next");
-    }
-
-    const fromSession3 = sessionStorage.getItem("fromSession3Next");
-    if (fromSession3 === "true") {
-      setShowPathwayDesign(true);
-      setFromSession3Next(true);
-      sessionStorage.removeItem("fromSession3Next");
+    // Re-read completedSessions on mount in case they were updated
+    try {
+      const saved = localStorage.getItem("amalia_completed_sessions");
+      if (saved) setCompletedSessions(JSON.parse(saved));
+    } catch {
+      // ignore
     }
   }, []);
+
+  // Derive per-session state from completedSessions
+  const session1Done = completedSessions.includes(1);
+  const session2Done = completedSessions.includes(2);
+  const session3Done = completedSessions.includes(3);
 
   const handleGeneratePathway = () => {
     setIsModalOpen(true);
@@ -72,17 +84,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Common Understanding",
       description:
         "Introducing ideas that matter to women and their place at work, based on research and industry reporting.",
-      status: fromSession3Next
-        ? "completed"
-        : fromSession2Next
-          ? "completed"
-          : fromNextSession
-            ? "completed"
-            : "active",
-      buttonText:
-        fromSession3Next || fromSession2Next || fromNextSession
-          ? "View"
-          : "Start element",
+      status: session1Done ? "completed" : "active",
+      buttonText: session1Done ? "View" : "Start element",
     },
     {
       id: 2,
@@ -92,15 +95,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Reflective Practice",
       description:
         "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
-      status: fromSession3Next
-        ? "completed"
-        : fromSession2Next
-          ? "completed"
-          : fromNextSession
-            ? "active"
-            : "locked",
-      buttonText:
-        fromSession3Next || fromSession2Next ? "View" : "Start element",
+      status: session2Done ? "completed" : session1Done ? "active" : "locked",
+      buttonText: session2Done ? "View" : "Start element",
     },
     {
       id: 3,
@@ -110,12 +106,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Application",
       description:
         "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
-      status: fromSession3Next
-        ? "completed"
-        : fromSession2Next
-          ? "active"
-          : "locked",
-      buttonText: fromSession3Next ? "View" : "Start element",
+      status: session3Done ? "completed" : session2Done ? "active" : "locked",
+      buttonText: session3Done ? "View" : "Start element",
     },
     {
       id: 4,
@@ -125,7 +117,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Integration",
       description:
         "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
-      status: fromSession3Next ? "active" : "locked",
+      status: session3Done ? "active" : "locked",
       buttonText: "Start element",
     },
   ];
@@ -154,11 +146,11 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
               <div className="flex items-center justify-between relative ">
                 <div className="absolute top-1/2 left-0 right-0 h-2 lg:h-4 rounded-full bg-[#E5E5E5] -translate-y-1/2 z-0"></div>
                 <div
-                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${fromSession3Next
+                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${session3Done
                     ? "w-full"
-                    : fromSession2Next
+                    : session2Done
                       ? "w-3/4"
-                      : fromNextSession
+                      : session1Done
                         ? "w-2/4"
                         : "w-1/4"
                     }`}

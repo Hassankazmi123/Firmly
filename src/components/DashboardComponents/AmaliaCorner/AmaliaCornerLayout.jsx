@@ -359,9 +359,13 @@ const AmaliaCornerLayout = () => {
       handleConversationSelect("session2");
     } else if (sessionNum === 2) {
       handleConversationSelect("session3");
+    } else if (sessionNum === 3) {
+      // Session 3 is the last in Amalia Corner flow — go back to dashboard
+      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+      sessionStorage.setItem("fromStartSession", "true");
+      navigate("/dashboard");
     }
-    // Session 3 is the last one in this flow, so no next session switch manually here
-  }, [handleConversationSelect]);
+  }, [handleConversationSelect, navigate]);
 
   const initialMessage = (
     <>
@@ -691,7 +695,7 @@ const AmaliaCornerLayout = () => {
                   <p className="text-base md:text-lg text-[#3D3D3D] font-inter mb-6">
                     We'll start with{" "}
                     <span className="font-semibold">{domainLabel}</span>. For
-                    that, I've scheduled 4 sessions for you:
+                    that, I've scheduled 3 sessions for you:
                   </p>
                   <ul className="space-y-3 mb-6">
                     <li className="flex items-start gap-3">
@@ -710,12 +714,6 @@ const AmaliaCornerLayout = () => {
                       <span className="text-[#6664D3] font-bold mt-1">•</span>
                       <span className="text-base text-[#3D3D3D] font-inter">
                         Session 3: {getSessionTitle(3)}
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#6664D3] font-bold mt-1">•</span>
-                      <span className="text-base text-[#3D3D3D] font-inter">
-                        Session 4: {getSessionTitle(4)}
                       </span>
                     </li>
                   </ul>
@@ -916,7 +914,7 @@ const AmaliaCornerLayout = () => {
                 </div>
                 <div className="bg-[#F5F5FF] rounded-xl p-4  mb-4 md:mb-6">
                   <p className="text-base  text-black font-regular font-inter mb-2">
-                    We'll start with {domainLabel}. For that, I've scheduled 4
+                    We'll start with {domainLabel}. For that, I've scheduled 3
                     sessions for you:
                   </p>
                   <ul className="space-y-1 mb-2">
@@ -936,12 +934,6 @@ const AmaliaCornerLayout = () => {
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
                         Session 3: {getSessionTitle(3)}
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 4: {getSessionTitle(4)}
                       </span>
                     </li>
                   </ul>

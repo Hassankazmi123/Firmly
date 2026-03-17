@@ -41,14 +41,19 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
     }
 
     if (historyMessages.length > 0) {
-      return historyMessages.map((msg, idx) => ({
-        id: msg.id || idx,
-        type:
-          msg.sender && msg.sender.toLowerCase().trim() === "user"
-            ? "user"
-            : "amalia",
-        content: msg.text || msg.content,
-      }));
+      return historyMessages
+        .map((msg, idx) => ({
+          id: msg.id || idx,
+          type:
+            msg.sender && msg.sender.toLowerCase().trim() === "user"
+              ? "user"
+              : "amalia",
+          content: msg.text || msg.content,
+        }))
+        .filter((msg) => {
+          const c = (msg.content || "").trim().toLowerCase();
+          return c !== "hello" && c !== "";
+        });
     }
     return [];
   }, []);
@@ -252,7 +257,12 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
         <div ref={messagesEndRef} />
 
         <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
-          {/* Next Session button hidden for session 3 as requested */}
+          <button
+            onClick={handleNextSession}
+            className="flex-1 px-5  py-3.5 lg:max-w-fit  bg-[#F5F5F5]  text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+          >
+            Next Session
+          </button>
           <button
             onClick={handleGoToDashboard}
             className="flex-1   py-3.5 px-5  bg-[#3D3D3D] lg:max-w-fit text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
