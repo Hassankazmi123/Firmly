@@ -695,25 +695,31 @@ const AmaliaCornerLayout = () => {
                   <p className="text-base md:text-lg text-[#3D3D3D] font-inter mb-6">
                     We'll start with{" "}
                     <span className="font-semibold">{domainLabel}</span>. For
-                    that, I've scheduled 3 sessions for you:
+                    that, I've scheduled 4 sessions for you:
                   </p>
                   <ul className="space-y-3 mb-6">
                     <li className="flex items-start gap-3">
-                      <span className="text-[#6664D3] font-bold mt-1">•</span>
-                      <span className="text-base text-[#3D3D3D] font-inter">
+                      <span className="text-black font-bold ">•</span>
+                      <span className="text-base text-black font-regular font-inter">
                         Session 1: {getSessionTitle(1)} (Common Understanding)
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-[#6664D3] font-bold mt-1">•</span>
-                      <span className="text-base text-[#3D3D3D] font-inter">
+                      <span className="text-black font-bold ">•</span>
+                      <span className="text-base text-black font-regular font-inter">
                         Session 2: {getSessionTitle(2)}
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="text-[#6664D3] font-bold mt-1">•</span>
-                      <span className="text-base text-[#3D3D3D] font-inter">
+                      <span className="text-black font-bold ">•</span>
+                      <span className="text-base text-black font-regular font-inter">
                         Session 3: {getSessionTitle(3)}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <span className="text-black font-bold ">•</span>
+                      <span className="text-base text-black font-regular font-inter">
+                        Session 4: {getSessionTitle(4)}
                       </span>
                     </li>
                   </ul>
@@ -914,26 +920,32 @@ const AmaliaCornerLayout = () => {
                 </div>
                 <div className="bg-[#F5F5FF] rounded-xl p-4  mb-4 md:mb-6">
                   <p className="text-base  text-black font-regular font-inter mb-2">
-                    We'll start with {domainLabel}. For that, I've scheduled 3
+                    We'll start with {domainLabel}. For that, I've scheduled 4
                     sessions for you:
                   </p>
-                  <ul className="space-y-1 mb-2">
-                    <li className="flex items-center gap-3">
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-start gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
                         Session 1: {getSessionTitle(1)} (Common Understanding)
                       </span>
                     </li>
-                    <li className="flex items-center gap-3">
+                    <li className="flex items-start gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
                         Session 2: {getSessionTitle(2)}
                       </span>
                     </li>
-                    <li className="flex items-center gap-3">
+                    <li className="flex items-start gap-3">
                       <span className="text-black font-bold ">•</span>
                       <span className="text-base text-black font-regular font-inter">
                         Session 3: {getSessionTitle(3)}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <span className="text-black font-bold ">•</span>
+                      <span className="text-base text-black font-regular font-inter">
+                        Session 4: {getSessionTitle(4)}
                       </span>
                     </li>
                   </ul>
