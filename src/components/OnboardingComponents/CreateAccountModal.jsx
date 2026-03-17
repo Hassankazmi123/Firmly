@@ -238,34 +238,35 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <OnboardingLayout>
         <div className="w-full min-h-full flex items-center justify-center px-4 sm:px-6 py-8 sm:py-10">
-          {/* Back button */}
-          <button
-            onClick={() => {
-              localStorage.removeItem("onboardingShowCreateAccount");
-              onClose();
-            }}
-            className="absolute top-16 sm:top-20 left-4 sm:left-6 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-all z-30"
-          >
-            <svg
-              className="w-6 h-6 sm:w-5 sm:h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-
           {/* Card */}
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl sm:rounded-3xl p-6 sm:p-8 w-full max-w-lg relative">
-            {/* Step indicator */}
-            <div className="text-white/70 text-xs sm:text-sm font-inter mb-3 sm:mb-4">
-              1 of 2
+            {/* Header section with back button and step pointer */}
+            <div className="flex items-center gap-3 mb-3 sm:mb-4">
+              <button
+                onClick={() => {
+                  localStorage.removeItem("onboardingShowCreateAccount");
+                  onClose();
+                }}
+                className="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white active:scale-95 transition-all -ml-2"
+                aria-label="Go back"
+              >
+                <svg
+                  className="w-5 h-5 sm:w-6 sm:h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <div className="text-white/70 text-xs sm:text-sm font-inter">
+                1 of 2
+              </div>
             </div>
 
             <h2 className="text-white text-xl sm:text-2xl font-semibold font-cormorant mb-2 sm:mb-3 text-left">
