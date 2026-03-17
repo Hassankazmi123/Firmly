@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { getUserProfile } from "../../../services/api";
 import { assessmentService } from "../../../services/assessment";
 import DebriefResultsModal from "../AllModals/DebriefResultsModal";
+import RadarChart from "./RadarChart";
 
 const Hero = () => {
   const location = useLocation();
@@ -12,6 +13,22 @@ const Hero = () => {
   const [isDebriefModalOpen, setIsDebriefModalOpen] = useState(false);
   const [overallScore, setOverallScore] = useState(null);
   const [scoreLabel, setScoreLabel] = useState("");
+  const [radarData, setRadarData] = useState({
+    GOAL: 70,
+    RES: 65,
+    EMP: 60,
+    BELONG: 55,
+    ENG: 50,
+    SELF: 45,
+  });
+  const [peerData, setPeerData] = useState({
+    GOAL: 60,
+    RES: 55,
+    EMP: 50,
+    BELONG: 45,
+    ENG: 40,
+    SELF: 35,
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -28,13 +45,15 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
-    const fetchScore = async () => {
+    const fetchResults = async () => {
       try {
         const assessmentId = localStorage.getItem("assessmentId");
         if (!assessmentId) return;
         const data = await assessmentService.getResults(assessmentId);
         const domains = data?.domains || [];
+
         if (domains.length > 0) {
+          // Calculate overall score
           const avg = Math.round(
             domains.reduce((acc, d) => acc + parseFloat(d.percent_0_100 || 0), 0) / domains.length
           );
@@ -43,12 +62,22 @@ const Hero = () => {
           else if (avg >= 50) setScoreLabel("Balanced");
           else if (avg >= 30) setScoreLabel("Growing");
           else setScoreLabel("Developing");
+
+          // Map domain scores for radar chart
+          const newRadarData = {};
+          const newPeerData = {};
+          domains.forEach(d => {
+            newRadarData[d.domain] = Math.round(parseFloat(d.percent_0_100 || 0));
+            newPeerData[d.domain] = Math.round(parseFloat(d.peer_mean_0_100 || 0));
+          });
+          setRadarData(prev => ({ ...prev, ...newRadarData }));
+          setPeerData(prev => ({ ...prev, ...newPeerData }));
         }
       } catch (err) {
-        console.warn("Could not fetch overall score:", err);
+        console.warn("Could not fetch assessment results:", err);
       }
     };
-    fetchScore();
+    fetchResults();
   }, []);
 
   const metrics = [
@@ -56,11 +85,6 @@ const Hero = () => {
       name: "Goal Orientation",
       description:
         "The tendency to set goals and make plans. People with high levels of goal orientation tend to think about their goals in advance.",
-    },
-    {
-      name: "Self-Belief",
-      description:
-        "Confidence in one's own abilities and judgment. People with high self-belief trust their capabilities and make conviction.",
     },
     {
       name: "Resilience",
@@ -81,6 +105,11 @@ const Hero = () => {
       name: "Engagement",
       description:
         "The level of involvement and enthusiasm in work. Engaged employees are more productive and contribute positively goals.",
+    },
+    {
+      name: "Self-Belief",
+      description:
+        "Confidence in one's own abilities and judgment. People with high self-belief trust their capabilities and make conviction.",
     },
   ];
 
@@ -105,18 +134,17 @@ const Hero = () => {
         <div className="relative mt-7">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center lg:mt-0 mt-5">
             <div data-tour="radar-chart">
-              <div className="flex items-center text-white text-sm ">
-                <span className="w-2 h-2 bg-[#FFCD4F] rounded-full mr-2"></span>
-                Today
+              <div className="flex items-center gap-6 text-white text-xs mb-6">
+                <div className="flex items-center">
+                  <span className="w-2 h-2 bg-[#FFCD4F] rounded-full mr-2 shadow-[0_0_8px_rgba(255,205,79,0.8)]"></span>
+                  Today
+                </div>
               </div>
-              <div className="flex items-center justify-center">
-                <img
-                  src="/assets/images/dashboard/poly.webp"
-                  alt="star icon"
-                  className="lg:h-[350px] lg:w-[430px] h-full w-full"
-                />
+              <div className="flex items-center justify-center lg:h-[450px] h-[350px]">
+                <RadarChart data={radarData} peerData={peerData} highlightIndex={currentMetric} />
               </div>
             </div>
+
             <div className="space-y-4" data-tour="overall-score">
               <div className="bg-[#7d7cd9] border border-white/20  rounded-2xl lg:px-5 lg:py-4 px-4 py-4">
                 <p className="text-white/70 text-sm lg:text-base font-inter">
@@ -158,13 +186,30 @@ const Hero = () => {
                     <span className="text-[#6664D3]">{isFromAmalia ? "Amalia Debrief" : "Start a Debrief"}</span>
                   </button>
                 </div>
-                <div className="max-w-md">
-                  <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 font-cormorant">
-                    {metrics[currentMetric].name}
-                  </h3>
-                  <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-6 font-inter">
-                    {metrics[currentMetric].description}
-                  </p>
+                <div className="flex items-end justify-between mb-4">
+                  <div className="max-w-md">
+                    <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 font-cormorant">
+                      {metrics[currentMetric].name}
+                    </h3>
+                    <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-6 font-inter">
+                      {metrics[currentMetric].description}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end mb-6">
+                    <div className="flex items-baseline">
+                      <span className="text-4xl sm:text-6xl font-bold text-white font-times-new-roman">
+                        {radarData[
+                          ["GOAL", "RES", "EMP", "BELONG", "ENG", "SELF"][currentMetric]
+                        ] || 0}
+                      </span>
+                      <span className="text-xl sm:text-2xl text-white/40 ml-1 font-times-new-roman">
+                        /100
+                      </span>
+                    </div>
+                    <p className="text-white/50 text-xs sm:text-sm font-inter">
+                      Domain Score
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-4 relative z-40">
                   <button
