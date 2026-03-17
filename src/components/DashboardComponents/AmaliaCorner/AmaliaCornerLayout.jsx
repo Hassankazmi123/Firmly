@@ -352,6 +352,7 @@ const AmaliaCornerLayout = () => {
   const handleNextSession = React.useCallback((sessionNum) => {
     setCompletedSessions((prev) => {
       const next = prev.includes(sessionNum) ? prev : [...prev, sessionNum];
+      localStorage.setItem("amalia_completed_sessions", JSON.stringify(next));
       return next;
     });
 
@@ -360,7 +361,12 @@ const AmaliaCornerLayout = () => {
     } else if (sessionNum === 2) {
       handleConversationSelect("session3");
     } else if (sessionNum === 3) {
-      // Session 3 is the last in Amalia Corner flow — go back to dashboard
+      // Session 3 is completed, go back to dashboard to start session 4
+      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+      sessionStorage.setItem("fromStartSession", "true");
+      navigate("/dashboard");
+    } else if (sessionNum === 4) {
+      // Session 4 is the last in Amalia Corner flow — go back to dashboard
       sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
       sessionStorage.setItem("fromStartSession", "true");
       navigate("/dashboard");
@@ -679,7 +685,10 @@ const AmaliaCornerLayout = () => {
           </div>
         ) : selectedConversation === "session4" ? (
           <div className="flex-1 overflow-hidden relative">
-            <Session4Chat isSidebarCollapsed={isSidebarCollapsed} />
+            <Session4Chat
+              isSidebarCollapsed={isSidebarCollapsed}
+              onComplete={() => handleNextSession(4)}
+            />
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto max-w-5xl mx-auto  px-4 pb-24 relative">

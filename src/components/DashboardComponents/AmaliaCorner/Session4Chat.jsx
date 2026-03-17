@@ -3,7 +3,7 @@ import ChatInputFooter from "./ChatInputFooter";
 import SessionFeedbackModal from "../AllModals/SessionFeedbackModal";
 import { pathwayService } from "../../../services/pathway";
 
-const Session4Chat = ({ isSidebarCollapsed = true }) => {
+const Session4Chat = ({ isSidebarCollapsed = true, onComplete }) => {
   const [messages, setMessages] = useState([]);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const messagesEndRef = useRef(null);
@@ -305,6 +305,7 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
       <SessionFeedbackModal
         isOpen={isFeedbackModalOpen}
         onClose={() => setIsFeedbackModalOpen(false)}
+        onContinue={onComplete}
       />
     </div>
   );

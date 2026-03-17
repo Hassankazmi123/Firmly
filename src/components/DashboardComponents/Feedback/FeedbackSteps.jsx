@@ -63,6 +63,16 @@ const FeedbackSteps = () => {
   };
 
   const handleGoToDashboard = () => {
+    // If completed from Session 4 specifically, set session 4 flag to complete
+    const savedSessions = localStorage.getItem("amalia_completed_sessions");
+    let completedSessions = savedSessions ? JSON.parse(savedSessions) : [];
+    if (!completedSessions.includes(4)) {
+      completedSessions.push(4);
+      localStorage.setItem("amalia_completed_sessions", JSON.stringify(completedSessions));
+    }
+    
+    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+    sessionStorage.setItem("fromStartSession", "true");
     navigate("/dashboard");
   };
 

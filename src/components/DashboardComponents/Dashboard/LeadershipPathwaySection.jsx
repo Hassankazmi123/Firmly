@@ -57,6 +57,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   const session1Done = completedSessions.includes(1);
   const session2Done = completedSessions.includes(2);
   const session3Done = completedSessions.includes(3);
+  const session4Done = completedSessions.includes(4);
 
   const handleGeneratePathway = () => {
     setIsModalOpen(true);
@@ -117,8 +118,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Integration",
       description:
         "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
-      status: session3Done ? "active" : "locked",
-      buttonText: "Start element",
+      status: session4Done ? "completed" : session3Done ? "active" : "locked",
+      buttonText: session4Done ? "View" : "Start element",
     },
   ];
 
@@ -146,13 +147,15 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
               <div className="flex items-center justify-between relative ">
                 <div className="absolute top-1/2 left-0 right-0 h-2 lg:h-4 rounded-full bg-[#E5E5E5] -translate-y-1/2 z-0"></div>
                 <div
-                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${session3Done
+                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${session4Done
                     ? "w-full"
-                    : session2Done
+                    : session3Done
                       ? "w-3/4"
-                      : session1Done
+                      : session2Done
                         ? "w-2/4"
-                        : "w-1/4"
+                        : session1Done
+                          ? "w-1/4"
+                          : "w-[12.5%]"
                     }`}
                 ></div>
                 {pathwaySteps.map((step, index) => (
@@ -249,6 +252,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
                           setIsSession2ModalOpen(true);
                         } else if (step.id === 3) {
                           setIsSession3ModalOpen(true);
+                        } else if (step.id === 4) {
+                          setIsSession4ModalOpen(true);
                         }
                       }}
                       className=" px-4 py-2 bg-[#F5F5F5] text-[#3D3D3D] rounded-xl font-inter-medium text-xs sm:text-sm md:text-base transition-colors hover:bg-[#E5E5E5]"
