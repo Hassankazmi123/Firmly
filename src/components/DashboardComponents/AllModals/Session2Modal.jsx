@@ -103,6 +103,7 @@ const Session2Modal = ({ isOpen, onClose, sessionData }) => {
                 onClick={() => {
                   sessionStorage.setItem("showSession2", "true");
                   sessionStorage.setItem("selectedConversation", "session2");
+                  sessionStorage.setItem("startedFromDashboard", "true");
                   onClose();
                   navigate("/amalia-corner");
                 }}

@@ -68,6 +68,10 @@ const AmaliaCornerLayout = () => {
 
   useEffect(() => {
     localStorage.setItem("amalia_completed_sessions", JSON.stringify(completedSessions));
+    // Sync session visibility with completed sessions
+    if (completedSessions.includes(1)) setShowSession2(true);
+    if (completedSessions.includes(2)) setShowSession3(true);
+    if (completedSessions.includes(3)) setShowSession4(true);
   }, [completedSessions]);
   useEffect(() => {
     const handleResize = () => {
@@ -356,11 +360,34 @@ const AmaliaCornerLayout = () => {
       return next;
     });
 
-    // After every session, go back to dashboard so the user can start the next session from there
+    // After every session, decide where to go based on entry point
+    const startedFromDashboard = sessionStorage.getItem("startedFromDashboard") === "true";
+    
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
     sessionStorage.setItem("fromStartSession", "true");
+    sessionStorage.setItem("fromNextSession", "true");
     sessionStorage.setItem("completedSessionNum", String(sessionNum));
-    navigate("/dashboard");
+
+    if (startedFromDashboard) {
+      sessionStorage.removeItem("startedFromDashboard");
+      navigate("/dashboard");
+    } else {
+      // Stay in Amalia Corner but return to pathway view
+      setSelectedConversation(null);
+      sessionStorage.removeItem("selectedConversation");
+    }
+
+    // Unlock next sessions based on completion status
+    if (sessionNum === 1) {
+      setShowSession2(true);
+      sessionStorage.setItem("showSession2", "true");
+    } else if (sessionNum === 2) {
+      setShowSession3(true);
+      sessionStorage.setItem("showSession3", "true");
+    } else if (sessionNum === 3) {
+      setShowSession4(true);
+      sessionStorage.setItem("showSession4", "true");
+    }
   }, [navigate]);
 
   const initialMessage = (
@@ -408,6 +435,8 @@ const AmaliaCornerLayout = () => {
 
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
     sessionStorage.setItem("fromStartSession", "true");
+    sessionStorage.setItem("showSession1", "true");
+    
     setTimeout(() => {
       navigate("/dashboard");
     }, 1200);
@@ -516,69 +545,9 @@ const AmaliaCornerLayout = () => {
   };
 
   const handleStartSession = () => {
-    // Start pathway and show feedback in chat
-    const startPathwayAndShowFeedback = async () => {
-      try {
-        const response = await pathwayService.startPathway();
-        // Handle both new pathway (200) and existing pathway (409)
-        if (response && response.domain) {
-          sessionStorage.setItem("currentPathwayDomain", response.domain);
-          setMessages((prev) => {
-            const updated = [
-              ...prev,
-              {
-                id: Date.now(),
-                type: "amalia",
-                content:
-                  `Pathway started! Your growth area is: ${response.domain.toUpperCase()}. Let's begin your personalized sessions.`,
-              },
-            ];
-            if (userId) {
-              localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
-            }
-            return updated;
-          });
-        } else if (response && response.statusCode === 409) {
-          setMessages((prev) => {
-            const updated = [
-              ...prev,
-              {
-                id: Date.now(),
-                type: "amalia",
-                content:
-                  "You already have an active pathway. Continuing with your existing sessions.",
-              },
-            ];
-            if (userId) {
-              localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
-            }
-            return updated;
-          });
-        }
-      } catch (e) {
-        setMessages((prev) => {
-          const updated = [
-            ...prev,
-            {
-              id: Date.now(),
-              type: "amalia",
-              content: "Failed to start pathway. Please try again later.",
-            },
-          ];
-          if (userId) {
-            localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
-          }
-          return updated;
-        });
-      }
-      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-      sessionStorage.setItem("fromStartSession", "true");
-      // Optionally, navigate to dashboard after a short delay
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1200);
-    };
-    startPathwayAndShowFeedback();
+    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+    sessionStorage.setItem("fromStartSession", "true");
+    navigate("/dashboard");
   };
 
   const domain = getDomain();
