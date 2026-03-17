@@ -3,6 +3,7 @@ import SettingsSidebar from "./SettingsSidebar";
 import SettingsHeader from "./SettingsHeader";
 import PersonalInformationSection from "./PersonalInformationSection";
 import ChangePasswordSection from "./ChangePasswordSection";
+import { changePassword } from "../../../services/api";
 // API Configuration
 const API_BASE_URL =
   process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
@@ -27,6 +28,10 @@ export default function SettingsScreen() {
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showSavedModal, setShowSavedModal] = useState(false);
+  const [modalContent, setModalContent] = useState({
+    title: "Changes Saved Successfully",
+    message: "Your profile has been updated successfully.",
+  });
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -155,6 +160,10 @@ export default function SettingsScreen() {
       });
 
       if (response.ok) {
+        setModalContent({
+          title: "Changes Saved Successfully",
+          message: "Your profile has been updated successfully.",
+        });
         setShowSavedModal(true);
       } else {
         const data = await response.json();
@@ -178,8 +187,49 @@ export default function SettingsScreen() {
       alert("An error occurred while saving: " + error.message);
     }
   };
-  const handleChangePassword = () => {
-    console.log("Changing password:", passwordInfo);
+  const handleChangePassword = async () => {
+    // Basic validation
+    if (
+      !passwordInfo.currentPassword ||
+      !passwordInfo.newPassword ||
+      !passwordInfo.confirmPassword
+    ) {
+      alert("Please fill in all password fields.");
+      return;
+    }
+
+    if (passwordInfo.newPassword !== passwordInfo.confirmPassword) {
+      alert("New password and confirm password do not match.");
+      return;
+    }
+
+    if (passwordInfo.newPassword.length < 8) {
+      alert("New password must be at least 8 characters long.");
+      return;
+    }
+
+    try {
+      await changePassword({
+        old_password: passwordInfo.currentPassword,
+        new_password: passwordInfo.newPassword,
+        confirm_password: passwordInfo.confirmPassword,
+      });
+
+      // Reset password form
+      setPasswordInfo({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setModalContent({
+        title: "Password Changed Successfully",
+        message: "Your password has been updated successfully.",
+      });
+      setShowSavedModal(true);
+    } catch (error) {
+      console.error("Error changing password:", error);
+      alert(error.message || "Failed to change password. Please check your current password.");
+    }
   };
 
   if (isLoading) {
@@ -226,10 +276,10 @@ export default function SettingsScreen() {
               />
             </div>
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4 font-cormorant px-2">
-              Changes Saved Successfully
+              {modalContent.title}
             </h2>
             <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-inter leading-relaxed px-2">
-              Your profile has been updated successfully.
+              {modalContent.message}
             </p>
             <button
               onClick={() => setShowSavedModal(false)}

@@ -135,3 +135,9 @@ export const authenticatedFetch = async (url, options = {}) => {
 export const getUserProfile = async () => {
     return await authenticatedFetch(`${API_AUTH_URL}/profile/`);
 };
+export const changePassword = async (passwordData) => {
+    return await authenticatedFetch(`${API_AUTH_URL}/change-password/`, {
+        method: "POST",
+        body: JSON.stringify(passwordData)
+    });
+};
