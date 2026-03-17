@@ -71,6 +71,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
         data = await pathwayService.startEmpathySession1();
       }
 
+      // First try to use the message directly from the start response
       if (data) {
         const content = data.message || data.text || data.response;
         if (content) {
@@ -79,7 +80,34 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
             type: 'amalia',
             content: content
           }]);
+          return; // Message set successfully, no need to fetch history
         }
+      }
+
+      // Fallback: fetch history to get the initial message
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession1();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession1();
+      } else if (domain === "eng") {
+        historyData = await pathwayService.getEngagementHistorySession1();
+      } else if (domain === "self") {
+        historyData = await pathwayService.getSelfAwarenessHistorySession1();
+      } else if (domain === "belong") {
+        historyData = await pathwayService.getBelongingHistorySession1();
+      } else {
+        historyData = await pathwayService.getEmpathyHistory();
+      }
+      const historyMessages = Array.isArray(historyData)
+        ? historyData
+        : historyData?.messages || [];
+      if (historyMessages.length > 0) {
+        setMessages(historyMessages.map((msg, idx) => ({
+          id: msg.id || idx,
+          type: msg.sender && msg.sender.toLowerCase().trim() === "user" ? "user" : "amalia",
+          content: msg.text || msg.content,
+        })));
       }
     } catch (err) {
       console.error(`Error starting session 1 (${domain}):`, err);

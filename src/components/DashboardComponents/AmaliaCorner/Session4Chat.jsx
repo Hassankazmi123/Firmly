@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import ChatInputFooter from "./ChatInputFooter";
 import SessionFeedbackModal from "../AllModals/SessionFeedbackModal";
 import { pathwayService } from "../../../services/pathway";
@@ -13,11 +13,26 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    initializeSession();
+  const getDomain = useCallback(() => {
+    const rawDomain = sessionStorage.getItem("currentPathwayDomain");
+    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined")
+      return "emp";
+    const d = rawDomain.toLowerCase();
+    if (
+      d.includes("resilience") ||
+      d.includes("resilien") ||
+      d.includes(" res")
+    )
+      return "res";
+    if (d.includes("goal")) return "goal";
+    if (d.includes("engagement") || d.includes("engage")) return "eng";
+    if (d.includes("self")) return "self";
+    if (d.includes("belonging") || d.includes("belong")) return "belong";
+    if (d.includes("empathy") || d.includes("emp")) return "emp";
+    return "emp";
   }, []);
 
-  const processHistoryData = (historyData) => {
+  const processHistoryData = useCallback((historyData) => {
     let historyMessages = [];
     if (Array.isArray(historyData)) {
       historyMessages = historyData;
@@ -36,28 +51,72 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
       }));
     }
     return [];
-  };
+  }, []);
 
-  const getDomain = () => {
-    const rawDomain = sessionStorage.getItem("currentPathwayDomain");
-    if (!rawDomain || rawDomain === "null" || rawDomain === "undefined")
-      return "emp";
-    const d = rawDomain.toLowerCase();
-    if (
-      d.includes("resilience") ||
-      d.includes("resilien") ||
-      d.includes(" res")
-    )
-      return "res";
-    if (d.includes("goal")) return "goal";
-    if (d.includes("engagement") || d.includes("engage")) return "eng";
-    if (d.includes("self")) return "self";
-    if (d.includes("belonging") || d.includes("belong")) return "belong";
-    if (d.includes("empathy") || d.includes("emp")) return "emp";
-    return "emp";
-  };
+  const startSession = useCallback(async () => {
+    const domain = getDomain();
+    try {
+      let data;
+      if (domain === "goal") {
+        data = await pathwayService.startGoalSession4();
+      } else if (domain === "res") {
+        data = await pathwayService.startResilienceSession4();
+      } else if (domain === "eng") {
+        data = await pathwayService.startEngagementSession4();
+      } else if (domain === "self") {
+        data = await pathwayService.startSelfAwarenessSession4();
+      } else if (domain === "belong") {
+        data = await pathwayService.startBelongingSession4();
+      } else {
+        data = await pathwayService.startEmpathySession4();
+      }
 
-  const initializeSession = async () => {
+      // First try to use the message directly from the start response
+      if (data) {
+        const content = data.message || data.text || data.response;
+        if (content) {
+          setMessages([
+            {
+              id: Date.now(),
+              type: "amalia",
+              content: content,
+            },
+          ]);
+          return; // Message set successfully, no need to fetch history
+        }
+      }
+
+      // Fallback: fetch history to get the initial message
+      let historyData;
+      if (domain === "goal") {
+        historyData = await pathwayService.getGoalHistorySession4();
+      } else if (domain === "res") {
+        historyData = await pathwayService.getResilienceHistorySession4();
+      } else if (domain === "eng") {
+        historyData = await pathwayService.getEngagementHistorySession4();
+      } else if (domain === "self") {
+        historyData = await pathwayService.getSelfAwarenessHistorySession4();
+      } else if (domain === "belong") {
+        historyData = await pathwayService.getBelongingHistorySession4();
+      } else {
+        historyData = await pathwayService.getEmpathyHistorySession4();
+      }
+      const historyMessages = Array.isArray(historyData)
+        ? historyData
+        : historyData?.messages || [];
+      if (historyMessages.length > 0) {
+        setMessages(historyMessages.map((msg, idx) => ({
+          id: msg.id || idx,
+          type: msg.sender && msg.sender.toLowerCase().trim() === "user" ? "user" : "amalia",
+          content: msg.text || msg.content,
+        })));
+      }
+    } catch (err) {
+      console.error(`Error starting session 4 (${getDomain()}):`, err);
+    }
+  }, [getDomain]);
+
+  const initializeSession = useCallback(async () => {
     setLoading(true);
     const domain = getDomain();
     try {
@@ -89,42 +148,11 @@ const Session4Chat = ({ isSidebarCollapsed = true }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getDomain, processHistoryData, startSession]);
 
-  const startSession = async () => {
-    const domain = getDomain();
-    try {
-      let data;
-      if (domain === "goal") {
-        data = await pathwayService.startGoalSession4();
-      } else if (domain === "res") {
-        data = await pathwayService.startResilienceSession4();
-      } else if (domain === "eng") {
-        data = await pathwayService.startEngagementSession4();
-      } else if (domain === "self") {
-        data = await pathwayService.startSelfAwarenessSession4();
-      } else if (domain === "belong") {
-        data = await pathwayService.startBelongingSession4();
-      } else {
-        data = await pathwayService.startEmpathySession4();
-      }
-
-      if (data) {
-        const content = data.message || data.text || data.response;
-        if (content) {
-          setMessages([
-            {
-              id: Date.now(),
-              type: "amalia",
-              content: content,
-            },
-          ]);
-        }
-      }
-    } catch (err) {
-      console.error(`Error starting session 4 (${domain}):`, err);
-    }
-  };
+  useEffect(() => {
+    initializeSession();
+  }, [initializeSession]);
 
   const handleSendMessage = async (text) => {
     const domain = getDomain();
