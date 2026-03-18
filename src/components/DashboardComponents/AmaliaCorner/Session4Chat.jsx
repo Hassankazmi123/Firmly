@@ -34,7 +34,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
     return "emp";
   }, []);
 
-  const processHistoryData = useCallback((historyData) => {
+  const processHistoryData = useCallback((historyData, forceHistory = true) => {
     let historyMessages = [];
     if (Array.isArray(historyData)) {
       historyMessages = historyData;
@@ -50,6 +50,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
             ? "user"
             : "amalia",
         content: msg.text || msg.content,
+        isHistory: forceHistory || (idx < historyMessages.length - 1)
       }));
     }
     return [];
@@ -111,6 +112,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
           id: msg.id || idx,
           type: (msg.role === "user" || (msg.sender && ["user", "human"].includes(msg.sender.toLowerCase().trim()))) ? "user" : "amalia",
           content: msg.text || msg.content,
+          isHistory: true
         })));
       }
     } catch (err) {
@@ -195,7 +197,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
         historyData = await pathwayService.getEmpathyHistorySession4();
       }
 
-      const formatted = processHistoryData(historyData);
+      const formatted = processHistoryData(historyData, false);
 
       if (formatted.length > 0) {
         setMessages(formatted);
@@ -244,7 +246,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
             key={message.id} 
             message={message} 
             userInitials={userInitials} 
-            disableAnimation={true}
+            disableAnimation={message.isHistory}
           />
         ))}
 

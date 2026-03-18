@@ -34,7 +34,7 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const processHistoryData = useCallback((historyData) => {
+  const processHistoryData = useCallback((historyData, forceHistory = true) => {
     let historyMessages = [];
     if (Array.isArray(historyData)) {
       historyMessages = historyData;
@@ -43,19 +43,17 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
     }
 
     if (historyMessages.length > 0) {
-      return historyMessages
-        .map((msg, idx) => ({
-          id: msg.id || idx,
-          type:
-            (msg.role === "user" || (msg.sender && ["user", "human"].includes(msg.sender.toLowerCase().trim())))
-              ? "user"
-              : "amalia",
-          content: msg.text || msg.content,
-        }))
-        .filter((msg) => {
-          const c = (msg.content || "").trim().toLowerCase();
-          return c !== "hello" && c !== "";
-        });
+      const filtered = historyMessages.filter((msg) => {
+        const c = (msg.text || msg.content || "").trim().toLowerCase();
+        return c !== "hello" && c !== "";
+      });
+
+      return filtered.map((msg, idx) => ({
+        id: msg.id || idx,
+        type: (msg.role === "user" || (msg.sender && ["user", "human"].includes(msg.sender.toLowerCase().trim()))) ? "user" : "amalia",
+        content: msg.text || msg.content,
+        isHistory: forceHistory || (idx < filtered.length - 1)
+      }));
     }
     return [];
   }, []);
@@ -118,6 +116,7 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
           id: msg.id || idx,
           type: (msg.role === "user" || (msg.sender && ["user", "human"].includes(msg.sender.toLowerCase().trim()))) ? "user" : "amalia",
           content: msg.text || msg.content,
+          isHistory: true,
         })));
       }
     } catch (err) {
@@ -202,7 +201,7 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
         historyData = await pathwayService.getEmpathyHistorySession3();
       }
 
-      const formatted = processHistoryData(historyData);
+      const formatted = processHistoryData(historyData, false);
 
       if (formatted.length > 0) {
         setMessages(formatted);
@@ -260,7 +259,7 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
             key={message.id} 
             message={message} 
             userInitials={userInitials} 
-            disableAnimation={true}
+            disableAnimation={message.isHistory}
           />
         ))}
 

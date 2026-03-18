@@ -3,6 +3,7 @@ import SpaceChatContent from "./SpaceChatContent";
 import SafeSpaceChatHeader from "./SafeSpaceChatHeader";
 import SafeSpaceChatInput from "./SafeSpaceChatInput";
 import { chatService } from "../../../services/chat";
+import { getUserProfile } from "../../../services/api";
 
 const SafeSpaceChatLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -11,9 +12,12 @@ const SafeSpaceChatLayout = () => {
   });
   const [messages, setMessages] = useState(() => {
     const saved = sessionStorage.getItem("safeSpaceChatMessages");
-    return saved ? JSON.parse(saved) : [];
+    const parsed = saved ? JSON.parse(saved) : [];
+    // Ensure all saved messages are marked as history
+    return parsed.map(m => ({ ...m, isHistory: true }));
   });
   const [isTyping, setIsTyping] = useState(false);
+  const [userInitials, setUserInitials] = useState("");
   const [currentThread, setCurrentThread] = useState(() => {
     const saved = sessionStorage.getItem("safeSpaceChatCurrentThread");
     return saved ? JSON.parse(saved) : null;
@@ -43,6 +47,23 @@ const SafeSpaceChatLayout = () => {
     };
     handleResize();
     window.addEventListener("resize", handleResize);
+
+    const fetchUser = async () => {
+      try {
+        const data = await getUserProfile();
+        if (data) {
+          const first = data.first_name || "";
+          const last = data.last_name || "";
+          if (first && last) {
+            setUserInitials((first.charAt(0) + last.charAt(0)).toUpperCase());
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+      }
+    };
+    fetchUser();
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -65,7 +86,7 @@ const SafeSpaceChatLayout = () => {
   }, [isSidebarCollapsed]);
 
   const handleSendMessage = async (message) => {
-    setMessages((prev) => [...prev, { type: "user", text: message }]);
+    setMessages((prev) => [...prev, { type: "user", text: message, isHistory: true }]);
     setIsTyping(true);
 
     const isIncognito = process.env.REACT_APP_INCOGNITO_MODE === 'true';
@@ -148,6 +169,7 @@ const SafeSpaceChatLayout = () => {
             {
               type: "ai",
               text: aiText,
+              isHistory: false,
             },
           ];
         });
@@ -171,6 +193,7 @@ const SafeSpaceChatLayout = () => {
           {
             type: "ai",
             text: "Welcome to our final session! Before we dive in, I want to thank you for your engagement throughout this program. Developing empathy is an ongoing journey, and the awareness and commitment you've shown are significant steps. How are you feeling about our work together so far?",
+            isHistory: false,
           },
         ]);
       }, 2000);
@@ -190,7 +213,11 @@ const SafeSpaceChatLayout = () => {
           hasMessages={messages.length > 0}
         />
         <div className="flex-1 overflow-hidden">
-          <SpaceChatContent messages={messages} isTyping={isTyping} />
+          <SpaceChatContent 
+            messages={messages} 
+            isTyping={isTyping} 
+            userInitials={userInitials}
+          />
         </div>
         <div className="flex-shrink-0">
           <SafeSpaceChatInput

@@ -546,10 +546,14 @@ const AmaliaCornerLayout = () => {
                 id: Date.now(),
                 type: "amalia",
                 content: botContent,
+                isHistory: false,
               },
             ];
             if (userId) {
-              localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+              localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated.map(m => {
+                const { isHistory, ...rest } = m;
+                return rest;
+              })));
             }
             return updated;
           });
@@ -566,10 +570,14 @@ const AmaliaCornerLayout = () => {
                   id: lastBot.id || Date.now(),
                   type: "amalia",
                   content: lastBot.content || lastBot.text || lastBot.message,
+                  isHistory: false,
                 },
               ];
               if (userId) {
-                localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+                localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated.map(m => {
+                  const { isHistory, ...rest } = m;
+                  return rest;
+                })));
               }
               return updated;
             });

@@ -4,6 +4,7 @@ import NormalChatHeader from "./NormalChatHeader";
 import NormalChatContent from "./NormalChatContent";
 import NormalChatInput from "./NormalChatInput";
 import { chatService } from "../../../services/chat";
+import { getUserProfile } from "../../../services/api";
 
 const NormalChatLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -12,6 +13,7 @@ const NormalChatLayout = () => {
   });
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = React.useRef(null);
   const [threads, setThreads] = useState([]);
   const [currentThread, setCurrentThread] = useState(() => {
     const saved = sessionStorage.getItem("normalChatCurrentThread");
@@ -19,6 +21,7 @@ const NormalChatLayout = () => {
   });
   const [isLoadingThreads, setIsLoadingThreads] = useState(true);
   const [error, setError] = useState(null);
+  const [userInitials, setUserInitials] = useState("");
 
   // Save sidebar state
   useEffect(() => {
@@ -33,6 +36,21 @@ const NormalChatLayout = () => {
   // Fetch threads on mount
   useEffect(() => {
     fetchThreads();
+    const fetchUser = async () => {
+      try {
+        const data = await getUserProfile();
+        if (data) {
+          const first = data.first_name || "";
+          const last = data.last_name || "";
+          if (first && last) {
+            setUserInitials((first.charAt(0) + last.charAt(0)).toUpperCase());
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+      }
+    };
+    fetchUser();
   }, []);
 
   // Fetch chat history when thread changes
@@ -102,6 +120,8 @@ const NormalChatLayout = () => {
       const transformedMessages = historyArray.map(msg => ({
         type: msg.role === "user" ? "user" : "ai",
         text: msg.content || msg.text || msg.message || "",
+        isHistory: true,
+        id: msg.id || Math.random().toString(36).substr(2, 9)
       }));
 
       setMessages(transformedMessages);
@@ -179,11 +199,25 @@ const NormalChatLayout = () => {
 
       // Send message to API
       const response = await chatService.sendMessage(threadToUse.id, messageText);
-      console.log("SendMessage Response:", response); // Debugging log
+      console.log("SendMessage Response:", response);
 
-      // Instead of guessing the field, immediately fetch the authoritative history
-      // This ensures we show exactly what is saved on the server, fixing the mismatch
-      await fetchChatHistory(threadToUse.id);
+      // Get the response content - try all possible fields
+      const botResponseText = response.response || response.message || response.content || 
+                             response.reply || response.text ||
+                             (response.data && (response.data.content || response.data.response || response.data.message || response.data.text)) || "";
+
+      if (botResponseText) {
+        // Mark the NEW message as NOT history so it animates
+        setMessages(prev => [...prev, { 
+          type: "ai", 
+          text: botResponseText, 
+          isHistory: false,
+          id: Date.now() 
+        }]);
+      } else {
+        // Fallback: fetch history if we couldn't parse the response
+        await fetchChatHistory(threadToUse.id);
+      }
 
       // Manually update the thread's timestamp locally and move to top
       // This fixes the issue where the backend doesn't update 'updated_at' automatically
@@ -332,6 +366,7 @@ const NormalChatLayout = () => {
             messages={messages}
             isTyping={isTyping}
             error={error}
+            userInitials={userInitials}
           />
         </div>
         <div className="flex-shrink-0">

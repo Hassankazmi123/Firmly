@@ -15,7 +15,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const processHistoryData = React.useCallback((historyData) => {
+  const processHistoryData = React.useCallback((historyData, forceHistory = true) => {
     let historyMessages = [];
     if (Array.isArray(historyData)) {
       historyMessages = historyData;
@@ -31,6 +31,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
             ? "user"
             : "amalia",
         content: msg.text || msg.content,
+        isHistory: forceHistory || (idx < historyMessages.length - 1)
       }));
     }
     return [];
@@ -109,6 +110,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
           id: msg.id || idx,
           type: (msg.role === "user" || (msg.sender && ["user", "human"].includes(msg.sender.toLowerCase().trim()))) ? "user" : "amalia",
           content: msg.text || msg.content,
+          isHistory: true
         })));
       }
     } catch (err) {
@@ -194,7 +196,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
         historyData = await pathwayService.getEmpathyHistory();
       }
 
-      const formatted = processHistoryData(historyData);
+      const formatted = processHistoryData(historyData, false);
 
       if (formatted.length > 0) {
         setMessages(formatted);
@@ -254,7 +256,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
             key={message.id} 
             message={message} 
             userInitials={userInitials} 
-            disableAnimation={true}
+            disableAnimation={message.isHistory}
           />
         ))}
 
