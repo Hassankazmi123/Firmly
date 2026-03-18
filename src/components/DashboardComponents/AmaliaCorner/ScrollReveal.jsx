@@ -9,7 +9,10 @@ const ScrollReveal = ({ children, direction = "up", delay = 0, className = "" })
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.unobserve(domRef.current);
+          // Safely unobserve the target once revealed
+          if (entry.target instanceof Element) {
+            observer.unobserve(entry.target);
+          }
         }
       });
     }, {
@@ -17,14 +20,15 @@ const ScrollReveal = ({ children, direction = "up", delay = 0, className = "" })
     });
 
     const currentRef = domRef.current;
-    if (currentRef) {
+    if (currentRef && currentRef instanceof Element) {
       observer.observe(currentRef);
     }
 
     return () => {
-      if (currentRef) {
+      if (currentRef && currentRef instanceof Element) {
         observer.unobserve(currentRef);
       }
+      observer.disconnect();
     };
   }, []);
 

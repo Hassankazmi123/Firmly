@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import ChatHeader from "./ChatHeader";
 import ChatMessage from "./ChatMessage";
@@ -15,10 +15,12 @@ import { Clock, Lock } from "lucide-react";
 import { pathwayService } from "../../../services/pathway";
 import { assessmentService } from "../../../services/assessment";
 import { getUserProfile } from "../../../services/api";
+import { chatService } from "../../../services/chat";
 import "./AmaliaCorner.css";
 
 const AmaliaCornerLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [messages, setMessages] = useState([]);
   const [userId, setUserId] = useState("");
@@ -151,7 +153,16 @@ const AmaliaCornerLayout = () => {
     if (s3) setShowSession3(true);
     if (s4) setShowSession4(true);
 
-    if (savedConversation) {
+    if (location.state?.showResults) {
+      setSelectedConversation("diagnostic");
+      // Small timeout to ensure the DOM is rendered before scrolling
+      setTimeout(() => {
+        const resultsEl = document.getElementById("diagnostic-results");
+        if (resultsEl) {
+          resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 500);
+    } else if (savedConversation) {
       setSelectedConversation(savedConversation);
     } else if (s4) {
       setSelectedConversation("session4");
@@ -164,7 +175,7 @@ const AmaliaCornerLayout = () => {
     } else {
       setSelectedConversation("diagnostic");
     }
-  }, []);
+  }, [location.state]);
 
   useEffect(() => {
     const detectDomain = async () => {
@@ -469,11 +480,14 @@ const AmaliaCornerLayout = () => {
     navigate("/dashboard", { state: { fromAmaliaCorner: true } });
   };
 
+  const [diagnosticThreadId, setDiagnosticThreadId] = useState(() => {
+    return localStorage.getItem("amalia_diagnostic_thread_id");
+  });
+
   const handleSendMessage = async (text) => {
     const userMsg = { id: Date.now(), type: "user", content: text };
     setMessages((prev) => {
       const updated = [...prev, userMsg];
-      // Save immediately for responsiveness
       if (userId) {
         localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
       }
@@ -483,87 +497,58 @@ const AmaliaCornerLayout = () => {
     setIsTyping(true);
 
     try {
-      let domain = getDomain();
-      // Keyword-based domain switching fallback
-      const lowerText = text.toLowerCase();
-      if (
-        lowerText.includes("resilience") ||
-        lowerText.includes("resilien") ||
-        lowerText.includes(" res")
-      ) {
-        domain = "res";
-        sessionStorage.setItem("currentPathwayDomain", "res");
-      } else if (lowerText.includes("goal")) {
-        domain = "goal";
-        sessionStorage.setItem("currentPathwayDomain", "goal");
-      } else if (
-        lowerText.includes("engagement") ||
-        lowerText.includes("engage")
-      ) {
-        domain = "eng";
-        sessionStorage.setItem("currentPathwayDomain", "eng");
-      } else if (
-        lowerText.includes("self") &&
-        lowerText.includes("awareness")
-      ) {
-        domain = "self";
-        sessionStorage.setItem("currentPathwayDomain", "self");
-      } else if (
-        lowerText.includes("belonging") ||
-        lowerText.includes("belong")
-      ) {
-        domain = "belong";
-        sessionStorage.setItem("currentPathwayDomain", "belong");
+      let tId = diagnosticThreadId;
+      if (!tId) {
+        const response = await chatService.createNewThread(false, "Diagnostic Debrief");
+        tId = response.id || response.thread_id;
+        if (tId) {
+          setDiagnosticThreadId(tId);
+          localStorage.setItem("amalia_diagnostic_thread_id", String(tId));
+        }
       }
 
-      let historyData;
-      if (domain === "goal") {
-        await pathwayService.sendGoalMessageSession1(text, "CORE");
-        historyData = await pathwayService.getGoalHistorySession1();
-      } else if (domain === "res") {
-        await pathwayService.sendResilienceMessageSession1(text, "CORE");
-        historyData = await pathwayService.getResilienceHistorySession1();
-      } else if (domain === "eng") {
-        await pathwayService.sendEngagementMessageSession1(text, "CORE");
-        historyData = await pathwayService.getEngagementHistorySession1();
-      } else if (domain === "self") {
-        await pathwayService.sendSelfAwarenessMessageSession1(text, "CORE");
-        historyData = await pathwayService.getSelfAwarenessHistorySession1();
-      } else if (domain === "belong") {
-        await pathwayService.sendBelongingMessageSession1(text, "CORE");
-        historyData = await pathwayService.getBelongingHistorySession1();
-      } else {
-        await pathwayService.sendEmpathyMessage(text, "CORE");
-        historyData = await pathwayService.getEmpathyHistory();
-      }
-
-      // Only append the latest bot response
-      const historyMessages = Array.isArray(historyData)
-        ? historyData
-        : historyData?.messages || [];
-      const latestBotMsg = historyMessages
-        .filter(
-          (msg) => !msg.sender || msg.sender.toLowerCase().trim() !== "user",
-        )
-        .slice(-1)[0];
-      if (latestBotMsg) {
-        setMessages((prev) => {
-          const updated = [
-            ...prev,
-            {
-              id: latestBotMsg.id || Date.now(),
-              type: "amalia",
-              content: latestBotMsg.text || latestBotMsg.content,
-            },
-          ];
-          if (userId) {
-            localStorage.setItem(
-              `amaliaChat_${userId}`,
-              JSON.stringify(updated),
-            );
+      if (tId) {
+        const response = await chatService.sendMessage(tId, text);
+        // Depending on API response, get the AI message
+        const botContent = response.response || response.message || response.content || (response.data && response.data.content);
+        
+        if (botContent) {
+          setMessages((prev) => {
+            const updated = [
+              ...prev,
+              {
+                id: Date.now(),
+                type: "amalia",
+                content: botContent,
+              },
+            ];
+            if (userId) {
+              localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+            }
+            return updated;
+          });
+        } else {
+          // Fallback: fetch history if sendMessage doesn't return content
+          const historyData = await chatService.getChatHistory(tId);
+          const historyArr = historyData.history || historyData.messages || historyData.data || [];
+          const lastBot = historyArr.filter(m => m.role === "assistant" || m.role === "ai" || (m.sender && m.sender.toLowerCase() !== "user")).slice(-1)[0];
+          if (lastBot) {
+             setMessages((prev) => {
+              const updated = [
+                ...prev,
+                {
+                  id: lastBot.id || Date.now(),
+                  type: "amalia",
+                  content: lastBot.content || lastBot.text || lastBot.message,
+                },
+              ];
+              if (userId) {
+                localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+              }
+              return updated;
+            });
           }
-          return updated;
-        });
+        }
       }
     } catch (error) {
       console.error("Failed to send message in diagnostic view:", error);
@@ -742,7 +727,9 @@ const AmaliaCornerLayout = () => {
               </div>
             )}
 
-            <ProgressBarsSection />
+            <div id="diagnostic-results">
+              <ProgressBarsSection />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <ScrollReveal direction="left">
                 <SummaryCard

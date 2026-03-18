@@ -204,7 +204,7 @@ const Hero = () => {
                     type="button"
                     onClick={() => {
                       if (isFromAmalia) {
-                        navigate("/amalia-corner");
+                        navigate("/amalia-corner", { state: { showResults: true } });
                         return;
                       }
                       setIsDebriefModalOpen(true);
