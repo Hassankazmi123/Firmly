@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ProgressBar from "./ProgressBar";
 import { assessmentService } from "../../../services/assessment";
+import ScrollReveal from "./ScrollReveal";
 
 const domainConfig = {
   GOAL: { label: "Goal Orientation", color: "green" },
@@ -106,17 +107,24 @@ const ProgressBarsSection = () => {
     );
   }
 
+  const directions = ["up", "right", "left", "down", "up", "right"];
+
   return (
     <div className="mb-6 md:mb-8">
       {progressData.map((item, index) => (
-        <ProgressBar
-          key={index}
-          label={item.label}
-          yourScore={item.score}
-          peersScore={item.peersScore}
-          color={item.color}
-          initialVectorPosition={item.vectorPosition}
-        />
+        <ScrollReveal 
+          key={index} 
+          direction={directions[index % directions.length]} 
+          delay={index * 100}
+        >
+          <ProgressBar
+            label={item.label}
+            yourScore={item.score}
+            peersScore={item.peersScore}
+            color={item.color}
+            initialVectorPosition={item.vectorPosition}
+          />
+        </ScrollReveal>
       ))}
     </div>
   );

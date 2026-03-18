@@ -21,3 +21,21 @@
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Scroll Reveal Animations */
+.reveal {
+  opacity: 0;
+  transition: all 1s cubic-bezier(0.17, 0.55, 0.55, 1);
+  pointer-events: none; /* Prevent interaction while hidden */
+}
+
+.reveal.reveal-up { transform: translateY(50px); }
+.reveal.reveal-down { transform: translateY(-50px); }
+.reveal.reveal-left { transform: translateX(-50px); }
+.reveal.reveal-right { transform: translateX(50px); }
+
+.reveal.active {
+  opacity: 1;
+  transform: translate(0, 0);
+  pointer-events: auto;
+}

@@ -5,6 +5,7 @@ import ChatHeader from "./ChatHeader";
 import ChatMessage from "./ChatMessage";
 import ProgressBarsSection from "./ProgressBarsSection";
 import SummaryCard from "./SummaryCard";
+import ScrollReveal from "./ScrollReveal";
 import ChatInputFooter from "./ChatInputFooter";
 import Session1Chat from "./Session1Chat";
 import Session2Chat from "./Session2Chat";
@@ -735,18 +736,22 @@ const AmaliaCornerLayout = () => {
 
             <ProgressBarsSection />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <SummaryCard
-                title="Doing great"
-                items={glowItems}
-                bgColor="bg-[#378C78]"
-                iconImage="/assets/images/dashboard/doing.webp"
-              />
-              <SummaryCard
-                title="Growth areas"
-                items={growItems}
-                bgColor="bg-[#C56A55]"
-                iconImage="/assets/images/dashboard/growth.webp"
-              />
+              <ScrollReveal direction="left">
+                <SummaryCard
+                  title="Doing great"
+                  items={glowItems}
+                  bgColor="bg-[#378C78]"
+                  iconImage="/assets/images/dashboard/doing.webp"
+                />
+              </ScrollReveal>
+              <ScrollReveal direction="right">
+                <SummaryCard
+                  title="Growth areas"
+                  items={growItems}
+                  bgColor="bg-[#C56A55]"
+                  iconImage="/assets/images/dashboard/growth.webp"
+                />
+              </ScrollReveal>
             </div>
 
             {!showPathwayView ? (
