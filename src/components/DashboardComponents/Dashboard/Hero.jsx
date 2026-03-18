@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getUserProfile } from "../../../services/api";
 import { assessmentService } from "../../../services/assessment";
 import DiagnosticDebriefModal from "../AllModals/DiagnosticDebriefModal";
@@ -7,6 +7,7 @@ import RadarChart from "./RadarChart";
 
 const Hero = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isFromAmalia =
     location.state?.fromAmaliaCorner ||
     localStorage.getItem("hasStartedDebrief") === "true";
@@ -95,8 +96,9 @@ const Hero = () => {
 
     // Auto-open debrief modal after 30 seconds
     const timerId = setTimeout(() => {
+      const hasStartedDebrief = localStorage.getItem("hasStartedDebrief") === "true";
       const hasShownAuto = sessionStorage.getItem("debrief_auto_shown");
-      if (!hasShownAuto) {
+      if (!hasShownAuto && !hasStartedDebrief) {
         setIsDebriefModalOpen(true);
         sessionStorage.setItem("debrief_auto_shown", "true");
       }
@@ -201,6 +203,10 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      if (isFromAmalia) {
+                        navigate("/amalia-corner");
+                        return;
+                      }
                       setIsDebriefModalOpen(true);
                       sessionStorage.setItem("debrief_auto_shown", "true");
                       localStorage.setItem("hasStartedDebrief", "true");
