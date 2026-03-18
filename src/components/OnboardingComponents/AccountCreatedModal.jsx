@@ -16,7 +16,7 @@ const AccountCreatedModal = ({ isOpen, onClose }) => {
       <div className="absolute inset-0 bg-black/50"></div>
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full mx-auto p-6 sm:p-8 md:p-10 text-center">
+      <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-xl w-full mx-auto p-6 sm:p-8 md:p-10 text-center">
         {/* Icon */}
         <div className="flex justify-center mb-4 sm:mb-6">
           <img
