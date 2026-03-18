@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 const ProgressBar = ({
   label,
   yourScore,
@@ -15,143 +15,69 @@ const ProgressBar = ({
     lightBlue: "bg-cyan-400",
   };
   const barColor = colorClasses[color] || colorClasses.green;
-  const isHigherThanPeers = yourScore > peersScore;
-  const [vectorPosition, setVectorPosition] = useState(() =>
-    initialVectorPosition !== undefined
-      ? Math.min(initialVectorPosition, 100)
-      : Math.min(peersScore + 2, 100)
-  );
-  const [isDragging, setIsDragging] = useState(false);
   const barRef = useRef(null);
-  const updateVectorPosition = useCallback((clientX) => {
-    if (!barRef.current) return;
-    const rect = barRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setVectorPosition(percentage);
-  }, []);
-  const handleMouseDown = useCallback(
-    (e) => {
-      e.preventDefault();
-      setIsDragging(true);
-      updateVectorPosition(e.clientX);
-    },
-    [updateVectorPosition]
-  );
-  const handleMouseMove = useCallback(
-    (e) => {
-      if (isDragging) {
-        updateVectorPosition(e.clientX);
-      }
-    },
-    [isDragging, updateVectorPosition]
-  );
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-  const handleTouchStart = useCallback(
-    (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      setIsDragging(true);
-      updateVectorPosition(touch.clientX);
-    },
-    [updateVectorPosition]
-  );
-  const handleTouchMove = useCallback(
-    (e) => {
-      e.preventDefault();
-      if (isDragging) {
-        const touch = e.touches[0];
-        updateVectorPosition(touch.clientX);
-      }
-    },
-    [isDragging, updateVectorPosition]
-  );
-  const handleTouchEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+
   useEffect(() => {
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-      });
-      document.addEventListener("touchend", handleTouchEnd);
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-        document.removeEventListener("touchmove", handleTouchMove);
-        document.removeEventListener("touchend", handleTouchEnd);
-      };
-    }
-  }, [
-    isDragging,
-    handleMouseMove,
-    handleMouseUp,
-    handleTouchMove,
-    handleTouchEnd,
-  ]);
+    // Listeners removed as drag is disabled
+  }, []);
+
   return (
     <div className="mb-4 md:mb-6">
-      <div className="flex items-center justify-between mb-2 gap-4">
-        <span className="text-sm md:text-base font-semibold text-[#3D3D3D] font-inter">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm md:text-base font-inter-semibold text-[#3D3D3D]">
           {label}
         </span>
-        <div className="flex items-center  gap-4">
-          {isHigherThanPeers ? (
-            <>
-              <span className="text-xs md:text-sm font-semibold text-[#3D3D3D]/60 font-inter">
-                Peers: {peersScore}
-              </span>
-              <span className="text-xs md:text-sm font-semibold text-[#6664D3] font-inter">
-                You: {yourScore}
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="text-xs md:text-sm font-semibold text-[#6664D3] font-inter">
-                You: {yourScore}
-              </span>
-              <span className="text-xs md:text-sm font-semibold text-[#3D3D3D]/60 font-inter">
-                Peers: {peersScore}
-              </span>
-            </>
-          )}
-        </div>
       </div>
       <div
         ref={barRef}
-        className="relative h-3.5 bg-gray-100 rounded-full overflow-visible"
+        className="relative h-3.5 bg-gray-100 rounded-full overflow-visible mt-3"
       >
         <div
-          className={`${barColor} h-full rounded-full`}
+          className={`${barColor} h-full rounded-full transition-all duration-1000 ease-out relative`}
           style={{
             width: `${yourScore}%`,
-            willChange: "auto",
+            willChange: "width",
             transform: "translateZ(0)",
           }}
-        />
-        <div
-          className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 z-20 cursor-grab active:cursor-grabbing touch-none select-none"
-          style={{
-            left: `${Math.min(vectorPosition, 100)}%`,
-            willChange: "transform",
-            transform: "translate(-50%, -50%) translateZ(0)",
-          }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
         >
-          <img
-            src="/assets/images/dashboard/vector.webp"
-            alt="Vector"
-            className="w-5 h-5 object-contain pointer-events-none"
-            draggable={false}
-          />
+          {/* You Score at the end of the bar */}
+          <div 
+             className="absolute -top-7 right-0 transform translate-x-1/2 flex flex-col items-center"
+             style={{ whiteSpace: 'nowrap' }}
+          >
+            <span className="text-xs md:text-sm font-inter-semibold text-[#6664D3]">
+              You: {yourScore}
+            </span>
+          </div>
+        </div>
+
+        {/* Peer Marker and Score */}
+        <div
+          className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 z-20 pointer-events-none"
+          style={{
+            left: `${peersScore}%`,
+            willChange: "left",
+            transition: "left 1s ease-out"
+          }}
+        >
+          <div className="flex flex-col items-center">
+            <span 
+              className="text-[10px] md:text-xs font-inter-medium text-[#3D3D3D]/60 mb-1"
+              style={{ whiteSpace: 'nowrap', position: 'absolute', bottom: '100%' }}
+            >
+              Peers: {peersScore}
+            </span>
+            <img
+              src="/assets/images/dashboard/vector.webp"
+              alt="Peer Marker"
+              className="w-5 h-5 object-contain"
+              draggable={false}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
 export default ProgressBar;

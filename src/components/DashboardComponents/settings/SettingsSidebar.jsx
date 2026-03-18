@@ -27,22 +27,6 @@ export default function SettingsSidebar() {
             Account settings
           </button>
         </div>
-        <div>
-          <h3 className="text-xs font-inter font-semibold text-[#3D3D3D]/40  mb-2 px-2">
-            Privacy
-          </h3>
-          <button
-            onClick={() => {
-            }}
-            className={`w-full text-left px-3 py-2 rounded-xl transition-colors ${
-              activeSection === "data-privacy"
-                ? "bg-gray-100 text-gray-900 font-medium"
-                : "text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            Data privacy
-          </button>
-        </div>
       </nav>
     </aside>
   );

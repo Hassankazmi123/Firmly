@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import ChatInputFooter from "./ChatInputFooter";
 import { useNavigate } from "react-router-dom";
 import { pathwayService } from "../../../services/pathway";
+import ChatMessage from "./ChatMessage";
 
-const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
+const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,7 +27,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
       return historyMessages.map((msg, idx) => ({
         id: msg.id || idx,
         type:
-          msg.sender && msg.sender.toLowerCase().trim() === "user"
+          (msg.role === "user" || (msg.sender && ["user", "human"].includes(msg.sender.toLowerCase().trim())))
             ? "user"
             : "amalia",
         content: msg.text || msg.content,
@@ -105,7 +107,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
       if (historyMessages.length > 0) {
         setMessages(historyMessages.map((msg, idx) => ({
           id: msg.id || idx,
-          type: msg.sender && msg.sender.toLowerCase().trim() === "user" ? "user" : "amalia",
+          type: (msg.role === "user" || (msg.sender && ["user", "human"].includes(msg.sender.toLowerCase().trim()))) ? "user" : "amalia",
           content: msg.text || msg.content,
         })));
       }
@@ -159,40 +161,9 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
+      setIsTyping(true);
       let domain = getDomain();
-
-      // Keyword-based domain switching fallback
-      const lowerText = text.toLowerCase();
-      if (
-        lowerText.includes("resilience") ||
-        lowerText.includes("resilien") ||
-        lowerText.includes(" res")
-      ) {
-        domain = "res";
-        sessionStorage.setItem("currentPathwayDomain", "res");
-      } else if (lowerText.includes("goal")) {
-        domain = "goal";
-        sessionStorage.setItem("currentPathwayDomain", "goal");
-      } else if (
-        lowerText.includes("engagement") ||
-        lowerText.includes("engage")
-      ) {
-        domain = "eng";
-        sessionStorage.setItem("currentPathwayDomain", "eng");
-      } else if (
-        lowerText.includes("self") &&
-        lowerText.includes("awareness")
-      ) {
-        domain = "self";
-        sessionStorage.setItem("currentPathwayDomain", "self");
-      } else if (
-        lowerText.includes("belonging") ||
-        lowerText.includes("belong")
-      ) {
-        domain = "belong";
-        sessionStorage.setItem("currentPathwayDomain", "belong");
-      }
-
+      // ... (rest of logic handles sending) ...
       if (domain === "goal") {
         await pathwayService.sendGoalMessageSession1(text, "CORE");
       } else if (domain === "res") {
@@ -230,6 +201,8 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
       }
     } catch (error) {
       console.error(`Failed to send message session 1 (${domain}):`, error);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -277,22 +250,31 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession }) => {
         )}
 
         {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`mb-6 flex w-full ${message.type === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`p-4 rounded-xl max-w-[85%] ${message.type === "amalia"
-                ? "bg-[#F5F5FF]"
-                : "bg-[#f5f5f5] ml-auto"
-                }`}
-            >
-              <p className="text-sm md:text-base text-black font-inter leading-relaxed whitespace-pre-wrap">
-                {message.content}
-              </p>
+          <ChatMessage 
+            key={message.id} 
+            message={message} 
+            userInitials={userInitials} 
+          />
+        ))}
+
+        {isTyping && (
+          <div className="flex items-center gap-2 px-4 mb-6">
+            <img
+              src="/assets/images/dashboard/normalstar.webp"
+              alt="Typing indicator"
+              className="w-5 h-5 animate-spin"
+            />
+            <div className="flex gap-1">
+              {[0, 150, 300, 450, 600].map((delay) => (
+                <div
+                  key={delay}
+                  className="w-2 h-2 bg-[#8A88F3] rounded-full animate-bounce"
+                  style={{ animationDelay: `${delay}ms` }}
+                ></div>
+              ))}
             </div>
           </div>
-        ))}
+        )}
         <div ref={messagesEndRef} />
 
         <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">

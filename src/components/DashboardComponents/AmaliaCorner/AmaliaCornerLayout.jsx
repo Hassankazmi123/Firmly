@@ -14,12 +14,15 @@ import { Clock, Lock } from "lucide-react";
 import { pathwayService } from "../../../services/pathway";
 import { assessmentService } from "../../../services/assessment";
 import { getUserProfile } from "../../../services/api";
+import "./AmaliaCorner.css";
+
 const AmaliaCornerLayout = () => {
   const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [messages, setMessages] = useState([]);
   const [userId, setUserId] = useState("");
   const [showPathwayView, setShowPathwayView] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [showSession1, setShowSession1] = useState(false);
   const [showSession2, setShowSession2] = useState(false);
   const [showSession3, setShowSession3] = useState(false);
@@ -28,6 +31,7 @@ const AmaliaCornerLayout = () => {
   const [glowItems, setGlowItems] = useState([]);
   const [growItems, setGrowItems] = useState([]);
   const [firstName, setFirstName] = useState("");
+  const [userInitials, setUserInitials] = useState("");
   const [completedSessions, setCompletedSessions] = useState(() => {
     const saved = localStorage.getItem("amalia_completed_sessions");
     return saved ? JSON.parse(saved) : [];
@@ -38,6 +42,13 @@ const AmaliaCornerLayout = () => {
         const data = await getUserProfile();
         if (data && data.first_name) {
           setFirstName(data.first_name);
+        }
+        if (data) {
+          const first = data.first_name || "";
+          const last = data.last_name || "";
+          setUserInitials(
+            (first.charAt(0) + last.charAt(0)).toUpperCase() || "YO",
+          );
         }
         if (data && data.id) {
           setUserId(data.id);
@@ -56,7 +67,16 @@ const AmaliaCornerLayout = () => {
     if (!userId) return;
     const saved = localStorage.getItem(`amaliaChat_${userId}`);
     if (saved) {
-      setMessages(JSON.parse(saved));
+      try {
+        const parsed = JSON.parse(saved);
+        // Filter out corrupted JSX objects that were serialized to localStorage
+        const sanitized = parsed.filter(
+          (msg) => typeof msg.content === "string",
+        );
+        setMessages(sanitized);
+      } catch (e) {
+        console.error("Failed to parse chat history:", e);
+      }
     }
   }, [userId]);
 
@@ -67,7 +87,10 @@ const AmaliaCornerLayout = () => {
   }, [messages, userId]);
 
   useEffect(() => {
-    localStorage.setItem("amalia_completed_sessions", JSON.stringify(completedSessions));
+    localStorage.setItem(
+      "amalia_completed_sessions",
+      JSON.stringify(completedSessions),
+    );
     // Sync session visibility with completed sessions
     if (completedSessions.includes(1)) setShowSession2(true);
     if (completedSessions.includes(2)) setShowSession3(true);
@@ -153,15 +176,23 @@ const AmaliaCornerLayout = () => {
             sessionStorage.setItem("currentPathwayDomain", response.domain);
             console.log("Pathway domain set to:", response.domain);
           } else if (response && response.statusCode === 409) {
-            console.log("Using existing pathway, attempting to fetch domain info");
+            console.log(
+              "Using existing pathway, attempting to fetch domain info",
+            );
             // Pathway exists but no domain in response, try to fetch next session info
             try {
               const nextSessionInfo = await pathwayService.getNextSessionInfo();
               if (nextSessionInfo && nextSessionInfo.domain) {
-                sessionStorage.setItem("currentPathwayDomain", nextSessionInfo.domain);
+                sessionStorage.setItem(
+                  "currentPathwayDomain",
+                  nextSessionInfo.domain,
+                );
               }
             } catch (infoErr) {
-              console.warn("Could not fetch next session info:", infoErr.message);
+              console.warn(
+                "Could not fetch next session info:",
+                infoErr.message,
+              );
             }
           }
         } catch (e) {
@@ -187,7 +218,11 @@ const AmaliaCornerLayout = () => {
             if (!assessmentId) {
               console.log("No assessment ID, starting new assessment...");
               const startData = await assessmentService.startAssessment("v1");
-              assessmentId = startData?.id || startData?.run_id || startData?.assessment_id || startData?.assessmentId;
+              assessmentId =
+                startData?.id ||
+                startData?.run_id ||
+                startData?.assessment_id ||
+                startData?.assessmentId;
               if (assessmentId) {
                 localStorage.setItem("assessmentId", String(assessmentId));
               }
@@ -203,20 +238,35 @@ const AmaliaCornerLayout = () => {
             console.warn(`Attempt ${retryCount}: ${err.message}`);
 
             // If 403 Forbidden or 404 Not Found, try starting a fresh assessment
-            if ((err.statusCode === 403 || err.statusCode === 404) && retryCount < maxRetries) {
+            if (
+              (err.statusCode === 403 || err.statusCode === 404) &&
+              retryCount < maxRetries
+            ) {
               try {
-                console.log("Attempting to start a fresh assessment due to error...");
+                console.log(
+                  "Attempting to start a fresh assessment due to error...",
+                );
                 const startData = await assessmentService.startAssessment("v1");
-                const newId = startData?.id || startData?.run_id || startData?.assessment_id || startData?.assessmentId;
+                const newId =
+                  startData?.id ||
+                  startData?.run_id ||
+                  startData?.assessment_id ||
+                  startData?.assessmentId;
                 if (newId) {
                   localStorage.setItem("assessmentId", String(newId));
                   assessmentId = String(newId);
-                  console.log("Fresh assessment started with ID:", assessmentId);
+                  console.log(
+                    "Fresh assessment started with ID:",
+                    assessmentId,
+                  );
                   // Continue loop to retry getResults with new ID
                   continue;
                 }
               } catch (startErr) {
-                console.error("Failed to start fresh assessment:", startErr.message);
+                console.error(
+                  "Failed to start fresh assessment:",
+                  startErr.message,
+                );
                 throw startErr;
               }
             }
@@ -351,95 +401,62 @@ const AmaliaCornerLayout = () => {
       sessionStorage.setItem("showSession3", "true");
       sessionStorage.setItem("showSession4", "true");
     }
-  }, [showSession1, showSession2, showSession3, showSession4]);
+  }, []);
 
-  const handleNextSession = React.useCallback((sessionNum) => {
-    setCompletedSessions((prev) => {
-      const next = prev.includes(sessionNum) ? prev : [...prev, sessionNum];
-      localStorage.setItem("amalia_completed_sessions", JSON.stringify(next));
-      return next;
-    });
+  const handleNextSession = React.useCallback(
+    (sessionNum) => {
+      setCompletedSessions((prev) => {
+        const next = prev.includes(sessionNum) ? prev : [...prev, sessionNum];
+        localStorage.setItem("amalia_completed_sessions", JSON.stringify(next));
+        return next;
+      });
 
-    // After every session, decide where to go based on entry point
-    const startedFromDashboard = sessionStorage.getItem("startedFromDashboard") === "true";
-    
-    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    sessionStorage.setItem("fromStartSession", "true");
-    sessionStorage.setItem("fromNextSession", "true");
-    sessionStorage.setItem("completedSessionNum", String(sessionNum));
+      // After every session, decide where to go based on entry point
+      const startedFromDashboard =
+        sessionStorage.getItem("startedFromDashboard") === "true";
 
-    if (startedFromDashboard) {
-      sessionStorage.removeItem("startedFromDashboard");
-      navigate("/dashboard");
-    } else {
-      // Stay in Amalia Corner but return to pathway view
-      setSelectedConversation(null);
-      sessionStorage.removeItem("selectedConversation");
-    }
+      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+      sessionStorage.setItem("fromStartSession", "true");
+      sessionStorage.setItem("fromNextSession", "true");
+      sessionStorage.setItem("completedSessionNum", String(sessionNum));
 
-    // Unlock next sessions based on completion status
-    if (sessionNum === 1) {
-      setShowSession2(true);
-      sessionStorage.setItem("showSession2", "true");
-    } else if (sessionNum === 2) {
-      setShowSession3(true);
-      sessionStorage.setItem("showSession3", "true");
-    } else if (sessionNum === 3) {
-      setShowSession4(true);
-      sessionStorage.setItem("showSession4", "true");
-    }
-  }, [navigate]);
-
-  const initialMessage = (
-    <>
-      Hi {firstName}, <br />I'm so glad you decided to dive deeper into your results
-      with me. What I see in your diagnostic is really quite insightful - it
-      paints a clear picture of who you are as a leader right now and where your
-      greatest opportunities lie. Let's start by looking at your overall profile
-      together.
-      <br />
-      The 'peers' benchmark shows you how your scores compare to other women in
-      your organization who have completed this same diagnostic, giving you
-      valuable context for understanding your results relative to your workplace
-      environment.
-    </>
-  );
-  const handleGeneratePathway = async () => {
-    try {
-      const response = await pathwayService.startPathway();
-      // Handle both new pathway (200) and existing pathway (409)
-      if (response && response.domain) {
-        sessionStorage.setItem("currentPathwayDomain", response.domain);
-        console.log("Pathway domain set:", response.domain);
-      } else if (response && response.statusCode === 409) {
-        console.log("Pathway already exists, will use existing one");
-        // Pathway exists, continue without error
+      if (startedFromDashboard) {
+        sessionStorage.removeItem("startedFromDashboard");
+        navigate("/dashboard");
+      } else {
+        // Stay in Amalia Corner but return to pathway view
+        setSelectedConversation(null);
+        sessionStorage.removeItem("selectedConversation");
       }
-    } catch (e) {
-      console.error("Failed to start pathway from layout:", e.message);
-    }
 
-    const pathwayMessage = (
-      <>
-        Great! Let's work together to create your personalized Leadership
-        Pathway. Based on your Glow and Grow areas, I'll help you develop a
-        tailored plan to enhance your leadership skills and reach your full
-        potential.
-        <br />
-        <br />
-        Let's start by discussing your goals and priorities. What would you like
-        to focus on first?
-      </>
-    );
-    setMessages([...messages, pathwayMessage]);
+      // Unlock next sessions based on completion status
+      if (sessionNum === 1) {
+        setShowSession2(true);
+        sessionStorage.setItem("showSession2", "true");
+      } else if (sessionNum === 2) {
+        setShowSession3(true);
+        sessionStorage.setItem("showSession3", "true");
+      } else if (sessionNum === 3) {
+        setShowSession4(true);
+        sessionStorage.setItem("showSession4", "true");
+      }
+    },
+    [navigate],
+  );
 
-    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    sessionStorage.setItem("fromStartSession", "true");
-    sessionStorage.setItem("showSession1", "true");
-    
+  const initialMessage = `Hi ${firstName}, \nI'm so glad you decided to dive deeper into your results with me. What I see in your diagnostic is really quite insightful - it paints a clear picture of who you are as a leader right now and where your greatest opportunities lie. Let's start by looking at your overall profile together.\n\nThe 'peers' benchmark shows you how your scores compare to other women in your organization who have completed this same diagnostic, giving you valuable context for understanding your results relative to your workplace environment.`;
+  const handleGeneratePathway = async () => {
+    const pathwayMessage = `Great! Let's work together to create your personalized Leadership Pathway. Based on your Glow and Grow areas, I'll help you develop a tailored plan to enhance your leadership skills and reach your full potential.\n\nLet's start by discussing your goals and priorities. What would you like to focus on first?`;
+
+    setIsTyping(true);
     setTimeout(() => {
-      navigate("/dashboard");
-    }, 1200);
+      setMessages([...messages, { type: "amalia", content: pathwayMessage }]);
+      setIsTyping(false);
+      setShowPathwayView(true);
+      sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+      sessionStorage.setItem("fromStartSession", "true");
+      sessionStorage.setItem("showSession1", "true");
+    }, 1500);
   };
   const handleGoToDashboard = () => {
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
@@ -457,23 +474,38 @@ const AmaliaCornerLayout = () => {
       return updated;
     });
 
+    setIsTyping(true);
+
     try {
       let domain = getDomain();
       // Keyword-based domain switching fallback
       const lowerText = text.toLowerCase();
-      if (lowerText.includes("resilience") || lowerText.includes("resilien") || lowerText.includes(" res")) {
+      if (
+        lowerText.includes("resilience") ||
+        lowerText.includes("resilien") ||
+        lowerText.includes(" res")
+      ) {
         domain = "res";
         sessionStorage.setItem("currentPathwayDomain", "res");
       } else if (lowerText.includes("goal")) {
         domain = "goal";
         sessionStorage.setItem("currentPathwayDomain", "goal");
-      } else if (lowerText.includes("engagement") || lowerText.includes("engage")) {
+      } else if (
+        lowerText.includes("engagement") ||
+        lowerText.includes("engage")
+      ) {
         domain = "eng";
         sessionStorage.setItem("currentPathwayDomain", "eng");
-      } else if (lowerText.includes("self") && lowerText.includes("awareness")) {
+      } else if (
+        lowerText.includes("self") &&
+        lowerText.includes("awareness")
+      ) {
         domain = "self";
         sessionStorage.setItem("currentPathwayDomain", "self");
-      } else if (lowerText.includes("belonging") || lowerText.includes("belong")) {
+      } else if (
+        lowerText.includes("belonging") ||
+        lowerText.includes("belong")
+      ) {
         domain = "belong";
         sessionStorage.setItem("currentPathwayDomain", "belong");
       }
@@ -500,9 +532,13 @@ const AmaliaCornerLayout = () => {
       }
 
       // Only append the latest bot response
-      const historyMessages = Array.isArray(historyData) ? historyData : historyData?.messages || [];
+      const historyMessages = Array.isArray(historyData)
+        ? historyData
+        : historyData?.messages || [];
       const latestBotMsg = historyMessages
-        .filter((msg) => !msg.sender || msg.sender.toLowerCase().trim() !== "user")
+        .filter(
+          (msg) => !msg.sender || msg.sender.toLowerCase().trim() !== "user",
+        )
         .slice(-1)[0];
       if (latestBotMsg) {
         setMessages((prev) => {
@@ -515,13 +551,18 @@ const AmaliaCornerLayout = () => {
             },
           ];
           if (userId) {
-            localStorage.setItem(`amaliaChat_${userId}`, JSON.stringify(updated));
+            localStorage.setItem(
+              `amaliaChat_${userId}`,
+              JSON.stringify(updated),
+            );
           }
           return updated;
         });
       }
     } catch (error) {
       console.error("Failed to send message in diagnostic view:", error);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -632,6 +673,7 @@ const AmaliaCornerLayout = () => {
             <Session1Chat
               isSidebarCollapsed={isSidebarCollapsed}
               onNextSession={() => handleNextSession(1)}
+              userInitials={userInitials}
             />
           </div>
         ) : selectedConversation === "session2" ? (
@@ -639,6 +681,7 @@ const AmaliaCornerLayout = () => {
             <Session2Chat
               isSidebarCollapsed={isSidebarCollapsed}
               onNextSession={() => handleNextSession(2)}
+              userInitials={userInitials}
             />
           </div>
         ) : selectedConversation === "session3" ? (
@@ -646,6 +689,7 @@ const AmaliaCornerLayout = () => {
             <Session3Chat
               isSidebarCollapsed={isSidebarCollapsed}
               onNextSession={() => handleNextSession(3)}
+              userInitials={userInitials}
             />
           </div>
         ) : selectedConversation === "session4" ? (
@@ -653,125 +697,83 @@ const AmaliaCornerLayout = () => {
             <Session4Chat
               isSidebarCollapsed={isSidebarCollapsed}
               onComplete={() => handleNextSession(4)}
+              userInitials={userInitials}
             />
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto max-w-5xl mx-auto  px-4 pb-24 relative">
-            {showPathwayView ? (
+          <div className="flex-1 overflow-y-auto max-w-5xl mx-auto px-4 pb-24 relative chat-container-scroll">
+            <ChatMessage
+              message={initialMessage}
+              userInitials={userInitials}
+            />
+            {messages.map((msg, index) => (
+              <ChatMessage
+                key={index}
+                message={msg}
+                userInitials={userInitials}
+              />
+            ))}
+
+            {isTyping && (
+              <div className="flex items-center gap-2 px-4 mb-6">
+                <img
+                  src="/assets/images/dashboard/normalstar.webp"
+                  alt="Typing indicator"
+                  className="w-5 h-5 animate-spin"
+                />
+                <div className="flex gap-1">
+                  {[0, 150, 300, 450, 600].map((delay) => (
+                    <div
+                      key={delay}
+                      className="w-2 h-2 bg-[#8A88F3] rounded-full animate-bounce"
+                      style={{ animationDelay: `${delay}ms` }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <ProgressBarsSection />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <SummaryCard
+                title="Doing great"
+                items={glowItems}
+                bgColor="bg-[#378C78]"
+                iconImage="/assets/images/dashboard/doing.webp"
+              />
+              <SummaryCard
+                title="Growth areas"
+                items={growItems}
+                bgColor="bg-[#C56A55]"
+                iconImage="/assets/images/dashboard/growth.webp"
+              />
+            </div>
+
+            {!showPathwayView ? (
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 my-6 md:my-8 max-w-2xl mx-auto">
+                <button
+                  onClick={handleGeneratePathway}
+                  className="flex-1 px-5 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+                >
+                  Generate my Leadership Pathway
+                </button>
+                <button
+                  onClick={handleGoToDashboard}
+                  className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+                >
+                  Go to Dashboard
+                </button>
+              </div>
+            ) : (
               <>
-                <div className="mb-8">
+                <div className="mb-8 mt-12 border-t pt-12 border-[#ECECEC]">
                   <p className="text-base md:text-lg text-[#3D3D3D] font-inter">
                     I'll create a personalized development plan focused on your
                     growth areas.
                   </p>
                 </div>
-                <div className="bg-[#F5F5F5] rounded-2xl p-6 md:p-8 mb-8">
-                  <p className="text-base md:text-lg text-[#3D3D3D] font-inter mb-6">
-                    We'll start with{" "}
-                    <span className="font-semibold">{domainLabel}</span>. For
-                    that, I've scheduled 4 sessions for you:
-                  </p>
-                  <ul className="space-y-3 mb-6">
-                    <li className="flex items-start gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 1: {getSessionTitle(1)} (Common Understanding)
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 2: {getSessionTitle(2)}
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 3: {getSessionTitle(3)}
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 4: {getSessionTitle(4)}
-                      </span>
-                    </li>
-                  </ul>
-                  <p className="text-sm md:text-base text-[#3D3D3D]/70 font-inter mb-4 leading-relaxed">
-                    Each session is designed to be conversational and practical,
-                    building on real workplace scenarios. We'll work together to
-                    develop your empathetic leadership skills through
-                    evidence-based techniques.
-                  </p>
-                  <p className="text-sm md:text-base text-[#3D3D3D]/70 font-inter">
-                    You would always have this pathway on the main dashboard so
-                    you can work on all the points one by one.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-                  <button
-                    onClick={handleStartSession}
-                    className="flex-1 px-6 py-3 bg-[#F5F5F5] text-[#3D3D3D] rounded-xl font-inter-medium text-base hover:bg-[#E5E5E5] transition-colors"
-                  >
-                    Start Session
-                  </button>
-                  <button
-                    onClick={handleGoToDashboard}
-                    className="flex-1 px-6 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-base hover:bg-[#2D2D2D] transition-colors"
-                  >
-                    Go to Dashboard
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <ChatMessage message={initialMessage} />
-                {messages.map((msg, index) => (
-                  <ChatMessage key={index} message={msg} />
-                ))}
-                <ProgressBarsSection />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  <SummaryCard
-                    title="Doing great"
-                    subtitle="Your female talent is thriving in the following domains."
-                    items={glowItems}
-                    bgColor="bg-[#378C78]"
-                    iconImage="/assets/images/dashboard/doing.webp"
-                  />
-                  <SummaryCard
-                    title="Growth areas"
-                    subtitle="These areas need your immediate attention to balance workplace wellbeing."
-                    items={growItems}
-                    bgColor="bg-[#C56A55]"
-                    iconImage="/assets/images/dashboard/growth.webp"
-                  />
-                </div>
-                <p className="text-sm md:text-base font-inter-regular text-black   bg-[#F5F5FF] p-4 rounded-xl">
-                  You can now view your Glow and Grow areas at all times on your
-                  dashboard. I will help you to work on them and improve your
-                  skills.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-4 my-6 md:my-8  max-w-2xl mx-auto">
-                  <button
-                    onClick={handleGeneratePathway}
-                    className="flex-1 px-5  py-3.5  bg-[#F5F5F5]  text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
-                  >
-                    Generate my Leadership Pathway
-                  </button>
-                  <button
-                    onClick={handleGoToDashboard}
-                    className="flex-1   py-3.5 px-5  bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
-                  >
-                    Go to Dashboard
-                  </button>
-                </div>
-                <div className="mb-8">
-                  <p className="text-sm md:text-base font-inter-regular text-black  mb-6 md:mb-8 bg-[#F5F5FF] p-4 rounded-xl">
-                    I'll create a personalized development plan focused on your
-                    growth areas.
-                  </p>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  {/* Expert knowledge card */}
                   <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -807,7 +809,10 @@ const AmaliaCornerLayout = () => {
                       Start element
                     </button>
                   </div>
-                  <div className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(1) ? "opacity-60" : ""}`}>
+                  {/* Workbook card */}
+                  <div
+                    className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(1) ? "opacity-60" : ""}`}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -816,7 +821,9 @@ const AmaliaCornerLayout = () => {
                           className="w-6 h-6"
                         />
                         <div>
-                          <p className={`text-xs font-inter-medium ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
+                          <p
+                            className={`text-xs font-inter-medium ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                          >
                             Workbook
                           </p>
                         </div>
@@ -828,10 +835,14 @@ const AmaliaCornerLayout = () => {
                         </div>
                       </div>
                     </div>
-                    <h3 className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
+                    <h3
+                      className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                    >
                       Reflective Practice
                     </h3>
-                    <p className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}>
+                    <p
+                      className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
+                    >
                       Small description about the element contents. Lorem ipsum
                       sit dolor amet avec consect.
                     </p>
@@ -849,7 +860,10 @@ const AmaliaCornerLayout = () => {
                       </button>
                     )}
                   </div>
-                  <div className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(2) ? "opacity-60" : ""}`}>
+                  {/* Application card */}
+                  <div
+                    className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(2) ? "opacity-60" : ""}`}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -858,7 +872,9 @@ const AmaliaCornerLayout = () => {
                           className="w-6 h-6"
                         />
                         <div>
-                          <p className={`text-xs font-inter-medium ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
+                          <p
+                            className={`text-xs font-inter-medium ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                          >
                             Workbook
                           </p>
                         </div>
@@ -870,10 +886,14 @@ const AmaliaCornerLayout = () => {
                         </div>
                       </div>
                     </div>
-                    <h3 className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}>
+                    <h3
+                      className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                    >
                       Application
                     </h3>
-                    <p className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}>
+                    <p
+                      className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
+                    >
                       Small description about the element contents. Lorem ipsum
                       sit dolor amet avec consect.
                     </p>
@@ -892,58 +912,41 @@ const AmaliaCornerLayout = () => {
                     )}
                   </div>
                 </div>
-                <div className="bg-[#F5F5FF] rounded-xl p-4  mb-4 md:mb-6">
-                  <p className="text-base  text-black font-regular font-inter mb-2">
+                <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-6 mb-8">
+                  <p className="text-base text-black font-inter mb-4">
                     We'll start with {domainLabel}. For that, I've scheduled 4
                     sessions for you:
                   </p>
                   <ul className="space-y-3 mb-6">
-                    <li className="flex items-start gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 1: {getSessionTitle(1)} (Common Understanding)
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 2: {getSessionTitle(2)}
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 3: {getSessionTitle(3)}
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <span className="text-black font-bold ">•</span>
-                      <span className="text-base text-black font-regular font-inter">
-                        Session 4: {getSessionTitle(4)}
-                      </span>
-                    </li>
+                    {[1, 2, 3, 4].map((num) => (
+                      <li key={num} className="flex items-start gap-3">
+                        <span className="text-black font-bold">•</span>
+                        <span className="text-base text-black font-inter">
+                          Session {num}: {getSessionTitle(num)}{" "}
+                          {num === 1 ? "(Common Understanding)" : ""}
+                        </span>
+                      </li>
+                    ))}
                   </ul>
-                  <p className="text-base text-black font-regular/70 font-inter mb-2 leading-relaxed">
+                  <p className="text-base text-black/70 font-inter mb-4 leading-relaxed">
                     Each session is designed to be conversational and practical,
-                    building on real workplace scenarios. We'll work together to
-                    develop your {domainLabel.toLowerCase()} skills through
-                    evidence-based techniques.
+                    building on real workplace scenarios.
                   </p>
-                  <p className="text-base text-black font-regular/70 font-inter">
+                  <p className="text-base text-black/70 font-inter">
                     You would always have this pathway on the main dashboard so
                     you can work on all the points one by one.
                   </p>
                 </div>
-                <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto">
+                <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
                   <button
                     onClick={handleStartSession}
-                    className="flex-1 px-5  py-3  bg-[#F5F5F5]  text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+                    className="flex-1 px-6 py-3 bg-[#F5F5F5] text-[#3D3D3D] rounded-xl font-inter-medium text-base hover:bg-[#E5E5E5] transition-colors"
                   >
                     Start Session
                   </button>
                   <button
                     onClick={handleGoToDashboard}
-                    className="flex-1 px-5 py-3 bg-[#3D3D3D] text-white rounded-2xl font-inter-medium text-base hover:bg-[#2D2D2D] transition-colors"
+                    className="flex-1 px-6 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-base hover:bg-[#2D2D2D] transition-colors"
                   >
                     Go to Dashboard
                   </button>
@@ -952,14 +955,14 @@ const AmaliaCornerLayout = () => {
             )}
           </div>
         )}
-        {!showPathwayView &&
-          selectedConversation !== "session1" &&
+        {selectedConversation !== "session1" &&
           selectedConversation !== "session2" &&
           selectedConversation !== "session3" &&
           selectedConversation !== "session4" && (
             <div
-              className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
-                } md:z-50`}
+              className={`absolute bottom-0 left-0 right-0 ${
+                isSidebarCollapsed ? "z-50" : ""
+              } md:z-50`}
             >
               <ChatInputFooter onSend={handleSendMessage} />
             </div>
