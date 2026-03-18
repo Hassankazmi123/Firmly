@@ -18,7 +18,7 @@ const ChatInputFooter = ({ onSend }) => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && handleSend()}
-          className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[#F5F5F5] text-[#9E9CAE] rounded-xl border border-[#ECECEC] focus:outline-none  focus:ring-[1px] focus:[#6664D3] font-inter-medium text-xs md:text-base"
+          className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[#F5F5F5] text-black rounded-xl border border-[#ECECEC] focus:outline-none  focus:ring-[1px] focus:[#6664D3] font-inter-medium text-xs md:text-base"
         />
         <div className="flex gap-2 md:gap-3 shrink-0">
           <button
