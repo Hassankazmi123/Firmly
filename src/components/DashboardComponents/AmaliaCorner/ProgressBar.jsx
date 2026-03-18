@@ -42,7 +42,7 @@ const ProgressBar = ({
         >
           {/* You Score at the end of the bar */}
           <div 
-             className="absolute -top-7 right-0 transform translate-x-1/2 flex flex-col items-center"
+             className={`absolute ${Math.abs(yourScore - peersScore) < 10 ? "-top-11" : "-top-7"} right-0 transform translate-x-1/2 flex flex-col items-center`}
              style={{ whiteSpace: 'nowrap' }}
           >
             <span className="text-xs md:text-sm font-inter-semibold text-[#6664D3]">

@@ -711,7 +711,7 @@ const AmaliaCornerLayout = () => {
             <ChatMessage
               message={initialMessage}
               userInitials={userInitials}
-              disableAnimation={true} // Always show welcome message fully immediately
+              disableAnimation={messages.length > 0 || !firstName} 
             />
             {messages.map((msg, index) => (
               <ChatMessage
