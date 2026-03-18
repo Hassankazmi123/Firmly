@@ -1,6 +1,6 @@
 import React from "react";
 
-const OnboardingLayout = ({ children }) => {
+const OnboardingLayout = ({ children, onLogoClick }) => {
   return (
     <div
       className="min-h-screen w-full relative overflow-hidden flex flex-col items-center justify-start pb-6 sm:pb-12 border-[8px] sm:border-[12px] md:border-[16px] border-[#6664d3]"
@@ -36,7 +36,10 @@ const OnboardingLayout = ({ children }) => {
         />
       </div>
       <header className="w-full pt-4 sm:pt-6 md:pt-8 flex justify-center z-20 relative">
-        <div className="text-white font-semibold tracking-wide text-lg sm:text-xl font-inter">
+        <div
+          className="text-white font-semibold tracking-wide text-lg sm:text-xl font-inter cursor-pointer"
+          onClick={() => onLogoClick && onLogoClick()}
+        >
           firmly
         </div>
       </header>
@@ -49,5 +52,3 @@ const OnboardingLayout = ({ children }) => {
 };
 
 export default OnboardingLayout;
-
-// fixed on small resolution as well

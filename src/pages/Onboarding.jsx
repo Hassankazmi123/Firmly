@@ -75,7 +75,9 @@ const Onboarding = () => {
   ];
 
   return (
-    <OnboardingLayout>{screens[currentScreen]?.component}</OnboardingLayout>
+    <OnboardingLayout onLogoClick={() => handleSetScreen(2)}>
+      {screens[currentScreen]?.component}
+    </OnboardingLayout>
   );
 };
 
