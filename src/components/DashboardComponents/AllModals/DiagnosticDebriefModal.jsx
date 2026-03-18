@@ -53,7 +53,7 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
       onGetDebrief();
     }
     onClose();
-    navigate("/amalia-corner");
+    navigate("/amalia-corner", { state: { animateInitial: true } });
   };
 
   if (!isOpen) return null;

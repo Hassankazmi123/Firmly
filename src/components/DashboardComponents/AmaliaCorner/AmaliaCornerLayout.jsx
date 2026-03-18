@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import ChatHeader from "./ChatHeader";
@@ -28,6 +28,7 @@ const AmaliaCornerLayout = () => {
     return sessionStorage.getItem("showPathwayView") === "true";
   });
   const [isTyping, setIsTyping] = useState(false);
+  const hasHistoryAtMount = useRef(false);
   const [showSession1, setShowSession1] = useState(false);
   const [showSession2, setShowSession2] = useState(false);
   const [showSession3, setShowSession3] = useState(false);
@@ -35,8 +36,30 @@ const AmaliaCornerLayout = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [glowItems, setGlowItems] = useState([]);
   const [growItems, setGrowItems] = useState([]);
-  const [firstName, setFirstName] = useState("");
-  const [userInitials, setUserInitials] = useState("");
+  const [firstName, setFirstName] = useState(() => {
+    try {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsed = JSON.parse(user);
+        return parsed.first_name;
+      }
+    } catch (e) {
+      console.warn("Failed to parse user from localStorage:", e);
+    }
+    return "";
+  });
+  const [userInitials, setUserInitials] = useState(() => {
+    try {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsed = JSON.parse(user);
+        const first = parsed.first_name;
+        const last = parsed.last_name;
+        return (first.charAt(0) + last.charAt(0)).toUpperCase();
+      }
+    } catch (e) { }
+    return "YO";
+  });
   const [completedSessions, setCompletedSessions] = useState(() => {
     const saved = localStorage.getItem("amalia_completed_sessions");
     return saved ? JSON.parse(saved) : [];
@@ -49,10 +72,10 @@ const AmaliaCornerLayout = () => {
           setFirstName(data.first_name);
         }
         if (data) {
-          const first = data.first_name || "";
-          const last = data.last_name || "";
+          const first = data.first_name;
+          const last = data.last_name;
           setUserInitials(
-            (first.charAt(0) + last.charAt(0)).toUpperCase() || "YO",
+            (first.charAt(0) + last.charAt(0)).toUpperCase(),
           );
         }
         if (data && data.id) {
@@ -74,6 +97,9 @@ const AmaliaCornerLayout = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        if (parsed && parsed.length > 0) {
+          hasHistoryAtMount.current = true;
+        }
         // Filter out corrupted JSX objects that were serialized to localStorage
         const sanitized = parsed.filter(
           (msg) => typeof msg.content === "string",
@@ -511,7 +537,7 @@ const AmaliaCornerLayout = () => {
         const response = await chatService.sendMessage(tId, text);
         // Depending on API response, get the AI message
         const botContent = response.response || response.message || response.content || (response.data && response.data.content);
-        
+
         if (botContent) {
           setMessages((prev) => {
             const updated = [
@@ -533,7 +559,7 @@ const AmaliaCornerLayout = () => {
           const historyArr = historyData.history || historyData.messages || historyData.data || [];
           const lastBot = historyArr.filter(m => m.role === "assistant" || m.role === "ai" || (m.sender && m.sender.toLowerCase() !== "user")).slice(-1)[0];
           if (lastBot) {
-             setMessages((prev) => {
+            setMessages((prev) => {
               const updated = [
                 ...prev,
                 {
@@ -697,7 +723,10 @@ const AmaliaCornerLayout = () => {
             <ChatMessage
               message={initialMessage}
               userInitials={userInitials}
-              disableAnimation={messages.length > 0 || !firstName}
+              disableAnimation={
+                !location.state?.animateInitial || 
+                hasHistoryAtMount.current
+              }
             />
             {messages.map((msg, index) => (
               <ChatMessage

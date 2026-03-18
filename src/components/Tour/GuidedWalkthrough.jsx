@@ -212,7 +212,8 @@ const GuidedWalkthrough = ({ onComplete }) => {
       
       markWalkthroughCompleted();
       
-      // Removed automatic modal opening to allow dashboard exploration first
+      // Scroll to top of dashboard when walkthrough is completed
+      window.scrollTo({ top: 0, behavior: "smooth" });
       
       if (onComplete) onComplete();
     }
