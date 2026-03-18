@@ -212,10 +212,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
       
       markWalkthroughCompleted();
       
-      // Open modal after a small delay to ensure walkthrough is fully closed
-      setTimeout(() => {
-        setIsDebriefModalOpen(true);
-      }, 150);
+      // Removed automatic modal opening to allow dashboard exploration first
       
       if (onComplete) onComplete();
     }

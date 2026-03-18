@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { getUserProfile } from "../../../services/api";
 import { assessmentService } from "../../../services/assessment";
-import DebriefResultsModal from "../AllModals/DebriefResultsModal";
+import DiagnosticDebriefModal from "../AllModals/DiagnosticDebriefModal";
 import RadarChart from "./RadarChart";
 
 const Hero = () => {
@@ -88,7 +88,19 @@ const Hero = () => {
         console.warn("Could not fetch assessment results:", err);
       }
     };
+
     fetchResults();
+
+    // Auto-open debrief modal after 30 seconds
+    const timerId = setTimeout(() => {
+      const hasShownAuto = sessionStorage.getItem("debrief_auto_shown");
+      if (!hasShownAuto) {
+        setIsDebriefModalOpen(true);
+        sessionStorage.setItem("debrief_auto_shown", "true");
+      }
+    }, 30000);
+
+    return () => clearTimeout(timerId);
   }, []);
 
   const metrics = [
@@ -186,7 +198,10 @@ const Hero = () => {
                   </p>
                   <button
                     type="button"
-                    onClick={() => setIsDebriefModalOpen(true)}
+                    onClick={() => {
+                      setIsDebriefModalOpen(true);
+                      sessionStorage.setItem("debrief_auto_shown", "true");
+                    }}
                     className=" bg-white  font-medium py-3 px-6 rounded-xl flex items-center justify-center space-x-2 transition-colors mb-4 hover:bg-white/90 active:scale-95"
                   >
                     <img
@@ -269,9 +284,13 @@ const Hero = () => {
           </div>
         </div>
       </section>
-      <DebriefResultsModal
+      <DiagnosticDebriefModal
         isOpen={isDebriefModalOpen}
         onClose={() => setIsDebriefModalOpen(false)}
+        onGetDebrief={() => {
+          setIsDebriefModalOpen(false);
+          // sessionStorage handle navigation inside DiagnosticDebriefModal is already there
+        }}
       />
     </>
   );
