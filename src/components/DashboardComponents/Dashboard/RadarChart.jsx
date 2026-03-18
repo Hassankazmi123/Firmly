@@ -1,12 +1,13 @@
 import React from "react";
 
-const RadarChart = ({ data, peerData, highlightIndex = 0 }) => {
+const RadarChart = ({ data, peerData, highlightIndex = 0, onMetricClick }) => {
+  const [hoveredIndex, setHoveredIndex] = React.useState(null);
   const size = 500;
   const center = size / 2;
   const radius = size * 0.32;
   const levels = 5;
 
-  // The 6 domains in the correct order for the radar chart
+  // ... (rest of the component logic for calculations)
   const domains = [
     { key: "GOAL", label: "GOAL ORIENTATION", angle: -90 },
     { key: "RES", label: "RESILIENCE", angle: -30 },
@@ -46,7 +47,6 @@ const RadarChart = ({ data, peerData, highlightIndex = 0 }) => {
   // Axis lines
   const axisLines = domains.map((d, i) => {
     const p = getPoint(d.angle, radius);
-    const isMainAxis = i === highlightIndex;
     return (
       <line
         key={`axis-${i}`}
@@ -147,22 +147,38 @@ const RadarChart = ({ data, peerData, highlightIndex = 0 }) => {
       {domains.map((d, i) => {
         const p = getPoint(d.angle, radius * 1.35);
         const isActive = i === highlightIndex;
+        const isHovered = i === hoveredIndex;
+        const score = data[d.key] || 0;
+
         return (
           <div
             key={d.key}
-            className={`absolute transform -translate-x-1/2 -translate-y-1/2 px-2 md:px-4 py-1.5 md:py-2 rounded-xl border transition-all duration-300 ${isActive
-              ? "bg-white/20 border-white/40 shadow-lg scale-110"
-              : "bg-white/5 border-white/10"
-              } backdrop-blur-sm pointer-events-none`}
+            onClick={() => onMetricClick?.(i)}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            className={`absolute transform -translate-x-1/2 -translate-y-1/2 px-3 md:px-5 py-2 md:py-2.5 rounded-xl border transition-all duration-300 cursor-pointer text-center min-w-[120px] ${isActive || isHovered
+              ? "bg-white/20 border-white/40 shadow-lg scale-110 z-50"
+              : "bg-white/5 border-white/10 z-10"
+              } backdrop-blur-md group hover:bg-white/30 transition-all`}
             style={{
               left: `${(p.x / size) * 100}%`,
               top: `${(p.y / size) * 100}%`,
             }}
           >
-            <span className={`text-[8px] md:text-[10px] lg:text-xs font-bold tracking-[0.1em] ${isActive ? "text-white" : "text-white/60"
-              }`}>
-              {d.label}
-            </span>
+            <div className="flex flex-col items-center">
+              <span className={`text-[9px] md:text-[11px] lg:text-[13px] font-bold tracking-[0.1em] transition-colors ${isActive || isHovered ? "text-white" : "text-white/60"
+                }`}>
+                {d.label}
+              </span>
+              {isHovered && (
+                <div className="mt-1 flex items-baseline animate-in fade-in slide-in-from-top-1 duration-200">
+                  <span className="text-sm md:text-lg font-bold text-[#FFCD4F] font-times-new-roman">
+                    {score}
+                  </span>
+                  <span className="text-[8px] md:text-[10px] text-white/40 ml-0.5">/100</span>
+                </div>
+              )}
+            </div>
           </div>
         );
       })}

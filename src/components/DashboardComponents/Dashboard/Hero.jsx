@@ -152,7 +152,7 @@ const Hero = () => {
                 </div>
               </div>
               <div className="flex items-center justify-center lg:h-[450px] h-[350px]">
-                <RadarChart data={radarData} peerData={peerData} highlightIndex={currentMetric} />
+                <RadarChart data={radarData} peerData={peerData} highlightIndex={currentMetric} onMetricClick={setCurrentMetric} />
               </div>
             </div>
 
