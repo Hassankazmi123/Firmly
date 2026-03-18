@@ -132,7 +132,15 @@ const NormalChatLayout = () => {
     }
   };
 
-  const handleCreateNewThread = async (title = "New Chat") => {
+  const handleCreateNewThread = async (title) => {
+    // If no title provided, it's just a local UI reset to "Draft" mode
+    if (!title) {
+      setCurrentThread(null);
+      setMessages([]);
+      setError(null);
+      return null;
+    }
+
     try {
       setError(null);
       const response = await chatService.createNewThread(false, title);
@@ -202,17 +210,17 @@ const NormalChatLayout = () => {
       console.log("SendMessage Response:", response);
 
       // Get the response content - try all possible fields
-      const botResponseText = response.response || response.message || response.content || 
-                             response.reply || response.text ||
-                             (response.data && (response.data.content || response.data.response || response.data.message || response.data.text)) || "";
+      const botResponseText = response.response || response.message || response.content ||
+        response.reply || response.text ||
+        (response.data && (response.data.content || response.data.response || response.data.message || response.data.text)) || "";
 
       if (botResponseText) {
         // Mark the NEW message as NOT history so it animates
-        setMessages(prev => [...prev, { 
-          type: "ai", 
-          text: botResponseText, 
+        setMessages(prev => [...prev, {
+          type: "ai",
+          text: botResponseText,
           isHistory: false,
-          id: Date.now() 
+          id: Date.now()
         }]);
       } else {
         // Fallback: fetch history if we couldn't parse the response

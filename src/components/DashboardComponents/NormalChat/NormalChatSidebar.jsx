@@ -21,7 +21,7 @@ const NormalChatSidebar = ({
 
   const handleNewChat = () => {
     if (onCreateNewThread) {
-      onCreateNewThread("My Chat Thread-1");
+      onCreateNewThread();
     } else if (onResetChat) {
       onResetChat();
     }
