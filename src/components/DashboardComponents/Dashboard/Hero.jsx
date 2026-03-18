@@ -7,7 +7,9 @@ import RadarChart from "./RadarChart";
 
 const Hero = () => {
   const location = useLocation();
-  const isFromAmalia = location.state?.fromAmaliaCorner || sessionStorage.getItem("hasVisitedAmaliaCorner") === "true";
+  const isFromAmalia =
+    location.state?.fromAmaliaCorner ||
+    localStorage.getItem("hasStartedDebrief") === "true";
   const [currentMetric, setCurrentMetric] = useState(0);
   const [firstName, setFirstName] = useState(() => {
     try {
@@ -201,6 +203,7 @@ const Hero = () => {
                     onClick={() => {
                       setIsDebriefModalOpen(true);
                       sessionStorage.setItem("debrief_auto_shown", "true");
+                      localStorage.setItem("hasStartedDebrief", "true");
                     }}
                     className=" bg-white  font-medium py-3 px-6 rounded-xl flex items-center justify-center space-x-2 transition-colors mb-4 hover:bg-white/90 active:scale-95"
                   >
@@ -210,6 +213,7 @@ const Hero = () => {
                       className="h-5 w-5"
                     />
                     <span className="text-[#6664D3]">{isFromAmalia ? "Amalia Debrief" : "Start a Debrief"}</span>
+
                   </button>
                 </div>
                 <div className="flex items-end justify-between mb-4">

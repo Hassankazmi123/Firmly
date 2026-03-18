@@ -76,9 +76,9 @@ const AmaliaCornerLayout = () => {
         const sanitized = parsed.filter(
           (msg) => typeof msg.content === "string",
         );
-          // Mark as history to disable animation on reload
-          const historyMsgs = sanitized.map(m => ({ ...m, isHistory: true }));
-          setMessages(historyMsgs);
+        // Mark as history to disable animation on reload
+        const historyMsgs = sanitized.map(m => ({ ...m, isHistory: true }));
+        setMessages(historyMsgs);
       } catch (e) {
         console.error("Failed to parse chat history:", e);
       }
@@ -449,7 +449,7 @@ const AmaliaCornerLayout = () => {
     [navigate],
   );
 
-  const initialMessage = `Hi ${firstName || "there"}, \nI'm so glad you decided to dive deeper into your results with me. What I see in your diagnostic is really quite insightful - it paints a clear picture of who you are as a leader right now and where your greatest opportunities lie. Let's start by looking at your overall profile together.\n\nThe 'peers' benchmark shows you how your scores compare to other women in your organization who have completed this same diagnostic, giving you valuable context for understanding your results relative to your workplace environment.`;
+  const initialMessage = `Hi ${firstName}, \nI'm so glad you decided to dive deeper into your results with me. What I see in your diagnostic is really quite insightful - it paints a clear picture of who you are as a leader right now and where your greatest opportunities lie. Let's start by looking at your overall profile together.\n\nThe 'peers' benchmark shows you how your scores compare to other women in your organization who have completed this same diagnostic, giving you valuable context for understanding your results relative to your workplace environment.`;
   const handleGeneratePathway = async () => {
     const pathwayMessage = `Great! Let's work together to create your personalized Leadership Pathway. Based on your Glow and Grow areas, I'll help you develop a tailored plan to enhance your leadership skills and reach your full potential.\n\nLet's start by discussing your goals and priorities. What would you like to focus on first?`;
 
@@ -592,6 +592,7 @@ const AmaliaCornerLayout = () => {
   };
 
   const handleStartSession = () => {
+    localStorage.setItem("hasStartedDebrief", "true");
     sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
     sessionStorage.setItem("fromStartSession", "true");
     navigate("/dashboard");
@@ -711,7 +712,7 @@ const AmaliaCornerLayout = () => {
             <ChatMessage
               message={initialMessage}
               userInitials={userInitials}
-              disableAnimation={messages.length > 0 || !firstName} 
+              disableAnimation={messages.length > 0 || !firstName}
             />
             {messages.map((msg, index) => (
               <ChatMessage
@@ -982,9 +983,8 @@ const AmaliaCornerLayout = () => {
           selectedConversation !== "session3" &&
           selectedConversation !== "session4" && (
             <div
-              className={`absolute bottom-0 left-0 right-0 ${
-                isSidebarCollapsed ? "z-50" : ""
-              } md:z-50`}
+              className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+                } md:z-50`}
             >
               <ChatInputFooter onSend={handleSendMessage} />
             </div>

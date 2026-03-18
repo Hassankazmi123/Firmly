@@ -16,7 +16,9 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   const [showPathwayDesign, setShowPathwayDesign] = useState(() => {
     try {
       const fromStart = sessionStorage.getItem("fromStartSession");
-      if (fromStart === "true") return true;
+      const hasStartedDebrief =
+        localStorage.getItem("hasStartedDebrief") === "true";
+      if (fromStart === "true" || hasStartedDebrief) return true;
       const saved = localStorage.getItem("amalia_completed_sessions");
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -40,7 +42,9 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
 
   useEffect(() => {
     const fromStartSession = sessionStorage.getItem("fromStartSession");
-    if (fromStartSession === "true") {
+    const hasStartedDebrief = localStorage.getItem("hasStartedDebrief") === "true";
+
+    if (fromStartSession === "true" || hasStartedDebrief) {
       setShowPathwayDesign(true);
     }
 

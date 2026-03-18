@@ -15,11 +15,13 @@ export default function Dashboard() {
   useEffect(() => {
     const visited = sessionStorage.getItem("hasVisitedAmaliaCorner");
     const fromStartSession = sessionStorage.getItem("fromStartSession");
-    if (visited === "true") {
+    const hasStartedDebrief =
+      localStorage.getItem("hasStartedDebrief") === "true";
+
+    if (visited === "true" || hasStartedDebrief) {
       setHasVisitedAmaliaCorner(true);
-      const timeoutId = setTimeout(() => {
-        sessionStorage.removeItem("hasVisitedAmaliaCorner");
-      }, 100);
+
+      // Only scroll if it's explicitly fromStartSession (the immediate redirect)
       if (fromStartSession === "true" && pathwaySectionRef.current) {
         setTimeout(() => {
           pathwaySectionRef.current?.scrollIntoView({
@@ -29,7 +31,14 @@ export default function Dashboard() {
           sessionStorage.removeItem("fromStartSession");
         }, 200);
       }
-      return () => clearTimeout(timeoutId);
+
+      // We only want to clear the session flag if it was there
+      if (visited === "true") {
+        const timeoutId = setTimeout(() => {
+          sessionStorage.removeItem("hasVisitedAmaliaCorner");
+        }, 100);
+        return () => clearTimeout(timeoutId);
+      }
     } else {
       setHasVisitedAmaliaCorner(false);
     }
