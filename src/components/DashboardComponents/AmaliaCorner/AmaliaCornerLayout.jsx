@@ -22,7 +22,9 @@ const AmaliaCornerLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [messages, setMessages] = useState([]);
   const [userId, setUserId] = useState("");
-  const [showPathwayView, setShowPathwayView] = useState(false);
+  const [showPathwayView, setShowPathwayView] = useState(() => {
+    return sessionStorage.getItem("showPathwayView") === "true";
+  });
   const [isTyping, setIsTyping] = useState(false);
   const [showSession1, setShowSession1] = useState(false);
   const [showSession2, setShowSession2] = useState(false);
@@ -74,7 +76,9 @@ const AmaliaCornerLayout = () => {
         const sanitized = parsed.filter(
           (msg) => typeof msg.content === "string",
         );
-        setMessages(sanitized);
+          // Mark as history to disable animation on reload
+          const historyMsgs = sanitized.map(m => ({ ...m, isHistory: true }));
+          setMessages(historyMsgs);
       } catch (e) {
         console.error("Failed to parse chat history:", e);
       }
@@ -445,7 +449,7 @@ const AmaliaCornerLayout = () => {
     [navigate],
   );
 
-  const initialMessage = `Hi ${firstName}, \nI'm so glad you decided to dive deeper into your results with me. What I see in your diagnostic is really quite insightful - it paints a clear picture of who you are as a leader right now and where your greatest opportunities lie. Let's start by looking at your overall profile together.\n\nThe 'peers' benchmark shows you how your scores compare to other women in your organization who have completed this same diagnostic, giving you valuable context for understanding your results relative to your workplace environment.`;
+  const initialMessage = `Hi ${firstName || "there"}, \nI'm so glad you decided to dive deeper into your results with me. What I see in your diagnostic is really quite insightful - it paints a clear picture of who you are as a leader right now and where your greatest opportunities lie. Let's start by looking at your overall profile together.\n\nThe 'peers' benchmark shows you how your scores compare to other women in your organization who have completed this same diagnostic, giving you valuable context for understanding your results relative to your workplace environment.`;
   const handleGeneratePathway = async () => {
     const pathwayMessage = `Great! Let's work together to create your personalized Leadership Pathway. Based on your Glow and Grow areas, I'll help you develop a tailored plan to enhance your leadership skills and reach your full potential.\n\nLet's start by discussing your goals and priorities. What would you like to focus on first?`;
 
@@ -454,6 +458,7 @@ const AmaliaCornerLayout = () => {
       setMessages([...messages, { type: "amalia", content: pathwayMessage }]);
       setIsTyping(false);
       setShowPathwayView(true);
+      sessionStorage.setItem("showPathwayView", "true");
       sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
       sessionStorage.setItem("fromStartSession", "true");
       sessionStorage.setItem("showSession1", "true");
@@ -706,12 +711,14 @@ const AmaliaCornerLayout = () => {
             <ChatMessage
               message={initialMessage}
               userInitials={userInitials}
+              disableAnimation={true} // Always show welcome message fully immediately
             />
             {messages.map((msg, index) => (
               <ChatMessage
                 key={index}
                 message={msg}
                 userInitials={userInitials}
+                disableAnimation={msg.isHistory}
               />
             ))}
 
@@ -771,177 +778,187 @@ const AmaliaCornerLayout = () => {
               </div>
             ) : (
               <>
-                <div className="mb-8 mt-12 border-t pt-12 border-[#ECECEC]">
-                  <p className="text-base md:text-lg text-[#3D3D3D] font-inter">
-                    I'll create a personalized development plan focused on your
-                    growth areas.
-                  </p>
-                </div>
+                <ScrollReveal direction="up">
+                  <div className="mb-8 mt-12 border-t pt-12 border-[#ECECEC]">
+                    <p className="text-base md:text-lg text-[#3D3D3D] font-inter">
+                      I'll create a personalized development plan focused on your
+                      growth areas.
+                    </p>
+                  </div>
+                </ScrollReveal>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                   {/* Expert knowledge card */}
-                  <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src="/assets/images/dashboard/expert.webp"
-                          alt="Workbook"
-                          className="w-4 h-4"
-                        />
-                        <div>
-                          <p className="text-xs font-inter-medium text-[#3D3D3D]">
-                            Expert knowledge
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-[#9CA3AF]" />
-                          <p className="text-xs font-inter text-[#9CA3AF]">
-                            8 min
-                          </p>
+                  <ScrollReveal direction="left" delay={100}>
+                    <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src="/assets/images/dashboard/expert.webp"
+                            alt="Workbook"
+                            className="w-4 h-4"
+                          />
+                          <div>
+                            <p className="text-xs font-inter-medium text-[#3D3D3D]">
+                              Expert knowledge
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-[#9CA3AF]" />
+                            <p className="text-xs font-inter text-[#9CA3AF]">
+                              8 min
+                            </p>
+                          </div>
                         </div>
                       </div>
+                      <h3 className="text-lg md:text-xl font-cormorant font-bold text-[#3D3D3D] mb-3">
+                        Common Understanding
+                      </h3>
+                      <p className="text-sm text-[#3D3D3D]/70 font-inter mb-6 leading-relaxed">
+                        Introducing ideas that matter to women and their place at
+                        work, based on research and industry reporting.
+                      </p>
+                      <button
+                        onClick={() => handleConversationSelect("session1")}
+                        className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors"
+                      >
+                        Start element
+                      </button>
                     </div>
-                    <h3 className="text-lg md:text-xl font-cormorant font-bold text-[#3D3D3D] mb-3">
-                      Common Understanding
-                    </h3>
-                    <p className="text-sm text-[#3D3D3D]/70 font-inter mb-6 leading-relaxed">
-                      Introducing ideas that matter to women and their place at
-                      work, based on research and industry reporting.
-                    </p>
-                    <button
-                      onClick={() => handleConversationSelect("session1")}
-                      className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors"
-                    >
-                      Start element
-                    </button>
-                  </div>
+                  </ScrollReveal>
                   {/* Workbook card */}
-                  <div
-                    className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(1) ? "opacity-60" : ""}`}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src="/assets/images/dashboard/workbook.webp"
-                          alt="Workbook"
-                          className="w-6 h-6"
-                        />
-                        <div>
-                          <p
-                            className={`text-xs font-inter-medium ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
-                          >
-                            Workbook
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-[#9CA3AF]" />
-                          <p className="text-xs font-inter text-[#9CA3AF]">
-                            8 min
-                          </p>
+                  <ScrollReveal direction="up" delay={200}>
+                    <div
+                      className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full ${!completedSessions.includes(1) ? "opacity-60" : ""}`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src="/assets/images/dashboard/workbook.webp"
+                            alt="Workbook"
+                            className="w-6 h-6"
+                          />
+                          <div>
+                            <p
+                              className={`text-xs font-inter-medium ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                            >
+                              Workbook
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-[#9CA3AF]" />
+                            <p className="text-xs font-inter text-[#9CA3AF]">
+                              8 min
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <h3
-                      className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
-                    >
-                      Reflective Practice
-                    </h3>
-                    <p
-                      className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
-                    >
-                      Small description about the element contents. Lorem ipsum
-                      sit dolor amet avec consect.
-                    </p>
-                    {completedSessions.includes(1) ? (
-                      <button
-                        onClick={() => handleConversationSelect("session2")}
-                        className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                      <h3
+                        className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
                       >
-                        Start element
-                      </button>
-                    ) : (
-                      <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                        <Lock className="w-4 h-4" />
-                        Locked
-                      </button>
-                    )}
-                  </div>
+                        Reflective Practice
+                      </h3>
+                      <p
+                        className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
+                      >
+                        Small description about the element contents. Lorem ipsum
+                        sit dolor amet avec consect.
+                      </p>
+                      {completedSessions.includes(1) ? (
+                        <button
+                          onClick={() => handleConversationSelect("session2")}
+                          className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                        >
+                          Start element
+                        </button>
+                      ) : (
+                        <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                          <Lock className="w-4 h-4" />
+                          Locked
+                        </button>
+                      )}
+                    </div>
+                  </ScrollReveal>
                   {/* Application card */}
-                  <div
-                    className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 ${!completedSessions.includes(2) ? "opacity-60" : ""}`}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src="/assets/images/dashboard/workbook.webp"
-                          alt="Workbook"
-                          className="w-6 h-6"
-                        />
-                        <div>
-                          <p
-                            className={`text-xs font-inter-medium ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
-                          >
-                            Workbook
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-[#9CA3AF]" />
-                          <p className="text-xs font-inter text-[#9CA3AF]">
-                            8 min
-                          </p>
+                  <ScrollReveal direction="right" delay={300}>
+                    <div
+                      className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full ${!completedSessions.includes(2) ? "opacity-60" : ""}`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src="/assets/images/dashboard/workbook.webp"
+                            alt="Workbook"
+                            className="w-6 h-6"
+                          />
+                          <div>
+                            <p
+                              className={`text-xs font-inter-medium ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                            >
+                              Workbook
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-[#9CA3AF]" />
+                            <p className="text-xs font-inter text-[#9CA3AF]">
+                              8 min
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <h3
-                      className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
-                    >
-                      Application
-                    </h3>
-                    <p
-                      className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
-                    >
-                      Small description about the element contents. Lorem ipsum
-                      sit dolor amet avec consect.
-                    </p>
-                    {completedSessions.includes(2) ? (
-                      <button
-                        onClick={() => handleConversationSelect("session3")}
-                        className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                      <h3
+                        className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
                       >
-                        Start element
-                      </button>
-                    ) : (
-                      <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                        <Lock className="w-4 h-4" />
-                        Locked
-                      </button>
-                    )}
+                        Application
+                      </h3>
+                      <p
+                        className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
+                      >
+                        Small description about the element contents. Lorem ipsum
+                        sit dolor amet avec consect.
+                      </p>
+                      {completedSessions.includes(2) ? (
+                        <button
+                          onClick={() => handleConversationSelect("session3")}
+                          className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                        >
+                          Start element
+                        </button>
+                      ) : (
+                        <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                          <Lock className="w-4 h-4" />
+                          Locked
+                        </button>
+                      )}
+                    </div>
+                  </ScrollReveal>
+                </div>
+                <ScrollReveal direction="up" delay={400}>
+                  <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-6 mb-8">
+                    <p className="text-base text-black font-inter mb-4">
+                      We'll start with {domainLabel}. For that, I've scheduled 4
+                      sessions for you:
+                    </p>
+                    <ul className="space-y-3 mb-6">
+                      {[1, 2, 3, 4].map((num) => (
+                        <li key={num} className="flex items-start gap-3">
+                          <span className="text-black font-bold">•</span>
+                          <span className="text-base text-black font-inter">
+                            Session {num}: {getSessionTitle(num)}{" "}
+                            {num === 1 ? "(Common Understanding)" : ""}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-base text-black/70 font-inter mb-4 leading-relaxed">
+                      Each session is designed to be conversational and practical,
+                      building on real workplace scenarios.
+                    </p>
+                    <p className="text-base text-black/70 font-inter">
+                      You would always have this pathway on the main dashboard so
+                      you can work on all the points one by one.
+                    </p>
                   </div>
-                </div>
-                <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-6 mb-8">
-                  <p className="text-base text-black font-inter mb-4">
-                    We'll start with {domainLabel}. For that, I've scheduled 4
-                    sessions for you:
-                  </p>
-                  <ul className="space-y-3 mb-6">
-                    {[1, 2, 3, 4].map((num) => (
-                      <li key={num} className="flex items-start gap-3">
-                        <span className="text-black font-bold">•</span>
-                        <span className="text-base text-black font-inter">
-                          Session {num}: {getSessionTitle(num)}{" "}
-                          {num === 1 ? "(Common Understanding)" : ""}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-base text-black/70 font-inter mb-4 leading-relaxed">
-                    Each session is designed to be conversational and practical,
-                    building on real workplace scenarios.
-                  </p>
-                  <p className="text-base text-black/70 font-inter">
-                    You would always have this pathway on the main dashboard so
-                    you can work on all the points one by one.
-                  </p>
-                </div>
+                </ScrollReveal>
                 <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
                   <button
                     onClick={handleStartSession}

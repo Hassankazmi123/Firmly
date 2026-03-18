@@ -244,6 +244,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
             key={message.id} 
             message={message} 
             userInitials={userInitials} 
+            disableAnimation={true}
           />
         ))}
 

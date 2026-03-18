@@ -260,6 +260,7 @@ const Session3Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
             key={message.id} 
             message={message} 
             userInitials={userInitials} 
+            disableAnimation={true}
           />
         ))}
 

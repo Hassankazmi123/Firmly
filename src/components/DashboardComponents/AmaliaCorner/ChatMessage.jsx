@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const ChatMessage = ({ message, userInitials, alignUserLeft = false }) => {
+const ChatMessage = ({ message, userInitials, alignUserLeft = false, disableAnimation = false }) => {
   const isMessageObject = typeof message === "object" && message !== null;
   const isReactElement = isMessageObject && message.$$typeof;
 
@@ -8,10 +8,10 @@ const ChatMessage = ({ message, userInitials, alignUserLeft = false }) => {
   const content = isMessageObject && !isReactElement ? message.content || message.text : message;
 
   const isUser = type === "user";
-  const [displayedContent, setDisplayedContent] = useState(isUser ? content : "");
+  const [displayedContent, setDisplayedContent] = useState(isUser || disableAnimation ? content : "");
 
   useEffect(() => {
-    if (!isUser && content) {
+    if (!isUser && !disableAnimation && content) {
       if (typeof content !== "string") {
         setDisplayedContent(content);
         return;
@@ -26,7 +26,7 @@ const ChatMessage = ({ message, userInitials, alignUserLeft = false }) => {
       }, 20);
       return () => clearInterval(timer);
     }
-  }, [content, isUser]);
+  }, [content, isUser, disableAnimation]);
   const isAmaliaString = !isUser && typeof content === "string";
 
   return (
