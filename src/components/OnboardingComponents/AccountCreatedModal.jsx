@@ -34,7 +34,7 @@ const AccountCreatedModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4 font-cormorant px-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 font-cormorant px-2">
           Account Created Successfully
         </h2>
 
