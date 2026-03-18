@@ -9,7 +9,18 @@ const Hero = () => {
   const location = useLocation();
   const isFromAmalia = location.state?.fromAmaliaCorner || sessionStorage.getItem("hasVisitedAmaliaCorner") === "true";
   const [currentMetric, setCurrentMetric] = useState(0);
-  const [firstName, setFirstName] = useState("");
+  const [firstName, setFirstName] = useState(() => {
+    try {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsed = JSON.parse(user);
+        return parsed.first_name || "";
+      }
+    } catch (e) {
+      console.warn("Failed to parse user from localStorage:", e);
+    }
+    return "";
+  });
   const [isDebriefModalOpen, setIsDebriefModalOpen] = useState(false);
   const [overallScore, setOverallScore] = useState(null);
   const [scoreLabel, setScoreLabel] = useState("");

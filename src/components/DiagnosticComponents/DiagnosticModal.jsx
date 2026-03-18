@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import NotificationPopup from "../DashboardComponents/notification/Notification";
 import { getUserProfile } from "../../services/api";
 
 const DiagnosticModal = () => {
@@ -15,7 +14,6 @@ const DiagnosticModal = () => {
     return null;
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -123,35 +121,7 @@ const DiagnosticModal = () => {
                 <span className="text-white/70 text-sm sm:text-base">
                   Amalia
                 </span>
-                <span className="text-sm flex items-center justify-center bg-[#ababab] border border-white/20 text-white/70 px-2 py-0.5 rounded-full">
-                  • online
-                </span>
               </div>
-            </div>
-            <div className="relative">
-              <button
-                className="relative text-white p-2 rounded-lg transition-colors"
-                onClick={() => setIsNotificationOpen((s) => !s)}
-                aria-expanded={isNotificationOpen}
-                aria-label="Toggle notifications"
-                type="button"
-              >
-                <svg
-                  className="w-7 h-7 sm:w-8 sm:h-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-                <span className="absolute top-1 right-2 h-2.5 w-2.5 bg-[#D46FA8] rounded-full" />
-              </button>
             </div>
             <div className="relative" ref={ltDropdownRef}>
               <button
@@ -276,10 +246,6 @@ const DiagnosticModal = () => {
           </div>
         </div>
       </header>
-      <NotificationPopup
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-      />
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center border-[8px] sm:border-[12px] md:border-[16px] border-[#f5f5f5] relative overflow-hidden bg-[#ebebeb] rounded-2xl sm:rounded-3xl">

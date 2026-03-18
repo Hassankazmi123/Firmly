@@ -133,7 +133,11 @@ export const authenticatedFetch = async (url, options = {}) => {
     }
 };
 export const getUserProfile = async () => {
-    return await authenticatedFetch(`${API_AUTH_URL}/profile/`);
+    const profile = await authenticatedFetch(`${API_AUTH_URL}/profile/`);
+    if (profile && profile.id) {
+        localStorage.setItem("user", JSON.stringify(profile));
+    }
+    return profile;
 };
 export const changePassword = async (passwordData) => {
     return await authenticatedFetch(`${API_AUTH_URL}/change-password/`, {

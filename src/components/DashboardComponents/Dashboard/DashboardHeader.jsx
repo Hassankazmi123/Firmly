@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { getUserProfile } from "../../../services/api";
 import logout from "../../../utils/logout";
 import Hero from "./Hero";
-import NotificationPopup from "../notification/Notification";
 const PortalDropdown = ({
   children,
   anchorRef,
@@ -81,14 +80,26 @@ const PortalDropdown = ({
 const DashboardHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [userInitials, setUserInitials] = useState("U");
+  const [userInitials, setUserInitials] = useState(() => {
+    try {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsed = JSON.parse(user);
+        if (parsed.first_name && parsed.last_name) {
+          return `${parsed.first_name.charAt(0)}${parsed.last_name.charAt(0)}`.toUpperCase();
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse user from localStorage:", e);
+    }
+    return "U";
+  });
   const [selectedTab, setSelectedTab] = useState(() => {
     if (location.pathname === "/amalia-corner") return "Amalia Corner";
     if (location.pathname === "/dashboard") return "Dashboard";
     return null;
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
   const mobileToggleRef = useRef(null);
   const ltToggleRef = useRef(null);
@@ -205,34 +216,8 @@ const DashboardHeader = () => {
                 className="h-5 w-5 sm:h-6 sm:w-6"
               />
               <span className="text-white/70 text-sm sm:text-base">Amalia</span>
-              <span className="text-sm flex items-center justify-center bg-[#7d7cd9] border border-white/20 text-white/70 px-2 py-0.5 rounded-full">
-                • online
-              </span>
             </div>
           </div>
-          <button
-            onClick={() => setIsNotificationOpen((s) => !s)}
-            className="relative text-white  p-2 rounded-lg transition-colors"
-            aria-expanded={isNotificationOpen}
-            aria-label="Toggle notifications"
-            type="button"
-          >
-            <svg
-              className="w-7 h-7 sm:w-8 sm:h-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
-            <span className="absolute top-1 right-2 h-2.5 w-2.5 bg-[#D46FA8] rounded-full" />
-          </button>
           <div className="relative z-[200]">
             <button
               ref={ltToggleRef}
@@ -390,10 +375,6 @@ const DashboardHeader = () => {
         className="absolute bottom-0 right-0 w-[613px] z-0 h-[515px] object-cover object-bottom pointer-events-none"
       />
     </header>
-    <NotificationPopup
-      isOpen={isNotificationOpen}
-      onClose={() => setIsNotificationOpen(false)}
-    />
     </>
   );
 };

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import NotificationPopup from "../DashboardComponents/notification/Notification";
 import { assessmentService } from "../../services/assessment";
 import { getUserProfile } from "../../services/api";
 import logout from "../../utils/logout";
@@ -10,8 +9,20 @@ const DiagnosticComplete = () => {
   const location = useLocation();
   const { runId: stateRunId } = location.state || {};
   const runId = stateRunId || localStorage.getItem("assessmentId");
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [userInitials, setUserInitials] = useState("U");
+  const [userInitials, setUserInitials] = useState(() => {
+    try {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsed = JSON.parse(user);
+        if (parsed.first_name && parsed.last_name) {
+          return `${parsed.first_name.charAt(0)}${parsed.last_name.charAt(0)}`.toUpperCase();
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse user from localStorage:", e);
+    }
+    return "U";
+  });
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
   const ltDropdownRef = useRef(null);
 
@@ -111,35 +122,7 @@ const DiagnosticComplete = () => {
                 <span className="text-white/70 text-sm sm:text-base">
                   Amalia
                 </span>
-                <span className="text-sm flex items-center justify-center bg-[#ababab] border border-white/20 text-white/70 px-2 py-0.5 rounded-full">
-                  • online
-                </span>
               </div>
-            </div>
-            <div className="relative">
-              <button
-                className="relative text-white p-2 rounded-lg transition-colors"
-                onClick={() => setIsNotificationOpen((s) => !s)}
-                aria-expanded={isNotificationOpen}
-                aria-label="Toggle notifications"
-                type="button"
-              >
-                <svg
-                  className="w-7 h-7 sm:w-8 sm:h-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-                <span className="absolute top-1 right-2 h-2.5 w-2.5 bg-[#D46FA8] rounded-full" />
-              </button>
             </div>
             <div className="relative" ref={ltDropdownRef}>
               <button
@@ -227,10 +210,6 @@ const DiagnosticComplete = () => {
           </div>
         </div>
       </header>
-      <NotificationPopup
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-      />
 
       <div className="flex-1 flex items-center justify-center border-[8px] sm:border-[12px] md:border-[16px] border-[#f5f5f5] relative overflow-hidden bg-[#ebebeb] rounded-2xl sm:rounded-3xl">
         <div className="absolute inset-0 z-0 pointer-events-none">
