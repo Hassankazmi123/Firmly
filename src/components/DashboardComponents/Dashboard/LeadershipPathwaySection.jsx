@@ -13,21 +13,12 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   const [isSession2ModalOpen, setIsSession2ModalOpen] = useState(false);
   const [isSession3ModalOpen, setIsSession3ModalOpen] = useState(false);
   const [isSession4ModalOpen, setIsSession4ModalOpen] = useState(false);
+  const [isPathwayGenerated, setIsPathwayGenerated] = useState(() => {
+    return localStorage.getItem("hasGeneratedPathway") === "true";
+  });
+
   const [showPathwayDesign, setShowPathwayDesign] = useState(() => {
-    try {
-      const fromStart = sessionStorage.getItem("fromStartSession");
-      const hasStartedDebrief =
-        localStorage.getItem("hasStartedDebrief") === "true";
-      if (fromStart === "true" || hasStartedDebrief) return true;
-      const saved = localStorage.getItem("amalia_completed_sessions");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) && parsed.length > 0;
-      }
-    } catch {
-      // ignore
-    }
-    return false;
+    return localStorage.getItem("hasGeneratedPathway") === "true";
   });
 
   // Read persisted completed sessions from localStorage (saved by AmaliaCornerLayout)
@@ -41,12 +32,9 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   });
 
   useEffect(() => {
-    const fromStartSession = sessionStorage.getItem("fromStartSession");
-    const hasStartedDebrief = localStorage.getItem("hasStartedDebrief") === "true";
-
-    if (fromStartSession === "true" || hasStartedDebrief) {
-      setShowPathwayDesign(true);
-    }
+    const hasGenerated = localStorage.getItem("hasGeneratedPathway") === "true";
+    setShowPathwayDesign(hasGenerated);
+    setIsPathwayGenerated(hasGenerated);
 
     // Re-read completedSessions on mount in case they were updated
     try {
@@ -56,6 +44,21 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       // ignore
     }
   }, []);
+
+  // Auto-open Leadership Pathway modal after 30 seconds if Grow & Glow is filled but Pathway is not yet generated
+  useEffect(() => {
+    if (hasVisitedAmaliaCorner && !isPathwayGenerated) {
+      const timerId = setTimeout(() => {
+        const autoShown = sessionStorage.getItem("pathway_auto_prompted");
+        if (!autoShown) {
+          console.log("Auto-prompting Leadership Pathway generation");
+          handleGeneratePathway();
+          sessionStorage.setItem("pathway_auto_prompted", "true");
+        }
+      }, 30000);
+      return () => clearTimeout(timerId);
+    }
+  }, [hasVisitedAmaliaCorner, isPathwayGenerated]);
 
   // Derive per-session state from completedSessions
   const session1Done = completedSessions.includes(1);
@@ -74,6 +77,10 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       if (response && response.domain) {
         sessionStorage.setItem("currentPathwayDomain", response.domain);
       }
+      localStorage.setItem("hasGeneratedPathway", "true");
+      localStorage.setItem("hasStartedSessions", "true");
+      setIsPathwayGenerated(true);
+      setShowPathwayDesign(true);
       console.log("Pathway started successfully");
     } catch (error) {
       console.error("Failed to start pathway:", error);

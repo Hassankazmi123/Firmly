@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import OnboardingLayout from "./OnboardingLayout";
 import CompleteProfileModal from "./CompleteProfileModal";
+import clearAppCache from "../../utils/cache";
 
 // API Configuration
 const API_BASE_URL =
@@ -128,7 +129,11 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         return;
       }
 
-      // Store tokens - handle different response formats
+      localStorage.removeItem("hasStartedDebrief");
+      localStorage.removeItem("hasGeneratedPathway");
+      localStorage.removeItem("hasStartedSessions");
+      sessionStorage.clear();
+
       let accessToken = null;
       let refreshToken = null;
 
@@ -161,6 +166,13 @@ const CreateAccountModal = ({ isOpen, onClose }) => {
         access: accessToken,
         refresh: refreshToken,
       };
+
+      // Clear any stale state from previous sessions before setting new user data
+      try {
+        await clearAppCache();
+      } catch (cacheError) {
+        console.warn("Failed to clear app cache during registration:", cacheError);
+      }
 
       localStorage.setItem("accessToken", accessToken);
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);

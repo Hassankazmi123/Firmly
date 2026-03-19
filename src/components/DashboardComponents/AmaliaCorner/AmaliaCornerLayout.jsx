@@ -488,6 +488,12 @@ const AmaliaCornerLayout = () => {
 
   const initialMessage = `Hi ${firstName}, \nI'm so glad you decided to dive deeper into your results with me. What I see in your diagnostic is really quite insightful - it paints a clear picture of who you are as a leader right now and where your greatest opportunities lie. Let's start by looking at your overall profile together.\n\nThe 'peers' benchmark shows you how your scores compare to other women in your organization who have completed this same diagnostic, giving you valuable context for understanding your results relative to your workplace environment.`;
   const handleGeneratePathway = async () => {
+    if (showPathwayView) {
+      sessionStorage.setItem("fromStartSession", "true");
+      handleGoToDashboard();
+      return;
+    }
+
     const pathwayMessage = `Great! Let's work together to create your personalized Leadership Pathway. Based on your Glow and Grow areas, I'll help you develop a tailored plan to enhance your leadership skills and reach your full potential.\n\nLet's start by discussing your goals and priorities. What would you like to focus on first?`;
 
     setIsTyping(true);
@@ -499,6 +505,7 @@ const AmaliaCornerLayout = () => {
       sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
       sessionStorage.setItem("fromStartSession", "true");
       sessionStorage.setItem("showSession1", "true");
+      localStorage.setItem("hasStartedSessions", "true");
     }, 1500);
   };
   const handleGoToDashboard = () => {
@@ -786,22 +793,22 @@ const AmaliaCornerLayout = () => {
               </ScrollReveal>
             </div>
 
-            {!showPathwayView ? (
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 my-6 md:my-8 max-w-2xl mx-auto">
-                <button
-                  onClick={handleGeneratePathway}
-                  className="flex-1 px-5 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
-                >
-                  Generate my Leadership Pathway
-                </button>
-                <button
-                  onClick={handleGoToDashboard}
-                  className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
-                >
-                  Go to Dashboard
-                </button>
-              </div>
-            ) : (
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 my-6 md:my-8 max-w-2xl mx-auto">
+              <button
+                onClick={handleGeneratePathway}
+                className="flex-1 px-5 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+              >
+                Generate my Leadership Pathway
+              </button>
+              <button
+                onClick={handleGoToDashboard}
+                className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+
+            {showPathwayView && (
               <>
                 <ScrollReveal direction="up">
                   <div className="mb-8 mt-12 border-t pt-12 border-[#ECECEC]">
@@ -984,7 +991,7 @@ const AmaliaCornerLayout = () => {
                     </p>
                   </div>
                 </ScrollReveal>
-                <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
+                <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto mb-8">
                   <button
                     onClick={handleStartSession}
                     className="flex-1 px-6 py-3 bg-[#F5F5F5] text-[#3D3D3D] rounded-xl font-inter-medium text-base hover:bg-[#E5E5E5] transition-colors"

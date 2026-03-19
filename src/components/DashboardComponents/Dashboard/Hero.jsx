@@ -101,6 +101,7 @@ const Hero = () => {
       if (!hasShownAuto && !hasStartedDebrief) {
         setIsDebriefModalOpen(true);
         sessionStorage.setItem("debrief_auto_shown", "true");
+        localStorage.setItem("hasStartedDebrief", "true");
       }
     }, 30000);
 

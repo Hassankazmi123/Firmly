@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
   const modalRef = useRef(null);
   const navigate = useNavigate();
+  const isFromAmalia = localStorage.getItem("hasStartedDebrief") === "true";
 
   useEffect(() => {
     if (isOpen) {
@@ -49,6 +50,7 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
   }, [isOpen, onClose]);
 
   const handleGetDebrief = () => {
+    localStorage.setItem("hasStartedDebrief", "true");
     if (onGetDebrief) {
       onGetDebrief();
     }
@@ -88,7 +90,7 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
                 onClick={handleGetDebrief}
                 className="w-full px-6 py-3 bg-[#3D3D3D] text-[#F5F5F5] rounded-xl font-inter font-medium transition-colors text-base "
               >
-                Get Debrief
+                Start Debrief
               </button>
             </div>
           </div>

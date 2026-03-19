@@ -98,8 +98,13 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
   }, [hasVisitedAmaliaCorner]);
 
   const handleImproveClick = () => {
-    // Clear any specific saved conversation to let AmaliaCorner pick the latest unlocked session
-    sessionStorage.removeItem("selectedConversation");
+    const isStarted = localStorage.getItem("hasStartedSessions") === "true";
+    if (!isStarted) {
+      sessionStorage.setItem("selectedConversation", "diagnostic");
+    } else {
+      // Clear any specific saved conversation to let AmaliaCorner pick the latest unlocked session
+      sessionStorage.removeItem("selectedConversation");
+    }
     navigate("/amalia-corner");
   };
 
