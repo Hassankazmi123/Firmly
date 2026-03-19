@@ -31,14 +31,6 @@ export default function Dashboard() {
           sessionStorage.removeItem("fromStartSession");
         }, 200);
       }
-
-      // We only want to clear the session flag if it was there
-      if (visited === "true") {
-        const timeoutId = setTimeout(() => {
-          sessionStorage.removeItem("hasVisitedAmaliaCorner");
-        }, 100);
-        return () => clearTimeout(timeoutId);
-      }
     } else {
       setHasVisitedAmaliaCorner(false);
     }
