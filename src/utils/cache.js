@@ -1,17 +1,5 @@
 export const clearAppCache = async () => {
   try {
-    try {
-      localStorage.clear();
-    } catch (e) {
-      console.warn("localStorage.clear failed:", e);
-    }
-
-    try {
-      sessionStorage.clear();
-    } catch (e) {
-      console.warn("sessionStorage.clear failed:", e);
-    }
-
     if (typeof caches !== "undefined" && caches.keys) {
       try {
         const keys = await caches.keys();

@@ -5,6 +5,8 @@ import LeadershipPathwaySection from "../components/DashboardComponents/Dashboar
 import DashboardHeader from "../components/DashboardComponents/Dashboard/DashboardHeader";
 import StartConversationModal from "../components/DashboardComponents/AllModals/StartConversationModal";
 import GuidedWalkthrough from "../components/Tour/GuidedWalkthrough";
+import { authenticatedFetch, API_AUTH_URL } from "../services/api";
+import { pathwayService } from "../services/pathway";
 
 export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,7 +23,6 @@ export default function Dashboard() {
     if (visited === "true" || hasStartedDebrief) {
       setHasVisitedAmaliaCorner(true);
 
-      // Only scroll if it's explicitly fromStartSession (the immediate redirect)
       if (fromStartSession === "true" && pathwaySectionRef.current) {
         setTimeout(() => {
           pathwaySectionRef.current?.scrollIntoView({
@@ -35,6 +36,40 @@ export default function Dashboard() {
       setHasVisitedAmaliaCorner(false);
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (hasVisitedAmaliaCorner) return;
+
+    const restoreVisitState = async () => {
+      try {
+        const data = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
+          method: "GET",
+        });
+        if (data?.debrief_complete === true) {
+          localStorage.setItem("hasStartedDebrief", "true");
+          sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+          setHasVisitedAmaliaCorner(true);
+          return;
+        }
+      } catch (err) {
+        console.warn("Failed to check debrief status:", err);
+      }
+
+      try {
+        const response = await pathwayService.startPathway();
+        if (response.isExisting || response.statusCode === 409) {
+          localStorage.setItem("hasGeneratedPathway", "true");
+          localStorage.setItem("hasStartedSessions", "true");
+          sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+          setHasVisitedAmaliaCorner(true);
+        }
+      } catch (err) {
+        console.warn("Failed to check pathway status:", err);
+      }
+    };
+
+    restoreVisitState();
+  }, [hasVisitedAmaliaCorner]);
 
   const handleStartChat = (mode) => {
     console.log(`Starting ${mode} chat`);

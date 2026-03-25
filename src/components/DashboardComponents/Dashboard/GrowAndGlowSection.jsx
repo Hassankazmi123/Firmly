@@ -13,7 +13,25 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
     const fetchAssessmentData = async () => {
       try {
         setLoading(true);
-        const assessmentId = localStorage.getItem("assessmentId");
+        let assessmentId = localStorage.getItem("assessmentId");
+
+        if (!assessmentId) {
+          try {
+            const startData = await assessmentService.startAssessment("v1");
+            assessmentId =
+              startData?.id ||
+              startData?.run_id ||
+              startData?.assessment_id ||
+              startData?.assessmentId;
+            if (assessmentId) {
+              localStorage.setItem("assessmentId", String(assessmentId));
+              assessmentId = String(assessmentId);
+            }
+          } catch (restoreErr) {
+            console.warn("Could not restore assessment ID:", restoreErr);
+          }
+        }
+
         if (!assessmentId) {
           throw new Error("No assessment run id found");
         }

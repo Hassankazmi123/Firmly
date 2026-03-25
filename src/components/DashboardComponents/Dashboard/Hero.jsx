@@ -68,7 +68,26 @@ const Hero = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const assessmentId = localStorage.getItem("assessmentId");
+        let assessmentId = localStorage.getItem("assessmentId");
+
+        if (!assessmentId) {
+          try {
+            const startData = await assessmentService.startAssessment("v1");
+            assessmentId =
+              startData?.id ||
+              startData?.run_id ||
+              startData?.assessment_id ||
+              startData?.assessmentId;
+            if (assessmentId) {
+              localStorage.setItem("assessmentId", String(assessmentId));
+              assessmentId = String(assessmentId);
+            }
+          } catch (restoreErr) {
+            console.warn("Could not restore assessment ID:", restoreErr);
+            return;
+          }
+        }
+
         if (!assessmentId) return;
         const data = await assessmentService.getResults(assessmentId);
         const domains = data?.domains || [];
@@ -119,7 +138,11 @@ const Hero = () => {
           method: "GET",
         });
         if (cancelled) return;
-        setDebriefComplete(data?.debrief_complete === true);
+        const isComplete = data?.debrief_complete === true;
+        setDebriefComplete(isComplete);
+        if (isComplete) {
+          localStorage.setItem("hasStartedDebrief", "true");
+        }
       } catch (err) {
         console.warn("Failed to fetch debrief flag:", err);
       }

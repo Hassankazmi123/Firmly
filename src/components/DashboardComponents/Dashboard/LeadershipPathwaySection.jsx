@@ -32,17 +32,71 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   });
 
   useEffect(() => {
-    const hasGenerated = localStorage.getItem("hasGeneratedPathway") === "true";
-    setShowPathwayDesign(hasGenerated);
-    setIsPathwayGenerated(hasGenerated);
+    const restorePathwayState = async () => {
+      let hasGenerated = localStorage.getItem("hasGeneratedPathway") === "true";
 
-    // Re-read completedSessions on mount in case they were updated
-    try {
-      const saved = localStorage.getItem("amalia_completed_sessions");
-      if (saved) setCompletedSessions(JSON.parse(saved));
-    } catch {
-      // ignore
-    }
+      if (!hasGenerated) {
+        try {
+          const response = await pathwayService.startPathway();
+          if (response.isExisting || response.statusCode === 409) {
+            hasGenerated = true;
+            localStorage.setItem("hasGeneratedPathway", "true");
+            localStorage.setItem("hasStartedSessions", "true");
+            if (response.domain) {
+              sessionStorage.setItem("currentPathwayDomain", response.domain);
+            }
+          }
+        } catch (err) {
+          console.warn("Could not restore pathway state:", err);
+        }
+      }
+
+      setShowPathwayDesign(hasGenerated);
+      setIsPathwayGenerated(hasGenerated);
+
+      try {
+        const saved = localStorage.getItem("amalia_completed_sessions");
+        if (saved) {
+          setCompletedSessions(JSON.parse(saved));
+          return;
+        }
+      } catch {
+        // ignore
+      }
+
+      if (hasGenerated) {
+        try {
+          const info = await pathwayService.getNextSessionInfo();
+          if (info) {
+            const completed = info.completed_sessions || info.completed || [];
+            const nextSession =
+              info.next_session || info.session_number || info.next;
+
+            let restoredSessions = [];
+            if (Array.isArray(completed) && completed.length > 0) {
+              restoredSessions = completed;
+            } else if (typeof nextSession === "number" && nextSession > 1) {
+              restoredSessions = Array.from(
+                { length: nextSession - 1 },
+                (_, i) => i + 1,
+              );
+            }
+
+            if (restoredSessions.length > 0) {
+              localStorage.setItem(
+                "amalia_completed_sessions",
+                JSON.stringify(restoredSessions),
+              );
+              setCompletedSessions(restoredSessions);
+            }
+          }
+        } catch (err) {
+          console.warn("Could not restore session state:", err);
+        }
+      }
+    };
+
+    restorePathwayState();
   }, []);
 
   // Auto-open Leadership Pathway modal after 30 seconds if Grow & Glow is filled but Pathway is not yet generated
@@ -138,10 +192,11 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
     <>
       <section
         data-tour="leadership-pathway"
-        className={`py-8 lg:py-12 ${showPathwayDesign
-          ? "  px-4 sm:px-6 lg:px-8 border border-[#E8E8E8] rounded-2xl"
-          : " "
-          }`}
+        className={`py-8 lg:py-12 ${
+          showPathwayDesign
+            ? "  px-4 sm:px-6 lg:px-8 border border-[#E8E8E8] rounded-2xl"
+            : " "
+        }`}
       >
         <div className="mb-8 sm:mb-12 ">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-1 font-cormorant">
@@ -158,16 +213,17 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
               <div className="flex items-center justify-between relative ">
                 <div className="absolute top-1/2 left-0 right-0 h-2 lg:h-4 rounded-full bg-[#E5E5E5] -translate-y-1/2 z-0"></div>
                 <div
-                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${session4Done
-                    ? "w-full"
-                    : session3Done
-                      ? "w-3/4"
-                      : session2Done
-                        ? "w-2/4"
-                        : session1Done
-                          ? "w-1/4"
-                          : "w-[12.5%]"
-                    }`}
+                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${
+                    session4Done
+                      ? "w-full"
+                      : session3Done
+                        ? "w-3/4"
+                        : session2Done
+                          ? "w-2/4"
+                          : session1Done
+                            ? "w-1/4"
+                            : "w-[12.5%]"
+                  }`}
                 ></div>
                 {pathwaySteps.map((step, index) => (
                   <div
@@ -175,10 +231,11 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
                     className="relative z-20 flex flex-col items-center flex-1"
                   >
                     <div
-                      className={`lg:w-10 lg:h-10 w-7 h-7   rounded-full flex items-center justify-center border-2 transition-all ${step.status === "active" || step.status === "completed"
-                        ? "bg-white border-none  shadow-sm"
-                        : "bg-white border-[#E5E5E5]"
-                        }`}
+                      className={`lg:w-10 lg:h-10 w-7 h-7   rounded-full flex items-center justify-center border-2 transition-all ${
+                        step.status === "active" || step.status === "completed"
+                          ? "bg-white border-none  shadow-sm"
+                          : "bg-white border-[#E5E5E5]"
+                      }`}
                     >
                       {step.status === "completed" ? (
                         <Check
@@ -199,10 +256,11 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
               {pathwaySteps.map((step) => (
                 <div
                   key={step.id}
-                  className={`bg-white border-2 rounded-2xl p-4 md:p-5 lg:p-6 transition-all ${step.status === "active" || step.status === "completed"
-                    ? "border-none shadow-sm"
-                    : "border-none opacity-40"
-                    }`}
+                  className={`bg-white border-2 rounded-2xl p-4 md:p-5 lg:p-6 transition-all ${
+                    step.status === "active" || step.status === "completed"
+                      ? "border-none shadow-sm"
+                      : "border-none opacity-40"
+                  }`}
                 >
                   <div className="flex items-start justify-between mb-3 md:mb-4">
                     <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
@@ -212,45 +270,50 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
                         className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 flex-shrink-0"
                       />
                       <p
-                        className={`text-xs sm:text-sm font-inter-medium truncate ${step.status === "active" ||
+                        className={`text-xs sm:text-sm font-inter-medium truncate ${
+                          step.status === "active" ||
                           step.status === "completed"
-                          ? "text-[#3D3D3D]"
-                          : "text-[#9CA3AF]"
-                          }`}
+                            ? "text-[#3D3D3D]"
+                            : "text-[#9CA3AF]"
+                        }`}
                       >
                         {step.type}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <Clock
-                        className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${step.status === "active"
-                          ? "text-[#9CA3AF]"
-                          : "text-[#9CA3AF]"
-                          }`}
+                        className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${
+                          step.status === "active"
+                            ? "text-[#9CA3AF]"
+                            : "text-[#9CA3AF]"
+                        }`}
                       />
                       <p
-                        className={`text-xs sm:text-sm font-inter ${step.status === "active"
-                          ? "text-[#9CA3AF]"
-                          : "text-[#9CA3AF]"
-                          }`}
+                        className={`text-xs sm:text-sm font-inter ${
+                          step.status === "active"
+                            ? "text-[#9CA3AF]"
+                            : "text-[#9CA3AF]"
+                        }`}
                       >
                         {step.duration}
                       </p>
                     </div>
                   </div>
                   <h3
-                    className={`text-base sm:text-lg md:text-xl font-cormorant font-bold mb-2 md:mb-3 ${step.status === "active" || step.status === "completed"
-                      ? "text-[#3D3D3D]"
-                      : "text-[#9CA3AF]"
-                      }`}
+                    className={`text-base sm:text-lg md:text-xl font-cormorant font-bold mb-2 md:mb-3 ${
+                      step.status === "active" || step.status === "completed"
+                        ? "text-[#3D3D3D]"
+                        : "text-[#9CA3AF]"
+                    }`}
                   >
                     {step.title}
                   </h3>
                   <p
-                    className={`text-xs sm:text-sm md:text-base font-inter mb-4 md:mb-6 leading-relaxed ${step.status === "active" || step.status === "completed"
-                      ? "text-[#3D3D3D]/70"
-                      : "text-[#9CA3AF]"
-                      }`}
+                    className={`text-xs sm:text-sm md:text-base font-inter mb-4 md:mb-6 leading-relaxed ${
+                      step.status === "active" || step.status === "completed"
+                        ? "text-[#3D3D3D]/70"
+                        : "text-[#9CA3AF]"
+                    }`}
                   >
                     {step.description}
                   </p>

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import clearAppCache from "../../utils/cache";
 
 const Screen4Card = ({ onBack }) => {
   const [email, setEmail] = useState("");
@@ -50,13 +49,6 @@ const Screen4Card = ({ onBack }) => {
       }
 
       if (accessToken) {
-        // Clear any stale state from previous sessions before setting new user data
-        try {
-          await clearAppCache();
-        } catch (cacheError) {
-          console.warn("Failed to clear app cache during login:", cacheError);
-        }
-
         localStorage.setItem("accessToken", accessToken);
         if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("onboardingComplete", "true");
