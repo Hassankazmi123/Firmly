@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import DiagnosticDebriefModal from "../DashboardComponents/AllModals/DiagnosticDebriefModal";
+import { API_AUTH_URL, authenticatedFetch } from "../../services/api";
 
 const steps = [
   {
@@ -62,23 +63,45 @@ const GuidedWalkthrough = ({ onComplete }) => {
   const [highlightedElement, setHighlightedElement] = useState(null);
   const [highlightRect, setHighlightRect] = useState(null);
   const [isDebriefModalOpen, setIsDebriefModalOpen] = useState(false);
+  const [isUpdatingOnboarding, setIsUpdatingOnboarding] = useState(false);
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 1024,
     height: typeof window !== "undefined" ? window.innerHeight : 768,
   });
   const overlayRef = useRef(null);
 
-  // Check if user has already seen the walkthrough
-  const hasSeenWalkthrough = () => {
+  const LOCAL_WALKTHROUGH_COMPLETED_KEY = "firmly_walkthrough_completed";
+
+  const hasSeenWalkthroughLocal = () => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("firmly_walkthrough_completed") === "true";
+    return localStorage.getItem(LOCAL_WALKTHROUGH_COMPLETED_KEY) === "true";
   };
 
-  // Mark walkthrough as completed
-  const markWalkthroughCompleted = () => {
+  const markWalkthroughCompletedLocal = () => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("firmly_walkthrough_completed", "true");
+      localStorage.setItem(LOCAL_WALKTHROUGH_COMPLETED_KEY, "true");
     }
+  };
+
+  const shouldCallOnboardingApi = () => {
+    // authenticatedFetch can refresh using refreshToken, so allow calls when either exists.
+    return !!(
+      localStorage.getItem("accessToken") || localStorage.getItem("refreshToken")
+    );
+  };
+
+  const getOnboardingCompleteFromServer = async () => {
+    const data = await authenticatedFetch(`${API_AUTH_URL}/onboarding/`, {
+      method: "GET",
+    });
+    return data?.onboarding_complete === true;
+  };
+
+  const updateOnboardingCompleteOnServer = async () => {
+    return await authenticatedFetch(`${API_AUTH_URL}/onboarding/`, {
+      method: "PUT",
+      body: JSON.stringify({ onboarding_complete: true }),
+    });
   };
 
   useEffect(() => {
@@ -94,37 +117,51 @@ const GuidedWalkthrough = ({ onComplete }) => {
   }, []);
 
   useEffect(() => {
-    // Only show walkthrough if user hasn't seen it before
-    if (hasSeenWalkthrough()) {
-      return;
-    }
+    let cancelled = false;
 
-    // Check if screen is mobile (width < 640px) - hide walkthrough on mobile
-    const checkMobile = () => {
-      return window.innerWidth < 640;
-    };
+    const checkMobile = () => window.innerWidth < 640;
 
-    // If mobile, mark as completed and don't show walkthrough
-    if (checkMobile()) {
-      markWalkthroughCompleted();
-      return;
-    }
+    const init = async () => {
+      let serverComplete = false;
+      if (shouldCallOnboardingApi()) {
+        try {
+          serverComplete = await getOnboardingCompleteFromServer();
+        } catch (e) {
+          console.warn("Failed to fetch onboarding flag:", e);
+        }
+      }
 
-    const delay = 1000;
-    const timer = setTimeout(() => {
-      // Double-check mobile before activating (in case of resize)
-      if (checkMobile()) {
-        markWalkthroughCompleted();
+      if (cancelled) return;
+
+      // If server says onboarding is complete, don't show walkthrough again.
+      // Also respect the local flag as a fallback.
+      if (serverComplete || hasSeenWalkthroughLocal()) {
+        setIsActive(false);
+        setCurrentStep(-1);
         return;
       }
-      // Mark as seen immediately when walkthrough starts
-      // This prevents it from showing again on refresh or tab switch
-      markWalkthroughCompleted();
-      setIsActive(true);
-      setCurrentStep(0);
-    }, delay);
 
-    return () => clearTimeout(timer);
+      // Check if screen is mobile (width < 640px) - hide walkthrough on mobile.
+      // We mark the local flag to preserve the existing behavior (and avoid repeat
+      // showing on refresh) but we do NOT update the server flag here.
+      if (checkMobile()) {
+        markWalkthroughCompletedLocal();
+        return;
+      }
+
+      const delay = 1000;
+      setTimeout(() => {
+        if (cancelled) return;
+        setIsActive(true);
+        setCurrentStep(0);
+      }, delay);
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -188,15 +225,22 @@ const GuidedWalkthrough = ({ onComplete }) => {
     };
   }, [currentStep, isActive]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      if (isUpdatingOnboarding) return;
+      setIsUpdatingOnboarding(true);
+
       // Close walkthrough completely first
       setIsActive(false);
       setCurrentStep(-1);
       setHighlightedElement(null);
       setHighlightRect(null);
+
+      // Show debrief modal after the walkthrough is finished.
+      // (Modal CTA will handle the actual PUT /debrief/ call.)
+      setIsDebriefModalOpen(true);
       
       // Clean up any applied styles
       steps.forEach((step) => {
@@ -209,8 +253,21 @@ const GuidedWalkthrough = ({ onComplete }) => {
           }
         }
       });
-      
-      markWalkthroughCompleted();
+
+      // Update onboarding flag on "Let's go" click.
+      const canUpdateOnServer = shouldCallOnboardingApi();
+      let putSucceeded = !canUpdateOnServer;
+      try {
+        if (canUpdateOnServer) {
+          await updateOnboardingCompleteOnServer();
+          putSucceeded = true;
+        }
+      } catch (e) {
+        console.warn("Failed to update onboarding flag:", e);
+      } finally {
+        setIsUpdatingOnboarding(false);
+        if (putSucceeded) markWalkthroughCompletedLocal();
+      }
       
       // Scroll to top of dashboard when walkthrough is completed
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -628,6 +685,12 @@ const GuidedWalkthrough = ({ onComplete }) => {
             </span>
             <button
               onClick={handleNext}
+              disabled={isUpdatingOnboarding}
+              style={
+                isUpdatingOnboarding
+                  ? { opacity: 0.7, cursor: "not-allowed" }
+                  : undefined
+              }
               className="bg-[#3D3D3D] hover:bg-[#2D2D2D] active:bg-[#1D1D1D] text-white px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base font-medium transition-all duration-200 font-inter flex items-center space-x-1 sm:space-x-1.5 lg:space-x-2 shadow-md hover:shadow-lg"
             >
               <span>

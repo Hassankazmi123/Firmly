@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getUserProfile } from "../../../services/api";
+import {
+  API_AUTH_URL,
+  authenticatedFetch,
+  getUserProfile,
+} from "../../../services/api";
 import { assessmentService } from "../../../services/assessment";
 import DiagnosticDebriefModal from "../AllModals/DiagnosticDebriefModal";
 import RadarChart from "./RadarChart";
@@ -8,9 +12,6 @@ import RadarChart from "./RadarChart";
 const Hero = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const isFromAmalia =
-    location.state?.fromAmaliaCorner ||
-    localStorage.getItem("hasStartedDebrief") === "true";
   const [currentMetric, setCurrentMetric] = useState(0);
   const [firstName, setFirstName] = useState(() => {
     try {
@@ -25,6 +26,12 @@ const Hero = () => {
     return "";
   });
   const [isDebriefModalOpen, setIsDebriefModalOpen] = useState(false);
+  const [debriefComplete, setDebriefComplete] = useState(() => {
+    // Fallback so UI doesn't flicker while the server check loads.
+    return localStorage.getItem("hasStartedDebrief") === "true";
+  });
+
+  const isFromAmalia = location.state?.fromAmaliaCorner || debriefComplete;
   const [overallScore, setOverallScore] = useState(null);
   const [scoreLabel, setScoreLabel] = useState("");
   const [radarData, setRadarData] = useState({
@@ -69,7 +76,10 @@ const Hero = () => {
         if (domains.length > 0) {
           // Calculate overall score
           const avg = Math.round(
-            domains.reduce((acc, d) => acc + parseFloat(d.percent_0_100 || 0), 0) / domains.length
+            domains.reduce(
+              (acc, d) => acc + parseFloat(d.percent_0_100 || 0),
+              0,
+            ) / domains.length,
           );
           setOverallScore(avg);
           if (avg >= 75) setScoreLabel("Excellent");
@@ -80,12 +90,16 @@ const Hero = () => {
           // Map domain scores for radar chart
           const newRadarData = {};
           const newPeerData = {};
-          domains.forEach(d => {
-            newRadarData[d.domain] = Math.round(parseFloat(d.percent_0_100 || 0));
-            newPeerData[d.domain] = Math.round(parseFloat(d.peer_mean_0_100 || 0));
+          domains.forEach((d) => {
+            newRadarData[d.domain] = Math.round(
+              parseFloat(d.percent_0_100 || 0),
+            );
+            newPeerData[d.domain] = Math.round(
+              parseFloat(d.peer_mean_0_100 || 0),
+            );
           });
-          setRadarData(prev => ({ ...prev, ...newRadarData }));
-          setPeerData(prev => ({ ...prev, ...newPeerData }));
+          setRadarData((prev) => ({ ...prev, ...newRadarData }));
+          setPeerData((prev) => ({ ...prev, ...newPeerData }));
         }
       } catch (err) {
         console.warn("Could not fetch assessment results:", err);
@@ -93,20 +107,43 @@ const Hero = () => {
     };
 
     fetchResults();
+  }, []);
 
-    // Auto-open debrief modal after 30 seconds
+  // Fetch debrief completion flag so dashboard can show correct CTA text.
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchDebriefFlag = async () => {
+      try {
+        const data = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
+          method: "GET",
+        });
+        if (cancelled) return;
+        setDebriefComplete(data?.debrief_complete === true);
+      } catch (err) {
+        console.warn("Failed to fetch debrief flag:", err);
+      }
+    };
+
+    fetchDebriefFlag();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Auto-open debrief modal after 30 seconds (only if not completed server-side).
+  useEffect(() => {
     const timerId = setTimeout(() => {
-      const hasStartedDebrief = localStorage.getItem("hasStartedDebrief") === "true";
       const hasShownAuto = sessionStorage.getItem("debrief_auto_shown");
-      if (!hasShownAuto && !hasStartedDebrief) {
+      if (!hasShownAuto && !debriefComplete) {
         setIsDebriefModalOpen(true);
         sessionStorage.setItem("debrief_auto_shown", "true");
-        localStorage.setItem("hasStartedDebrief", "true");
       }
     }, 30000);
 
     return () => clearTimeout(timerId);
-  }, []);
+  }, [debriefComplete]);
 
   const metrics = [
     {
@@ -169,7 +206,12 @@ const Hero = () => {
                 </div>
               </div>
               <div className="flex items-center justify-center lg:h-[450px] h-[350px]">
-                <RadarChart data={radarData} peerData={peerData} highlightIndex={currentMetric} onMetricClick={setCurrentMetric} />
+                <RadarChart
+                  data={radarData}
+                  peerData={peerData}
+                  highlightIndex={currentMetric}
+                  onMetricClick={setCurrentMetric}
+                />
               </div>
             </div>
 
@@ -180,13 +222,17 @@ const Hero = () => {
                 </p>
                 <div className="flex items-center justify-between ">
                   <h2 className="text-2xl sm:text-4xl font-bold text-white font-cormorant">
-                    {overallScore !== null ? scoreLabel : (
+                    {overallScore !== null ? (
+                      scoreLabel
+                    ) : (
                       <span className="inline-block w-24 h-8 bg-white/20 rounded-lg animate-pulse" />
                     )}
                   </h2>
                   <div className="flex items-baseline">
                     <span className="text-3xl sm:text-6xl lg:text-7xl font-bold text-white font-times-new-roman ">
-                      {overallScore !== null ? overallScore : (
+                      {overallScore !== null ? (
+                        overallScore
+                      ) : (
                         <span className="inline-block w-16 h-14 bg-white/20 rounded-lg animate-pulse" />
                       )}
                     </span>
@@ -205,12 +251,13 @@ const Hero = () => {
                     type="button"
                     onClick={() => {
                       if (isFromAmalia) {
-                        navigate("/amalia-corner", { state: { showResults: true } });
+                        navigate("/amalia-corner", {
+                          state: { showResults: true },
+                        });
                         return;
                       }
                       setIsDebriefModalOpen(true);
                       sessionStorage.setItem("debrief_auto_shown", "true");
-                      localStorage.setItem("hasStartedDebrief", "true");
                     }}
                     className=" bg-white  font-medium py-3 px-6 rounded-xl flex items-center justify-center space-x-2 transition-colors mb-4 hover:bg-white/90 active:scale-95"
                   >
@@ -219,8 +266,9 @@ const Hero = () => {
                       alt="star icon"
                       className="h-5 w-5"
                     />
-                    <span className="text-[#6664D3]">{isFromAmalia ? "Amalia Debrief" : "Start a Debrief"}</span>
-
+                    <span className="text-[#6664D3]">
+                      {debriefComplete ? "Amalia Debrief" : "Start a Debrief"}
+                    </span>
                   </button>
                 </div>
                 <div className="flex items-end justify-between mb-4">
@@ -236,7 +284,9 @@ const Hero = () => {
                     <div className="flex items-baseline">
                       <span className="text-4xl sm:text-6xl font-bold text-white font-times-new-roman">
                         {radarData[
-                          ["GOAL", "RES", "EMP", "BELONG", "ENG", "SELF"][currentMetric]
+                          ["GOAL", "RES", "EMP", "BELONG", "ENG", "SELF"][
+                            currentMetric
+                          ]
                         ] || 0}
                       </span>
                       <span className="text-xl sm:text-2xl text-white/40 ml-1 font-times-new-roman">
@@ -299,8 +349,8 @@ const Hero = () => {
         isOpen={isDebriefModalOpen}
         onClose={() => setIsDebriefModalOpen(false)}
         onGetDebrief={() => {
+          setDebriefComplete(true);
           setIsDebriefModalOpen(false);
-          // sessionStorage handle navigation inside DiagnosticDebriefModal is already there
         }}
       />
     </>

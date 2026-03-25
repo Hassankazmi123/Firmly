@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_AUTH_URL, authenticatedFetch } from "../../../services/api";
 
 const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
   const modalRef = useRef(null);
   const navigate = useNavigate();
-  const isFromAmalia = localStorage.getItem("hasStartedDebrief") === "true";
+  const [isUpdatingDebrief, setIsUpdatingDebrief] = useState(false);
+  const [updateError, setUpdateError] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -49,13 +51,28 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
     };
   }, [isOpen, onClose]);
 
-  const handleGetDebrief = () => {
-    localStorage.setItem("hasStartedDebrief", "true");
-    if (onGetDebrief) {
-      onGetDebrief();
+  const handleGetDebrief = async () => {
+    if (isUpdatingDebrief) return;
+    setIsUpdatingDebrief(true);
+    setUpdateError(null);
+
+    try {
+      // Update server flag so dashboard can show "Amalia Debrief" next load.
+      await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
+        method: "PUT",
+        body: JSON.stringify({ debrief_complete: true }),
+      });
+
+      localStorage.setItem("hasStartedDebrief", "true"); // fallback for current session
+      if (onGetDebrief) onGetDebrief();
+
+      onClose();
+      navigate("/amalia-corner", { state: { animateInitial: true } });
+    } catch (e) {
+      console.error("Failed to update debrief flag:", e);
+      setUpdateError("Could not start debrief. Please try again.");
+      setIsUpdatingDebrief(false);
     }
-    onClose();
-    navigate("/amalia-corner", { state: { animateInitial: true } });
   };
 
   if (!isOpen) return null;
@@ -88,10 +105,21 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
             <div className="max-w-xl mx-auto">
               <button
                 onClick={handleGetDebrief}
+                disabled={isUpdatingDebrief}
+                style={
+                  isUpdatingDebrief
+                    ? { opacity: 0.7, cursor: "not-allowed" }
+                    : undefined
+                }
                 className="w-full px-6 py-3 bg-[#3D3D3D] text-[#F5F5F5] rounded-xl font-inter font-medium transition-colors text-base "
               >
-                Start Debrief
+                {isUpdatingDebrief ? "Starting..." : "Get a Debrief"}
               </button>
+              {updateError && (
+                <p className="mt-3 text-sm text-red-600 font-inter" role="alert">
+                  {updateError}
+                </p>
+              )}
             </div>
           </div>
         </div>
