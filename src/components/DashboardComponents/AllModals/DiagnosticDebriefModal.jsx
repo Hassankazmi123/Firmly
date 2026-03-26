@@ -113,7 +113,7 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
                 }
                 className="w-full px-6 py-3 bg-[#3D3D3D] text-[#F5F5F5] rounded-xl font-inter font-medium transition-colors text-base "
               >
-                {isUpdatingDebrief ? "Starting..." : "Get a Debrief"}
+                {isUpdatingDebrief ? "Starting..." : "Start Debrief"}
               </button>
               {updateError && (
                 <p className="mt-3 text-sm text-red-600 font-inter" role="alert">

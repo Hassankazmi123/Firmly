@@ -285,7 +285,7 @@ const Hero = () => {
                       <span className="text-4xl sm:text-6xl font-bold text-white font-times-new-roman">
                         {radarData[
                           ["GOAL", "RES", "EMP", "BELONG", "ENG", "SELF"][
-                            currentMetric
+                          currentMetric
                           ]
                         ] || 0}
                       </span>

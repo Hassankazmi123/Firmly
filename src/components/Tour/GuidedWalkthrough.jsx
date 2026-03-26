@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import DiagnosticDebriefModal from "../DashboardComponents/AllModals/DiagnosticDebriefModal";
+
 import { API_AUTH_URL, authenticatedFetch } from "../../services/api";
 
 const steps = [
@@ -62,7 +62,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
   const [isActive, setIsActive] = useState(false);
   const [highlightedElement, setHighlightedElement] = useState(null);
   const [highlightRect, setHighlightRect] = useState(null);
-  const [isDebriefModalOpen, setIsDebriefModalOpen] = useState(false);
+
   const [isUpdatingOnboarding, setIsUpdatingOnboarding] = useState(false);
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 1024,
@@ -239,8 +239,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
       setHighlightRect(null);
 
       // Show debrief modal after the walkthrough is finished.
-      // (Modal CTA will handle the actual PUT /debrief/ call.)
-      setIsDebriefModalOpen(true);
+
       
       // Clean up any applied styles
       steps.forEach((step) => {
@@ -276,11 +275,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
     }
   };
 
-  const handleGetDebrief = () => {
-    // Handle the "Get Debrief" action
-    // You can navigate to a specific page or trigger an action here
-    console.log("Get Debrief clicked");
-  };
+
 
   // Always render modal, even when walkthrough is not active
   // Don't render walkthrough if not active or on mobile screen
@@ -288,11 +283,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
   if (!isActive || currentStep === -1 || isMobileScreen) {
     return (
       <>
-        <DiagnosticDebriefModal
-          isOpen={isDebriefModalOpen}
-          onClose={() => setIsDebriefModalOpen(false)}
-          onGetDebrief={handleGetDebrief}
-        />
+
       </>
     );
   }
@@ -715,11 +706,7 @@ const GuidedWalkthrough = ({ onComplete }) => {
           </div>
         </div>
       </div>
-      <DiagnosticDebriefModal
-        isOpen={isDebriefModalOpen}
-        onClose={() => setIsDebriefModalOpen(false)}
-        onGetDebrief={handleGetDebrief}
-      />
+
     </>
   );
 };
