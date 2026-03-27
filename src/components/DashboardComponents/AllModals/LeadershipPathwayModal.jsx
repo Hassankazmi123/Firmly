@@ -53,7 +53,6 @@ const LeadershipPathwayModal = ({ isOpen, onClose, onGenerate }) => {
       onGenerate();
     }
     onClose();
-    navigate("/amalia-corner");
   };
 
   if (!isOpen) return null;
