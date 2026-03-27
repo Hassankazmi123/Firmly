@@ -10,10 +10,17 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionPhase, setSessionPhase] = useState("");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const checkHistoryStatus = React.useCallback((historyData) => {
+    if (historyData?.status === "COMPLETED") {
+      setSessionPhase("GOODBYE");
+    }
+  }, []);
 
   const processHistoryData = React.useCallback((historyData, forceHistory = true) => {
     let historyMessages = [];
@@ -137,6 +144,9 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
         historyData = await pathwayService.getEmpathyHistory();
       }
 
+      // Unlock Next Session button if session already completed
+      checkHistoryStatus(historyData);
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
@@ -150,7 +160,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
     } finally {
       setLoading(false);
     }
-  }, [getDomain, processHistoryData, startSession]);
+  }, [getDomain, processHistoryData, startSession, checkHistoryStatus]);
 
   useEffect(() => {
     initializeSession();
@@ -166,18 +176,24 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
       setIsTyping(true);
       let domain = getDomain();
       // ... (rest of logic handles sending) ...
+      let sendResponse;
       if (domain === "goal") {
-        await pathwayService.sendGoalMessageSession1(text, "CORE");
+        sendResponse = await pathwayService.sendGoalMessageSession1(text, "CORE");
       } else if (domain === "res") {
-        await pathwayService.sendResilienceMessageSession1(text, "CORE");
+        sendResponse = await pathwayService.sendResilienceMessageSession1(text, "CORE");
       } else if (domain === "eng") {
-        await pathwayService.sendEngagementMessageSession1(text, "CORE");
+        sendResponse = await pathwayService.sendEngagementMessageSession1(text, "CORE");
       } else if (domain === "self") {
-        await pathwayService.sendSelfAwarenessMessageSession1(text, "CORE");
+        sendResponse = await pathwayService.sendSelfAwarenessMessageSession1(text, "CORE");
       } else if (domain === "belong") {
-        await pathwayService.sendBelongingMessageSession1(text, "CORE");
+        sendResponse = await pathwayService.sendBelongingMessageSession1(text, "CORE");
       } else {
-        await pathwayService.sendEmpathyMessage(text, "CORE");
+        sendResponse = await pathwayService.sendEmpathyMessage(text, "CORE");
+      }
+
+      // Track phase from the send response
+      if (sendResponse?.phase) {
+        setSessionPhase(sendResponse.phase);
       }
 
       // Fetch fresh history to get the bot response and sync state
@@ -195,6 +211,9 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
       } else {
         historyData = await pathwayService.getEmpathyHistory();
       }
+
+      // Unlock Next Session button if session completed
+      checkHistoryStatus(historyData);
 
       const formatted = processHistoryData(historyData, false);
 
@@ -282,14 +301,18 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
 
         <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
           <button
-            onClick={handleNextSession}
-            className="flex-1 px-5  py-3.5  bg-[#F5F5F5]  text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+            onClick={sessionPhase === "GOODBYE" ? handleNextSession : undefined}
+            className={`flex-1 px-5 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-all text-sm md:text-base ${
+              sessionPhase === "GOODBYE"
+                ? "opacity-100 cursor-pointer hover:bg-[#E5E5E5]"
+                : "opacity-30 cursor-not-allowed pointer-events-none"
+            }`}
           >
             Next Session
           </button>
           <button
             onClick={handleGoToDashboard}
-            className="flex-1   py-3.5 px-5  bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+            className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
           >
             Go to Dashboard
           </button>

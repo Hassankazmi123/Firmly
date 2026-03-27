@@ -10,6 +10,7 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionPhase, setSessionPhase] = useState("");
 
   const getDomain = useCallback(() => {
     const rawDomain = sessionStorage.getItem("currentPathwayDomain");
@@ -33,6 +34,12 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const checkHistoryStatus = useCallback((historyData) => {
+    if (historyData?.status === "COMPLETED") {
+      setSessionPhase("GOODBYE");
+    }
+  }, []);
 
   const processHistoryData = useCallback((historyData, forceHistory = true) => {
     let historyMessages = [];
@@ -143,6 +150,9 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
         historyData = await pathwayService.getEmpathyHistorySession2();
       }
 
+      // Unlock Next Session button if session already completed
+      checkHistoryStatus(historyData);
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
@@ -156,7 +166,7 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
     } finally {
       setLoading(false);
     }
-  }, [getDomain, processHistoryData, startSession]);
+  }, [getDomain, processHistoryData, startSession, checkHistoryStatus]);
 
   useEffect(() => {
     initializeSession();
@@ -171,18 +181,24 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
       setIsTyping(true);
       let currentDomain = getDomain();
       // ... (rest of sending logic) ...
+      let sendResponse;
       if (currentDomain === "goal") {
-        await pathwayService.sendGoalMessageSession2(text, "CORE");
+        sendResponse = await pathwayService.sendGoalMessageSession2(text, "CORE");
       } else if (currentDomain === "res") {
-        await pathwayService.sendResilienceMessageSession2(text, "CORE");
+        sendResponse = await pathwayService.sendResilienceMessageSession2(text, "CORE");
       } else if (currentDomain === "eng") {
-        await pathwayService.sendEngagementMessageSession2(text, "CORE");
+        sendResponse = await pathwayService.sendEngagementMessageSession2(text, "CORE");
       } else if (currentDomain === "self") {
-        await pathwayService.sendSelfAwarenessMessageSession2(text, "CORE");
+        sendResponse = await pathwayService.sendSelfAwarenessMessageSession2(text, "CORE");
       } else if (currentDomain === "belong") {
-        await pathwayService.sendBelongingMessageSession2(text, "CORE");
+        sendResponse = await pathwayService.sendBelongingMessageSession2(text, "CORE");
       } else {
-        await pathwayService.sendEmpathyMessageSession2(text, "CORE");
+        sendResponse = await pathwayService.sendEmpathyMessageSession2(text, "CORE");
+      }
+
+      // Track phase from the send response
+      if (sendResponse?.phase) {
+        setSessionPhase(sendResponse.phase);
       }
 
       // Fetch fresh history to get the bot response and sync state
@@ -200,6 +216,9 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
       } else {
         historyData = await pathwayService.getEmpathyHistorySession2();
       }
+
+      // Unlock Next Session button if session completed
+      checkHistoryStatus(historyData);
 
       const formatted = processHistoryData(historyData, false);
 
@@ -285,14 +304,18 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
 
         <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
           <button
-            onClick={handleNextSession}
-            className="flex-1 px-5  py-3.5 lg:max-w-fit  bg-[#F5F5F5]  text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+            onClick={sessionPhase === "GOODBYE" ? handleNextSession : undefined}
+            className={`flex-1 px-5 py-3.5 lg:max-w-fit bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-all text-sm md:text-base ${
+              sessionPhase === "GOODBYE"
+                ? "opacity-100 cursor-pointer hover:bg-[#E5E5E5]"
+                : "opacity-30 cursor-not-allowed pointer-events-none"
+            }`}
           >
             Next Session
           </button>
           <button
             onClick={handleGoToDashboard}
-            className="flex-1   py-3.5 px-5 lg:max-w-fit  bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+            className="flex-1 py-3.5 px-5 lg:max-w-fit bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
           >
             Go to Dashboard
           </button>
