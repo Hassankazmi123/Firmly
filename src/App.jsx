@@ -13,6 +13,7 @@ import SafeSpaceChat from "./pages/SafeSpaceChat";
 import Feedback from "./pages/Feedback";
 import Diagnostic from "./pages/Diagnostic";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 import DiagnosticModal from "./components/DiagnosticComponents/DiagnosticModal";
 import DiagnosticComplete from "./components/DiagnosticComponents/DiagnosticComplete";
 
@@ -99,6 +100,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/not-found" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
