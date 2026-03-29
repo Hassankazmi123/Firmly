@@ -68,8 +68,23 @@ const Hero = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const assessmentId = localStorage.getItem("assessmentId");
-        if (!assessmentId) return;
+        let assessmentId = localStorage.getItem("assessmentId");
+
+        // If no ID is found (e.g., after login/cache clear), try to recover it from the server
+        if (!assessmentId) {
+          console.log("No assessmentId in cache, attempting to recover from server...");
+          const resumeData = await assessmentService.startAssessment();
+          // Extract ID from the resume/start response
+          assessmentId = resumeData?.id || resumeData?.run_id || resumeData?.assessment_id || resumeData?.assessmentId ||
+            resumeData?.assessment?.id || resumeData?.run?.id || resumeData?.data?.id ||
+            localStorage.getItem("assessmentId"); // Fallback to cache since service saves it there
+        }
+
+        if (!assessmentId) {
+          console.warn("Could not find or recover assessmentId.");
+          return;
+        }
+
         const data = await assessmentService.getResults(assessmentId);
         const domains = data?.domains || [];
 

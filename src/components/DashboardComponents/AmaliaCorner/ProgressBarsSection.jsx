@@ -20,10 +20,21 @@ const ProgressBarsSection = () => {
     const fetchAssessmentData = async () => {
       try {
         setLoading(true);
-        const assessmentId = localStorage.getItem("assessmentId");
+        let assessmentId = localStorage.getItem("assessmentId");
+
+        // Auto-recover assessment ID if missing
         if (!assessmentId) {
-          throw new Error("No assessment run id found");
+          console.log("No assessmentId in cache for ProgressBars, attempting recovery...");
+          const resumeData = await assessmentService.startAssessment();
+          assessmentId = resumeData?.id || resumeData?.run_id || resumeData?.assessment_id || resumeData?.assessmentId ||
+            resumeData?.assessment?.id || resumeData?.run?.id || resumeData?.data?.id ||
+            localStorage.getItem("assessmentId"); // Fallback to cache since service saves it there
         }
+
+        if (!assessmentId) {
+          throw new Error("Could not find or recover assessmentId");
+        }
+
         const data = await assessmentService.getResults(assessmentId);
 
         if (data && data.domains) {

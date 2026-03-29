@@ -13,10 +13,21 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
     const fetchAssessmentData = async () => {
       try {
         setLoading(true);
-        const assessmentId = localStorage.getItem("assessmentId");
+        let assessmentId = localStorage.getItem("assessmentId");
+
+        // Auto-recover assessment ID if missing
         if (!assessmentId) {
-          throw new Error("No assessment run id found");
+          console.log("No assessmentId in cache for GrowAndGlow, attempting recovery...");
+          const resumeData = await assessmentService.startAssessment();
+          assessmentId = resumeData?.id || resumeData?.run_id || resumeData?.assessment_id || resumeData?.assessmentId ||
+            resumeData?.assessment?.id || resumeData?.run?.id || resumeData?.data?.id ||
+            localStorage.getItem("assessmentId"); // Fallback to cache since service saves it there
         }
+
+        if (!assessmentId) {
+          throw new Error("Could not find or recover assessmentId");
+        }
+
         const data = await assessmentService.getResults(assessmentId);
 
         if (data && data.domains && data.glow && data.grow) {
@@ -68,33 +79,40 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
 
           setDoingGreatItems(glowData);
           setGrowthAreasItems(growData);
+
+          // If we successfully recovered data, ensure the "visited" flags are restored
+          if (!hasVisitedAmaliaCorner) {
+            console.log("Restoring visited flags based on recovered data...");
+            sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
+            // We can't update the parent's prop directly easily without a callback, 
+            // but the parent will re-read session state on next render or we can just 
+            // use a local state for the UI if needed.
+          }
         }
       } catch (error) {
         console.error(
           "Failed to fetch assessment data for GrowAndGlow:",
           error,
         );
-        // Fallback to default data
-        setDoingGreatItems([
-          { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
-          { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
-          { abbreviation: "RES", label: "Resilience", score: 87 },
-        ]);
-        setGrowthAreasItems([
-          { abbreviation: "EMP", label: "Empathy", score: 32 },
-          { abbreviation: "ENG", label: "Engagement", score: 24 },
-          { abbreviation: "SEL", label: "Self-belief", score: 22 },
-        ]);
+        // Only show fallbacks if we explicitly fail or have NO data
+        if (hasVisitedAmaliaCorner) {
+          setDoingGreatItems([
+            { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
+            { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
+            { abbreviation: "RES", label: "Resilience", score: 87 },
+          ]);
+          setGrowthAreasItems([
+            { abbreviation: "EMP", label: "Empathy", score: 32 },
+            { abbreviation: "ENG", label: "Engagement", score: 24 },
+            { abbreviation: "SEL", label: "Self-belief", score: 22 },
+          ]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    if (hasVisitedAmaliaCorner) {
-      fetchAssessmentData();
-    } else {
-      setLoading(false);
-    }
+    fetchAssessmentData();
   }, [hasVisitedAmaliaCorner]);
 
   const handleImproveClick = () => {
@@ -108,6 +126,8 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
     navigate("/amalia-corner");
   };
 
+  const showRealContent = hasVisitedAmaliaCorner;
+
   return (
     <section data-tour="grow-glow" className="py-8 lg:py-12">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -119,7 +139,7 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
             Get insights on where you shine and what needs to be improved
           </p>
         </div>
-        {hasVisitedAmaliaCorner && (
+        {showRealContent && (
           <button
             onClick={handleImproveClick}
             className="px-5 py-3 bg-[#3D3D3D] text-white rounded-xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D] whitespace-nowrap"
@@ -128,7 +148,7 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
           </button>
         )}
       </div>
-      {hasVisitedAmaliaCorner ? (
+      {showRealContent ? (
         loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             <div className="border border-[#0000000A] bg-gray-100 rounded-2xl p-6 min-h-[250px] flex items-center justify-center">

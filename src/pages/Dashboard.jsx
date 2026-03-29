@@ -5,6 +5,7 @@ import LeadershipPathwaySection from "../components/DashboardComponents/Dashboar
 import DashboardHeader from "../components/DashboardComponents/Dashboard/DashboardHeader";
 import StartConversationModal from "../components/DashboardComponents/AllModals/StartConversationModal";
 import GuidedWalkthrough from "../components/Tour/GuidedWalkthrough";
+import { API_AUTH_URL, authenticatedFetch } from "../services/api";
 
 export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,10 +16,10 @@ export default function Dashboard() {
   useEffect(() => {
     const visited = sessionStorage.getItem("hasVisitedAmaliaCorner");
     const fromStartSession = sessionStorage.getItem("fromStartSession");
-    const hasStartedDebrief =
+    const hasStartedDebriefLocal =
       localStorage.getItem("hasStartedDebrief") === "true";
 
-    if (visited === "true" || hasStartedDebrief) {
+    if (visited === "true" || hasStartedDebriefLocal) {
       setHasVisitedAmaliaCorner(true);
 
       // Only scroll if it's explicitly fromStartSession (the immediate redirect)
@@ -32,7 +33,24 @@ export default function Dashboard() {
         }, 200);
       }
     } else {
-      setHasVisitedAmaliaCorner(false);
+      // If no local flag, check server for returning users
+      const fetchDebriefStatus = async () => {
+        try {
+          const data = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
+            method: "GET",
+          });
+          if (data && data.debrief_complete === true) {
+            setHasVisitedAmaliaCorner(true);
+            localStorage.setItem("hasStartedDebrief", "true");
+          } else {
+            setHasVisitedAmaliaCorner(false);
+          }
+        } catch (err) {
+          console.warn("Failed to fetch debrief status in Dashboard:", err);
+          setHasVisitedAmaliaCorner(false);
+        }
+      };
+      fetchDebriefStatus();
     }
   }, [location.pathname]);
 

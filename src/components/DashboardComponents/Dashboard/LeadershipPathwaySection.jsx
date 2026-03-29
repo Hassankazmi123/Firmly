@@ -16,6 +16,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   const [isPathwayGenerated, setIsPathwayGenerated] = useState(() => {
     return localStorage.getItem("hasGeneratedPathway") === "true";
   });
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [showPathwayDesign, setShowPathwayDesign] = useState(() => {
     return localStorage.getItem("hasGeneratedPathway") === "true";
@@ -32,9 +33,58 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   });
 
   useEffect(() => {
-    const hasGenerated = localStorage.getItem("hasGeneratedPathway") === "true";
-    setShowPathwayDesign(hasGenerated);
-    setIsPathwayGenerated(hasGenerated);
+    const recoverPathwayState = async () => {
+      try {
+        // 1. Check if pathway exists by looking for session info
+        const nextSessionInfo = await pathwayService.getNextSessionInfo();
+        
+        if (nextSessionInfo && (nextSessionInfo.next_session_number || nextSessionInfo.nextSessionNumber)) {
+          console.log("Restoring pathway sessions from server...");
+          
+          localStorage.setItem("hasGeneratedPathway", "true");
+          localStorage.setItem("hasStartedSessions", "true");
+          setIsPathwayGenerated(true);
+          setShowPathwayDesign(true);
+
+          if (nextSessionInfo.domain) {
+            sessionStorage.setItem("currentPathwayDomain", nextSessionInfo.domain);
+          }
+
+          // Recover completed sessions
+          const nextNum = parseInt(nextSessionInfo.next_session_number || nextSessionInfo.nextSessionNumber);
+          if (!isNaN(nextNum)) {
+            const done = [];
+            for (let i = 1; i < nextNum; i++) {
+              done.push(i);
+            }
+            if (done.length > 0) {
+              setCompletedSessions(done);
+              localStorage.setItem("amalia_completed_sessions", JSON.stringify(done));
+            }
+          }
+        } else {
+          // If no session info found, fallback to checking if a pathway technicaly exists 
+          // (used for identifying new vs returning users who haven't started sessions)
+          const response = await pathwayService.startPathway();
+          if (response && response.statusCode === 409) {
+             // Status 409 (Conflict) means it was already generated before!
+             setShowPathwayDesign(true);
+             setIsPathwayGenerated(true);
+             localStorage.setItem("hasGeneratedPathway", "true");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to recover pathway state:", err);
+      }
+    };
+
+    const hasGeneratedLocal = localStorage.getItem("hasGeneratedPathway") === "true";
+    if (!hasGeneratedLocal && hasVisitedAmaliaCorner) {
+      recoverPathwayState();
+    } else if (hasGeneratedLocal) {
+      setShowPathwayDesign(true);
+      setIsPathwayGenerated(true);
+    }
 
     // Re-read completedSessions on mount in case they were updated
     try {
@@ -43,22 +93,22 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
     } catch {
       // ignore
     }
-  }, []);
+  }, [hasVisitedAmaliaCorner]);
 
-  // Auto-open Leadership Pathway modal after 30 seconds if Grow & Glow is filled but Pathway is not yet generated
+  // Auto-open Leadership Pathway modal after 20 seconds if Grow & Glow is filled but Pathway is not yet showing
   useEffect(() => {
-    if (hasVisitedAmaliaCorner && !isPathwayGenerated) {
+    if (hasVisitedAmaliaCorner && !showPathwayDesign) {
       const timerId = setTimeout(() => {
         const autoShown = sessionStorage.getItem("pathway_auto_prompted");
         if (!autoShown) {
           console.log("Auto-prompting Leadership Pathway generation");
-          handleGeneratePathway();
+          setIsModalOpen(true);
           sessionStorage.setItem("pathway_auto_prompted", "true");
         }
-      }, 30000);
+      }, 20000); // 20 seconds as requested
       return () => clearTimeout(timerId);
     }
-  }, [hasVisitedAmaliaCorner, isPathwayGenerated]);
+  }, [hasVisitedAmaliaCorner, showPathwayDesign]);
 
   // Derive per-session state from completedSessions
   const session1Done = completedSessions.includes(1);
@@ -66,12 +116,15 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   const session3Done = completedSessions.includes(3);
   const session4Done = completedSessions.includes(4);
 
-  const handleGeneratePathway = () => {
-    setIsModalOpen(true);
+  const handleManualGenerate = async () => {
+    // Manual click generates directly on the dashboard
+    handleGenerate();
   };
 
   const handleGenerate = async () => {
+    if (isGenerating) return;
     console.log("Generate Leadership Pathway clicked");
+    setIsGenerating(true);
     try {
       const response = await pathwayService.startPathway();
       if (response && response.domain) {
@@ -84,6 +137,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       console.log("Pathway started successfully");
     } catch (error) {
       console.error("Failed to start pathway:", error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -318,10 +373,11 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
               </p>
               {hasVisitedAmaliaCorner && (
                 <button
-                  onClick={handleGeneratePathway}
-                  className="px-5 py-3 bg-[#3D3D3D] text-white rounded-xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
+                  onClick={handleManualGenerate}
+                  disabled={isGenerating}
+                  className={`px-5 py-3 bg-[#3D3D3D] text-white rounded-xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D] ${isGenerating ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
-                  Generate my Leadership Pathway
+                  {isGenerating ? "Generating..." : "Generate my Leadership Pathway"}
                 </button>
               )}
             </div>

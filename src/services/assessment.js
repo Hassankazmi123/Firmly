@@ -4,7 +4,10 @@ const extractRunId = (payload) =>
   payload?.id ||
   payload?.run_id ||
   payload?.assessment_id ||
-  payload?.assessmentId;
+  payload?.assessmentId ||
+  payload?.assessment?.id ||
+  payload?.run?.id ||
+  payload?.data?.id;
 
 export const assessmentService = {
   // Start or resume assessment
