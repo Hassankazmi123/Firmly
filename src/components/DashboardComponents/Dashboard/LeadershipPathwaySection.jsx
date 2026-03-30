@@ -35,6 +35,38 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
   useEffect(() => {
     const recoverPathwayState = async () => {
       try {
+        // 0. Check for session summary from login sync
+        const summaryStr = localStorage.getItem("session_history_summary");
+        if (summaryStr) {
+          const summary = JSON.parse(summaryStr);
+          if (summary.anyStarted) {
+            console.log("Restoring pathway state from sync summary...");
+            setIsPathwayGenerated(true);
+            setShowPathwayDesign(true);
+            localStorage.setItem("hasGeneratedPathway", "true");
+            localStorage.setItem("hasStartedSessions", "true");
+            
+            // Derive completed sessions from summary for current domain
+            const currentDomain = sessionStorage.getItem("currentPathwayDomain")?.toLowerCase();
+            const domainKey = Object.keys(summary.sessions).find(d => 
+              currentDomain?.includes(d) || d.includes(currentDomain || "")
+            ) || "emp";
+            
+            const domainSessions = summary.sessions[domainKey] || {};
+            const done = [];
+            Object.keys(domainSessions).forEach(stepId => {
+              if (domainSessions[stepId] === "COMPLETED") {
+                done.push(parseInt(stepId));
+              }
+            });
+            if (done.length > 0) {
+              setCompletedSessions(done);
+              localStorage.setItem("amalia_completed_sessions", JSON.stringify(done));
+            }
+            return; // Summary used, skip other recovery steps
+          }
+        }
+
         // 1. Check if pathway exists by looking for session info
         const nextSessionInfo = await pathwayService.getNextSessionInfo();
         
@@ -142,6 +174,32 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
     }
   };
 
+  const getSessionStatus = (stepId) => {
+    const summaryStr = localStorage.getItem("session_history_summary");
+    if (summaryStr) {
+      const summary = JSON.parse(summaryStr);
+      const currentDomain = sessionStorage.getItem("currentPathwayDomain")?.toLowerCase();
+      const domainKey = Object.keys(summary.sessions).find(d => 
+        currentDomain?.includes(d) || d.includes(currentDomain || "")
+      ) || "emp";
+      
+      const status = summary.sessions[domainKey]?.[stepId];
+      if (status === "COMPLETED") return "completed";
+      if (status === "IN_PROGRESS") return "active";
+    }
+    
+    // Fallback to legacy logic
+    const done = completedSessions.includes(stepId);
+    if (done) return "completed";
+    
+    if (stepId === 1) return "active";
+    if (stepId === 2) return completedSessions.includes(1) ? "active" : "locked";
+    if (stepId === 3) return completedSessions.includes(2) ? "active" : "locked";
+    if (stepId === 4) return completedSessions.includes(3) ? "active" : "locked";
+    
+    return "locked";
+  };
+
   const pathwaySteps = [
     {
       id: 1,
@@ -151,8 +209,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Common Understanding",
       description:
         "Introducing ideas that matter to women and their place at work, based on research and industry reporting.",
-      status: session1Done ? "completed" : "active",
-      buttonText: session1Done ? "View" : "Start element",
+      status: getSessionStatus(1),
+      buttonText: getSessionStatus(1) === "completed" ? "View" : "Start element",
     },
     {
       id: 2,
@@ -162,8 +220,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Reflective Practice",
       description:
         "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
-      status: session2Done ? "completed" : session1Done ? "active" : "locked",
-      buttonText: session2Done ? "View" : "Start element",
+      status: getSessionStatus(2),
+      buttonText: getSessionStatus(2) === "completed" ? "View" : "Start element",
     },
     {
       id: 3,
@@ -173,8 +231,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Application",
       description:
         "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
-      status: session3Done ? "completed" : session2Done ? "active" : "locked",
-      buttonText: session3Done ? "View" : "Start element",
+      status: getSessionStatus(3),
+      buttonText: getSessionStatus(3) === "completed" ? "View" : "Start element",
     },
     {
       id: 4,
@@ -184,8 +242,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       title: "Integration",
       description:
         "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
-      status: session4Done ? "completed" : session3Done ? "active" : "locked",
-      buttonText: session4Done ? "View" : "Start element",
+      status: getSessionStatus(4),
+      buttonText: getSessionStatus(4) === "completed" ? "View" : "Start element",
     },
   ];
 
@@ -213,16 +271,17 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
               <div className="flex items-center justify-between relative ">
                 <div className="absolute top-1/2 left-0 right-0 h-2 lg:h-4 rounded-full bg-[#E5E5E5] -translate-y-1/2 z-0"></div>
                 <div
-                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${session4Done
-                    ? "w-full"
-                    : session3Done
+                  className={`absolute top-1/2 left-0 h-2 lg:h-4 rounded-full bg-[#5C91E0] -translate-y-1/2 z-10 ${
+                    getSessionStatus(4) === "completed"
+                      ? "w-full"
+                      : getSessionStatus(3) === "completed"
                       ? "w-3/4"
-                      : session2Done
-                        ? "w-2/4"
-                        : session1Done
-                          ? "w-1/4"
-                          : "w-[12.5%]"
-                    }`}
+                      : getSessionStatus(2) === "completed"
+                      ? "w-2/4"
+                      : getSessionStatus(1) === "completed"
+                      ? "w-1/4"
+                      : "w-[12.5%]"
+                  }`}
                 ></div>
                 {pathwaySteps.map((step, index) => (
                   <div
@@ -230,10 +289,11 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
                     className="relative z-20 flex flex-col items-center flex-1"
                   >
                     <div
-                      className={`lg:w-10 lg:h-10 w-7 h-7   rounded-full flex items-center justify-center border-2 transition-all ${step.status === "active" || step.status === "completed"
-                        ? "bg-white border-none  shadow-sm"
-                        : "bg-white border-[#E5E5E5]"
-                        }`}
+                      className={`lg:w-10 lg:h-10 w-7 h-7   rounded-full flex items-center justify-center border-2 transition-all ${
+                        step.status === "active" || step.status === "completed"
+                          ? "bg-white border-none  shadow-sm"
+                          : "bg-white border-[#E5E5E5]"
+                      }`}
                     >
                       {step.status === "completed" ? (
                         <Check

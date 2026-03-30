@@ -163,10 +163,18 @@ const AmaliaCornerLayout = () => {
     const savedConversation = sessionStorage.getItem("selectedConversation");
 
     const shouldShowPathway = sessionStorage.getItem("showLeadershipPathway");
-    if (shouldShowPathway === "true") {
+    const summaryStr = localStorage.getItem("session_history_summary");
+    let hasSyncSummary = false;
+    if (summaryStr) {
+      try {
+        const summary = JSON.parse(summaryStr);
+        if (summary.anyStarted) hasSyncSummary = true;
+      } catch (e) {}
+    }
+
+    if (shouldShowPathway === "true" || hasSyncSummary) {
       setShowPathwayView(true);
-      // We keep this one-time flag removal as it's an entry point from Dashboard
-      sessionStorage.removeItem("showLeadershipPathway");
+      if (shouldShowPathway === "true") sessionStorage.removeItem("showLeadershipPathway");
     }
 
     const s1 = sessionStorage.getItem("showSession1") === "true";
@@ -174,10 +182,76 @@ const AmaliaCornerLayout = () => {
     const s3 = sessionStorage.getItem("showSession3") === "true";
     const s4 = sessionStorage.getItem("showSession4") === "true";
 
+    // Restore from sync summary if available (for returning users)
+    if (summaryStr) {
+      try {
+        const summary = JSON.parse(summaryStr);
+        if (summary.anyStarted) {
+          setShowSession1(true);
+          
+          let currentDomain = sessionStorage.getItem("currentPathwayDomain")?.toLowerCase();
+          
+          // If no domain in session storage, pick the first one from summary
+          if (!currentDomain || currentDomain === "null" || currentDomain === "undefined") {
+            const domainsFound = Object.keys(summary.sessions);
+            if (domainsFound.length > 0) {
+              const firstDomain = domainsFound[0];
+              const domainMap = {
+                emp: "Empathy",
+                goal: "Goal",
+                res: "Resilience",
+                eng: "Engagement",
+                self: "SelfAwareness",
+                belong: "Belonging"
+              };
+              currentDomain = firstDomain;
+              sessionStorage.setItem("currentPathwayDomain", domainMap[firstDomain] || firstDomain);
+            }
+          }
+
+          const domainKey = Object.keys(summary.sessions).find(d => 
+            currentDomain?.includes(d) || d.includes(currentDomain || "")
+          ) || Object.keys(summary.sessions)[0] || "emp";
+          
+          const domainSessions = summary.sessions[domainKey] || {};
+          const done = [];
+          Object.keys(domainSessions).forEach(stepId => {
+             const status = domainSessions[stepId];
+             if (status === "COMPLETED") done.push(parseInt(stepId));
+             
+             // Unlock visibility for started or completed sessions
+             if (status === "IN_PROGRESS" || status === "COMPLETED") {
+                if (stepId === "2") setShowSession2(true);
+                if (stepId === "3") setShowSession3(true);
+                if (stepId === "4") setShowSession4(true);
+             }
+          });
+          if (done.length > 0) {
+            setCompletedSessions(done);
+          }
+        }
+      } catch (e) {
+        console.warn("Error restoring state from sync summary:", e);
+      }
+    }
+
     if (s1) setShowSession1(true);
     if (s2) setShowSession2(true);
     if (s3) setShowSession3(true);
     if (s4) setShowSession4(true);
+
+    let latestSession = null;
+    if (summaryStr) {
+      try {
+        const summary = JSON.parse(summaryStr);
+        const domainKey = Object.keys(summary.sessions)[0];
+        const sessions = summary.sessions[domainKey] || {};
+        if (sessions["4"]) latestSession = "session4";
+        else if (sessions["3"]) latestSession = "session3";
+        else if (sessions["2"]) latestSession = "session2";
+        else if (summary.anyStarted) latestSession = "session1";
+      } catch (e) {}
+    }
 
     if (location.state?.showResults) {
       setSelectedConversation("diagnostic");
@@ -190,13 +264,13 @@ const AmaliaCornerLayout = () => {
       }, 500);
     } else if (savedConversation) {
       setSelectedConversation(savedConversation);
-    } else if (s4) {
+    } else if (s4 || latestSession === "session4") {
       setSelectedConversation("session4");
-    } else if (s3) {
+    } else if (s3 || latestSession === "session3") {
       setSelectedConversation("session3");
-    } else if (s2) {
+    } else if (s2 || latestSession === "session2") {
       setSelectedConversation("session2");
-    } else if (s1) {
+    } else if (s1 || latestSession === "session1") {
       setSelectedConversation("session1");
     } else {
       setSelectedConversation("diagnostic");

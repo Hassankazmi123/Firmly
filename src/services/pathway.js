@@ -524,5 +524,57 @@ export const pathwayService = {
         return await authenticatedFetch(`${API_PATHWAY_URL}/next-session`, {
             method: "GET",
         });
+    },
+
+    checkAllSessionsHistory: async () => {
+        const domains = ["emp", "goal", "res", "eng", "self", "belong"];
+        const summary = {
+            anyStarted: false,
+            sessions: {}
+        };
+
+        const fetchPromises = [];
+
+        domains.forEach(domain => {
+            for (let i = 1; i <= 4; i++) {
+                let methodName = "";
+                if (domain === "emp" && i === 1) {
+                    methodName = "getEmpathyHistory";
+                } else {
+                    const domainMap = {
+                        emp: "Empathy",
+                        goal: "Goal",
+                        res: "Resilience",
+                        eng: "Engagement",
+                        self: "SelfAwareness",
+                        belong: "Belonging"
+                    };
+                    methodName = `get${domainMap[domain]}HistorySession${i}`;
+                }
+
+                if (pathwayService[methodName]) {
+                    fetchPromises.push(
+                        pathwayService[methodName]()
+                               .then(res => ({ domain, session: i, data: res }))
+                               .catch(err => ({ domain, session: i, error: err }))
+                    );
+                }
+            }
+        });
+
+        const results = await Promise.all(fetchPromises);
+
+        results.forEach(result => {
+            if (result.data) {
+                const status = result.data.status;
+                if (status === "COMPLETED" || status === "IN_PROGRESS") {
+                    summary.anyStarted = true;
+                    if (!summary.sessions[result.domain]) summary.sessions[result.domain] = {};
+                    summary.sessions[result.domain][result.session] = status;
+                }
+            }
+        });
+
+        return summary;
     }
 };

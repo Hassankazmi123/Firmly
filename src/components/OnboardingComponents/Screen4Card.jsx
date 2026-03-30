@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import clearAppCache from "../../utils/cache";
+import { pathwayService } from "../../services/pathway";
 
 const Screen4Card = ({ onBack }) => {
   const [email, setEmail] = useState("");
@@ -60,6 +61,35 @@ const Screen4Card = ({ onBack }) => {
         localStorage.setItem("accessToken", accessToken);
         if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("onboardingComplete", "true");
+
+        // [Returning User Sync] Check session history for all domains/sessions
+        try {
+          const historySummary = await pathwayService.checkAllSessionsHistory();
+          if (historySummary && historySummary.anyStarted) {
+            localStorage.setItem("session_history_summary", JSON.stringify(historySummary));
+            localStorage.setItem("hasGeneratedPathway", "true");
+            localStorage.setItem("hasStartedSessions", "true");
+            
+            // Set first active domain found as the current domain
+            const domainsFound = Object.keys(historySummary.sessions);
+            if (domainsFound.length > 0) {
+              const firstDomain = domainsFound[0];
+              // Map abbreviation back to full domain name if possible, or just use the abbrev
+              const domainMap = {
+                emp: "Empathy",
+                goal: "Goal",
+                res: "Resilience",
+                eng: "Engagement",
+                self: "SelfAwareness",
+                belong: "Belonging"
+              };
+              sessionStorage.setItem("currentPathwayDomain", domainMap[firstDomain] || firstDomain);
+            }
+          }
+        } catch (historyErr) {
+          console.warn("Failed to sync session history on login:", historyErr);
+        }
+
         navigate("/dashboard");
       } else {
         throw new Error("Invalid server response: missing access token");
