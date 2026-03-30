@@ -17,7 +17,7 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resetToken, setResetToken] = useState("");
-  const [tokenError, setTokenError] = useState("");
+
 
   // Extract token from URL when component mounts
   useEffect(() => {
@@ -26,10 +26,6 @@ const ResetPassword = () => {
 
     if (token) {
       setResetToken(token);
-    } else {
-      setTokenError(
-        "Reset token not found. Please use the link from your email."
-      );
     }
   }, []);
 
@@ -183,16 +179,7 @@ const ResetPassword = () => {
           </p>
 
           {/* Token error state */}
-          {tokenError ? (
-            <div className="w-full px-4 py-4 rounded-2xl bg-[#F26767]/20 border border-[#F26767]/40 text-white text-sm font-inter text-left flex items-start gap-3">
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#F26767]" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd" />
-              </svg>
-              <span className="leading-relaxed">{tokenError}</span>
-            </div>
-          ) : (
+
             <div className="space-y-4 sm:space-y-5">
               {/* New Password */}
               <div className="text-left">
@@ -281,7 +268,7 @@ const ResetPassword = () => {
                 Back to Login
               </button>
             </div>
-          )}
+
         </div>
       </div>
     </OnboardingLayout>
