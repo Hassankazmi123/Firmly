@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const NormalChatHeader = ({ onMenuClick, currentThread = null }) => {
   return (
@@ -27,9 +28,12 @@ const NormalChatHeader = ({ onMenuClick, currentThread = null }) => {
           {currentThread?.title || "Amalia"}
         </h1>
       </div>
-      <div className="text-md md:text-lg font-cormorant font-semibold underline text-black">
+      <Link 
+        to="/dashboard/safe-space-chat" 
+        className="text-md md:text-lg font-cormorant font-semibold underline text-black hover:text-[#6664D3] transition-colors cursor-pointer"
+      >
         Safe Space
-      </div>
+      </Link>
     </div>
   );
 };

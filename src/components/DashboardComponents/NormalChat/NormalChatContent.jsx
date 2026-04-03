@@ -78,33 +78,6 @@ const NormalChatContent = ({
           Standard coaching conversation. Messages persist so you can revisit
           insights anytime.
         </p>
-        <div className="mb-4">
-          <button className="text-[#6664D3]  font-inter text-sm md:text-base transition-colors ">
-            Ask about
-          </button>
-        </div>
-        <div className="flex flex-col gap-2 md:gap-3 max-w-2xl mx-auto pb-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-            {suggestedTopics.slice(0, 4).map((topic, index) => (
-              <button
-                key={index}
-                className="px-3 lg:text-md text-xs md:px-4.5 py-2 md:py-3.5 bg-[#f5f5f5] text-[#3D3D3D]/60 lg:rounded-xl rounded-md font-inter font-medium  transition-colors"
-              >
-                {topic}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 md:justify-center md:mx-auto md:w-fit">
-            {suggestedTopics.slice(4, 7).map((topic, index) => (
-              <button
-                key={index + 4}
-                className="px-3 lg:text-md text-xs md:px-4.5 py-2 md:py-3.5 bg-[#F5F5F5] text-[#3D3D3D]/60 rounded-xl font-inter font-medium  transition-colors"
-              >
-                {topic}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
