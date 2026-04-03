@@ -78,6 +78,16 @@ const StartConversationModal = ({ isOpen, onClose, onStartChat }) => {
           className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden my-auto sm:my-0 max-h-[90vh] sm:max-h-[95vh] flex flex-col"
         >
           <div className="bg-[#6664D3] px-4 sm:px-8 py-6  relative overflow-hidden">
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-20"
+              aria-label="Close modal"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             <div
               className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
               style={{

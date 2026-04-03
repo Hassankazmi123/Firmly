@@ -88,6 +88,17 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
           ref={modalRef}
           className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative"
         >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors z-20"
+            aria-label="Close modal"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           <div className="p-8  flex flex-col items-center text-center">
             <button className=" w-16 h-16 sm:w-24 sm:h-24 bg-[#6664D3]  active:scale-95 rounded-full flex items-center justify-center  hover:shadow-[#8A7BBF]/50 transition-all duration-300 flex-shrink-0 group">
               <img

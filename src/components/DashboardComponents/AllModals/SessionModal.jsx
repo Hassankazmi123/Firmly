@@ -68,6 +68,16 @@ const SessionModal = ({ isOpen, onClose, sessionData }) => {
       ></div>
       <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 overflow-y-auto">
         <div ref={modalRef} className="relative w-full max-w-3xl">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 transition-colors z-20"
+            aria-label="Close modal"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
           <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-8  flex flex-col items-center text-center">
             <div className="flex justify-center mb-6">
               <div className="relative flex items-center justify-center">
