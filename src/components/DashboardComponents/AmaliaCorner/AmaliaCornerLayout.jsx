@@ -894,7 +894,7 @@ const AmaliaCornerLayout = () => {
                         <div className="flex items-center gap-3">
                           <img
                             src="/assets/images/dashboard/expert.webp"
-                            alt="Workbook"
+                            alt="Expert knowledge"
                             className="w-4 h-4"
                           />
                           <div>
@@ -914,8 +914,7 @@ const AmaliaCornerLayout = () => {
                         Common Understanding
                       </h3>
                       <p className="text-sm text-[#3D3D3D]/70 font-inter mb-6 leading-relaxed">
-                        Introducing ideas that matter to women and their place at
-                        work, based on research and industry reporting.
+                        Explore research-based leadership concepts and identify how specialized workplace insights can accelerate your professional growth.
                       </p>
                       <button
                         onClick={() => handleConversationSelect("session1")}
@@ -925,7 +924,7 @@ const AmaliaCornerLayout = () => {
                       </button>
                     </div>
                   </ScrollReveal>
-                  {/* Workbook card */}
+                  {/* Workbook card - Reflective Practice */}
                   <ScrollReveal direction="up" delay={200}>
                     <div
                       className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full ${!completedSessions.includes(1) ? "opacity-60" : ""}`}
@@ -960,8 +959,7 @@ const AmaliaCornerLayout = () => {
                       <p
                         className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(1) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
                       >
-                        Small description about the element contents. Lorem ipsum
-                        sit dolor amet avec consect.
+                        Engage in reflective exercises to analyze your current leadership style and identify specific areas for behavioral improvement.
                       </p>
                       {completedSessions.includes(1) ? (
                         <button
@@ -978,7 +976,7 @@ const AmaliaCornerLayout = () => {
                       )}
                     </div>
                   </ScrollReveal>
-                  {/* Application card */}
+                  {/* Workbook card - Application */}
                   <ScrollReveal direction="right" delay={300}>
                     <div
                       className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full ${!completedSessions.includes(2) ? "opacity-60" : ""}`}
@@ -1013,8 +1011,7 @@ const AmaliaCornerLayout = () => {
                       <p
                         className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(2) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
                       >
-                        Small description about the element contents. Lorem ipsum
-                        sit dolor amet avec consect.
+                        Practice implementing core leadership strategies through interactive scenarios designed to build confidence in real-world situations.
                       </p>
                       {completedSessions.includes(2) ? (
                         <button
@@ -1035,11 +1032,11 @@ const AmaliaCornerLayout = () => {
                 <ScrollReveal direction="up" delay={400}>
                   <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-6 mb-8">
                     <p className="text-base text-black font-inter mb-4">
-                      We'll start with {domainLabel}. For that, I've scheduled 4
+                      We'll start with {domainLabel}. For that, I've scheduled 3
                       sessions for you:
                     </p>
                     <ul className="space-y-3 mb-6">
-                      {[1, 2, 3, 4].map((num) => (
+                      {[1, 2, 3].map((num) => (
                         <li key={num} className="flex items-start gap-3">
                           <span className="text-black font-bold">•</span>
                           <span className="text-base text-black font-inter">

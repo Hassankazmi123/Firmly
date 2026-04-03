@@ -208,7 +208,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       duration: "8 min",
       title: "Common Understanding",
       description:
-        "Introducing ideas that matter to women and their place at work, based on research and industry reporting.",
+        "Explore research-based leadership concepts and identify how specialized workplace insights can accelerate your professional growth.",
       status: getSessionStatus(1),
       buttonText: getSessionStatus(1) === "completed" ? "View" : "Start element",
     },
@@ -219,7 +219,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       duration: "8 min",
       title: "Reflective Practice",
       description:
-        "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
+        "Engage in reflective exercises to analyze your current leadership style and identify specific areas for behavioral improvement.",
       status: getSessionStatus(2),
       buttonText: getSessionStatus(2) === "completed" ? "View" : "Start element",
     },
@@ -230,7 +230,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       duration: "8 min",
       title: "Application",
       description:
-        "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
+        "Practice implementing core leadership strategies through interactive scenarios designed to build confidence in real-world situations.",
       status: getSessionStatus(3),
       buttonText: getSessionStatus(3) === "completed" ? "View" : "Start element",
     },
@@ -241,7 +241,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       duration: "15 min",
       title: "Integration",
       description:
-        "Small description about the element contents. Lorem ipsum sit dolor amet avec consect.",
+        "Synthesize your learnings into a sustainable action plan, ensuring your new leadership skills are fully integrated into your daily routine.",
       status: getSessionStatus(4),
       buttonText: getSessionStatus(4) === "completed" ? "View" : "Start element",
     },
