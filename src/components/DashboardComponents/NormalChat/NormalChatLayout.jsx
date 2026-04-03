@@ -82,14 +82,22 @@ const NormalChatLayout = () => {
         return normalized;
       });
 
+      // Filter out system-generated threads (e.g. Diagnostic Results or Pathway sessions)
+      const filteredThreads = normalizedThreads.filter(thread => {
+        const title = thread.title || "";
+        const isDiagnostic = title === "Leadership Diagnostic Results" || title === "Diagnostic Debrief";
+        const isPathway = /^(GOAL|RES|ENG|SELF|BELONG|EMP)\s*[-—]\s*/i.test(title);
+        return !isDiagnostic && !isPathway;
+      });
+
       // Sort threads by updated_at or created_at descending (most recent first)
-      normalizedThreads.sort((a, b) => {
+      filteredThreads.sort((a, b) => {
         const dateA = new Date(a.updated_at || a.created_at || 0);
         const dateB = new Date(b.updated_at || b.created_at || 0);
         return dateB - dateA;
       });
 
-      setThreads(normalizedThreads);
+      setThreads(filteredThreads);
     } catch (err) {
       console.error("Failed to fetch threads:", err);
       setError("Failed to load chat threads");
