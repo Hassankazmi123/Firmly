@@ -25,7 +25,8 @@ const AmaliaCornerLayout = () => {
   const [messages, setMessages] = useState([]);
   const [userId, setUserId] = useState("");
   const [showPathwayView, setShowPathwayView] = useState(() => {
-    return sessionStorage.getItem("showPathwayView") === "true";
+    return sessionStorage.getItem("showPathwayView") === "true" || 
+           localStorage.getItem("hasGeneratedPathway") === "true";
   });
   const [isTyping, setIsTyping] = useState(false);
   const hasHistoryAtMount = useRef(false);
@@ -172,9 +173,13 @@ const AmaliaCornerLayout = () => {
       } catch (e) {}
     }
 
-    if (shouldShowPathway === "true" || hasSyncSummary) {
+    if (shouldShowPathway === "true" || hasSyncSummary || localStorage.getItem("hasGeneratedPathway") === "true") {
       setShowPathwayView(true);
       if (shouldShowPathway === "true") sessionStorage.removeItem("showLeadershipPathway");
+      
+      // If pathway is generated/started, ensure Session 1 is visible in sidebar
+      setShowSession1(true);
+      sessionStorage.setItem("showSession1", "true");
     }
 
     const s1 = sessionStorage.getItem("showSession1") === "true";
@@ -575,10 +580,12 @@ const AmaliaCornerLayout = () => {
       setMessages([...messages, { type: "amalia", content: pathwayMessage }]);
       setIsTyping(false);
       setShowPathwayView(true);
+      setShowSession1(true); // Show in sidebar immediately
       sessionStorage.setItem("showPathwayView", "true");
       sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
       sessionStorage.setItem("fromStartSession", "true");
       sessionStorage.setItem("showSession1", "true");
+      localStorage.setItem("hasGeneratedPathway", "true");
       localStorage.setItem("hasStartedSessions", "true");
     }, 1500);
   };
@@ -872,14 +879,16 @@ const AmaliaCornerLayout = () => {
               </ScrollReveal>
             </div>
 
-            <div className="flex justify-center my-6 md:my-8">
-              <button
-                onClick={handleGeneratePathway}
-                className="px-8 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5] shadow-sm"
-              >
-                Generate my Leadership Pathway
-              </button>
-            </div>
+            {!showPathwayView && (
+              <div className="flex justify-center my-6 md:my-8">
+                <button
+                  onClick={handleGeneratePathway}
+                  className="px-8 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5] shadow-sm"
+                >
+                  Generate my Leadership Pathway
+                </button>
+              </div>
+            )}
 
             {showPathwayView && (
               <>
@@ -1035,13 +1044,13 @@ const AmaliaCornerLayout = () => {
                   </ScrollReveal>
                 </div>
                 <ScrollReveal direction="up" delay={400}>
-                  <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-6 mb-8">
+                  <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-6 mb-4">
                     <p className="text-base text-black font-inter mb-4">
-                      We'll start with {domainLabel}. For that, I've scheduled 3
+                      We'll start with {getDomainLabel()}. For that, I've scheduled 4
                       sessions for you:
                     </p>
                     <ul className="space-y-3 mb-6">
-                      {[1, 2, 3].map((num) => (
+                      {[1, 2, 3, 4].map((num) => (
                         <li key={num} className="flex items-start gap-3">
                           <span className="text-black font-bold">•</span>
                           <span className="text-base text-black font-inter">
@@ -1051,11 +1060,17 @@ const AmaliaCornerLayout = () => {
                         </li>
                       ))}
                     </ul>
-                    <p className="text-base text-black/70 font-inter mb-4 leading-relaxed">
+                    <p className="text-base text-black font-inter mb-2 leading-relaxed">
                       Each session is designed to be conversational and practical,
-                      building on real workplace scenarios.
+                      building on real workplace scenarios. We'll work together to
+                      develop your {getDomainLabel().toLowerCase()} leadership skills through
+                      evidence-based techniques.
                     </p>
-                    <p className="text-base text-black/70 font-inter">
+                  </div>
+                </ScrollReveal>
+                <ScrollReveal direction="up" delay={450}>
+                  <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-5 mb-8">
+                    <p className="text-base text-black font-inter">
                       You would always have this pathway on the main dashboard so
                       you can work on all the points one by one.
                     </p>

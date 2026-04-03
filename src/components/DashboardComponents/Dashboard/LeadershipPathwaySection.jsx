@@ -164,6 +164,8 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       }
       localStorage.setItem("hasGeneratedPathway", "true");
       localStorage.setItem("hasStartedSessions", "true");
+      sessionStorage.setItem("showSession1", "true");
+      sessionStorage.setItem("showPathwayView", "true");
       setIsPathwayGenerated(true);
       setShowPathwayDesign(true);
       console.log("Pathway started successfully");
@@ -435,7 +437,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
                 <button
                   onClick={handleManualGenerate}
                   disabled={isGenerating}
-                  className={`px-5 py-3 bg-[#3D3D3D] text-white rounded-xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D] ${isGenerating ? "opacity-70 cursor-not-allowed" : ""}`}
+                  className={`px-6 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D] ${isGenerating ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
                   {isGenerating ? "Generating..." : "Generate my Leadership Pathway"}
                 </button>
