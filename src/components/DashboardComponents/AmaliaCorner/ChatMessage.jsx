@@ -31,43 +31,9 @@ const ChatMessage = ({ message, userInitials, alignUserLeft = false, disableAnim
 
   return (
     <div className="mb-6 flex w-full flex-col relative animate-fadeInUp">
-      {/* 
-        RESERVED SPACE: 
-        Invisible placeholder to force the row to take its final height immediately,
-        preventing the content below from jumping.
-      */}
-      {isAmaliaString && (
-        <div
-          className="flex w-full items-start gap-3 opacity-0 pointer-events-none"
-          aria-hidden="true"
-        >
-          <div className="flex-shrink-0 mt-1">
-            <img
-              src="/assets/images/dashboard/starwhite.webp"
-              alt=""
-              className="w-10 h-10 rounded-full bg-[#8A88F3] p-2 object-contain"
-            />
-          </div>
-          <div className="rounded-2xl p-4 max-w-[85%] bg-[#F5F5FF] text-black rounded-tl-none">
-            <div className="text-sm md:text-base font-inter leading-relaxed whitespace-pre-wrap">
-              {content}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 
-        VISIBLE CONTENT:
-        If it's Amalia's string, we position it absolutely over the placeholder to allow inner growth.
-        Otherwise, it uses normal flex layout.
-      */}
       <div
-        className={`${
-          isAmaliaString
-            ? "absolute top-0 left-0 w-full flex items-start gap-3"
-            : `flex w-full items-start gap-3 ${
-                isUser && !alignUserLeft ? "justify-end" : "justify-start"
-              }`
+        className={`flex w-full items-start gap-3 ${
+          isUser && !alignUserLeft ? "justify-end" : "justify-start"
         }`}
       >
         {!isUser && (

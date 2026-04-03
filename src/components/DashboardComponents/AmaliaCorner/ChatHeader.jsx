@@ -22,7 +22,7 @@ const ChatHeader = ({ onMenuClick }) => {
         </svg>
       </button>
       <h1 className="text-xl md:text-2xl font-semibold text-black font-cormorant">
-        In Conversation with Amalia
+        {title || "In Conversation with Amalia"}
       </h1>
     </div>
   );

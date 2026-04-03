@@ -786,6 +786,13 @@ const AmaliaCornerLayout = () => {
       <div className="flex-1  flex flex-col overflow-hidden bg-white rounded-2xl border border-[#ECECEC] relative">
         <ChatHeader
           onMenuClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          title={
+            selectedConversation === "diagnostic" || !selectedConversation 
+              ? "Diagnostic Debrief" 
+              : selectedConversation.startsWith("session")
+                ? `Session ${selectedConversation.replace("session", "")}`
+                : "New Conversation"
+          }
         />
         {selectedConversation === "session1" ? (
           <div className="flex-1 overflow-hidden relative">
@@ -821,20 +828,23 @@ const AmaliaCornerLayout = () => {
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto max-w-5xl mx-auto px-4 pb-24 relative chat-container-scroll">
-            <ChatMessage
-              message={initialMessage}
-              userInitials={userInitials}
-              disableAnimation={
-                !location.state?.animateInitial || 
-                hasHistoryAtMount.current
-              }
-            />
+            {(selectedConversation === "diagnostic" || !selectedConversation) && messages.length === 0 && (
+              <ChatMessage
+                message={initialMessage}
+                userInitials={userInitials}
+                disableAnimation={
+                  !location.state?.animateInitial || 
+                  hasHistoryAtMount.current
+                }
+              />
+            )}
+            
             {messages.map((msg, index) => (
               <ChatMessage
                 key={index}
                 message={msg}
                 userInitials={userInitials}
-                disableAnimation={msg.isHistory}
+                disableAnimation={true}
               />
             ))}
 
