@@ -844,7 +844,7 @@ const AmaliaCornerLayout = () => {
                 key={index}
                 message={msg}
                 userInitials={userInitials}
-                disableAnimation={true}
+                disableAnimation={msg.isHistory}
               />
             ))}
 

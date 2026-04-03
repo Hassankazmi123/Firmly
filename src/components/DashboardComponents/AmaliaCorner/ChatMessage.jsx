@@ -11,20 +11,22 @@ const ChatMessage = ({ message, userInitials, alignUserLeft = false, disableAnim
   const [displayedContent, setDisplayedContent] = useState(isUser || disableAnimation ? content : "");
 
   useEffect(() => {
-    if (!isUser && !disableAnimation && content) {
-      if (typeof content !== "string") {
-        setDisplayedContent(content);
-        return;
-      }
-      let index = 0;
-      const timer = setInterval(() => {
-        setDisplayedContent((prev) => content.slice(0, index + 1));
-        index++;
-        if (index >= content.length) {
-          clearInterval(timer);
+    if (!isUser && !disableAnimation && content && typeof content === "string") {
+      setDisplayedContent("");
+
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < content.length) {
+          setDisplayedContent(content.substring(0, i + 1));
+          i++;
+        } else {
+          clearInterval(interval);
         }
-      }, 20);
-      return () => clearInterval(timer);
+      }, 15);
+
+      return () => clearInterval(interval);
+    } else {
+      setDisplayedContent(content);
     }
   }, [content, isUser, disableAnimation]);
   const isAmaliaString = !isUser && typeof content === "string";
@@ -32,9 +34,8 @@ const ChatMessage = ({ message, userInitials, alignUserLeft = false, disableAnim
   return (
     <div className="mb-6 flex w-full flex-col relative animate-fadeInUp">
       <div
-        className={`flex w-full items-start gap-3 ${
-          isUser && !alignUserLeft ? "justify-end" : "justify-start"
-        }`}
+        className={`flex w-full items-start gap-3 ${isUser && !alignUserLeft ? "justify-end" : "justify-start"
+          }`}
       >
         {!isUser && (
           <div className="flex-shrink-0 mt-1">
@@ -55,11 +56,10 @@ const ChatMessage = ({ message, userInitials, alignUserLeft = false, disableAnim
         )}
 
         <div
-          className={`rounded-2xl p-4 max-w-[85%] ${
-            isUser
-              ? "bg-[#F5F5F5] text-[#3D3D3D] rounded-tr-none"
-              : "bg-[#F5F5FF] text-black rounded-tl-none"
-          }`}
+          className={`rounded-2xl p-4 max-w-[85%] ${isUser
+            ? "bg-[#F5F5F5] text-[#3D3D3D] rounded-tr-none"
+            : "bg-[#F5F5FF] text-black rounded-tl-none"
+            }`}
         >
           <div className="text-sm md:text-base font-inter leading-relaxed whitespace-pre-wrap">
             {displayedContent}
