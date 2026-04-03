@@ -222,6 +222,7 @@ const SafeSpaceChatLayout = () => {
         <div className="flex-shrink-0">
           <SafeSpaceChatInput
             onSendMessage={handleSendMessage}
+            disabled={isTyping}
           />
         </div>
         <img

@@ -284,7 +284,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
           isSidebarCollapsed ? "z-50" : ""
         } md:z-50`}
       >
-        <ChatInputFooter onSend={handleSendMessage} />
+        <ChatInputFooter onSend={handleSendMessage} disabled={isTyping} />
       </div>
       <SessionFeedbackModal
         isOpen={isFeedbackModalOpen}

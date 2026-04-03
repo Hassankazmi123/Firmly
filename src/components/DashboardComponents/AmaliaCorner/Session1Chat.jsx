@@ -323,7 +323,7 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
           isSidebarCollapsed ? "z-50" : ""
         } md:z-50`}
       >
-        <ChatInputFooter onSend={handleSendMessage} />
+        <ChatInputFooter onSend={handleSendMessage} disabled={isTyping} />
       </div>
     </div>
   );

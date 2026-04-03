@@ -325,7 +325,7 @@ const Session2Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
         className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
           } md:z-50`}
       >
-        <ChatInputFooter onSend={handleSendMessage} />
+        <ChatInputFooter onSend={handleSendMessage} disabled={isTyping} />
       </div>
     </div>
   );
