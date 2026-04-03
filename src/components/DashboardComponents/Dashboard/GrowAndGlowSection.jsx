@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import SummaryCard from "../AmaliaCorner/SummaryCard";
 import { assessmentService } from "../../../services/assessment";
 
-const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
+const GrowAndGlowSection = ({
+  hasVisitedAmaliaCorner = false,
+  isPathwayGenerated = false,
+}) => {
   const navigate = useNavigate();
   const [doingGreatItems, setDoingGreatItems] = useState([]);
   const [growthAreasItems, setGrowthAreasItems] = useState([]);
@@ -113,7 +116,7 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
     };
 
     fetchAssessmentData();
-  }, [hasVisitedAmaliaCorner]);
+  }, [hasVisitedAmaliaCorner, isPathwayGenerated]);
 
   const handleImproveClick = () => {
     const isStarted = localStorage.getItem("hasStartedSessions") === "true";
@@ -126,7 +129,7 @@ const GrowAndGlowSection = ({ hasVisitedAmaliaCorner = false }) => {
     navigate("/amalia-corner");
   };
 
-  const showRealContent = hasVisitedAmaliaCorner;
+  const showRealContent = isPathwayGenerated;
 
   return (
     <section data-tour="grow-glow" className="py-8 lg:py-12">

@@ -12,6 +12,9 @@ export default function Dashboard() {
   const [hasVisitedAmaliaCorner, setHasVisitedAmaliaCorner] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [isPathwayGenerated, setIsPathwayGenerated] = useState(() => {
+    return localStorage.getItem("hasGeneratedPathway") === "true";
+  });
   const pathwaySectionRef = useRef(null);
 
   useEffect(() => {
@@ -63,10 +66,14 @@ export default function Dashboard() {
     <div className="min-h-screen relative">
       <DashboardHeader />
       <div className="bg-[#f5f5f5] 2xl:px-16 xl:px-12 lg:px-8 md:px-6 sm:px-4 px-4">
-        <GrowAndGlowSection hasVisitedAmaliaCorner={hasVisitedAmaliaCorner} />
+        <GrowAndGlowSection 
+          hasVisitedAmaliaCorner={hasVisitedAmaliaCorner} 
+          isPathwayGenerated={isPathwayGenerated}
+        />
         <div className="lg:pb-10 pb-7" ref={pathwaySectionRef}>
           <LeadershipPathwaySection
             hasVisitedAmaliaCorner={hasVisitedAmaliaCorner}
+            onGenerated={() => setIsPathwayGenerated(true)}
           />
         </div>
       </div>

@@ -7,7 +7,10 @@ import Session3Modal from "../AllModals/Session3Modal";
 import Session4Modal from "../AllModals/Session4Modal";
 import { pathwayService } from "../../../services/pathway";
 
-const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
+const LeadershipPathwaySection = ({
+  hasVisitedAmaliaCorner = false,
+  onGenerated,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isSession2ModalOpen, setIsSession2ModalOpen] = useState(false);
@@ -168,6 +171,7 @@ const LeadershipPathwaySection = ({ hasVisitedAmaliaCorner = false }) => {
       sessionStorage.setItem("showPathwayView", "true");
       setIsPathwayGenerated(true);
       setShowPathwayDesign(true);
+      if (onGenerated) onGenerated();
       console.log("Pathway started successfully");
     } catch (error) {
       console.error("Failed to start pathway:", error);
