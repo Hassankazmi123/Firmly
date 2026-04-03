@@ -1,5 +1,5 @@
 import React from "react";
-const ChatHeader = ({ onMenuClick }) => {
+const ChatHeader = ({ onMenuClick, title }) => {
   return (
     <div className="p-4  flex items-center gap-4">
       <button
