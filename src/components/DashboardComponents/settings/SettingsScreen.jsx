@@ -32,6 +32,7 @@ export default function SettingsScreen() {
     title: "Changes Saved Successfully",
     message: "Your profile has been updated successfully.",
   });
+  const [isImageDeleted, setIsImageDeleted] = useState(false);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -111,6 +112,7 @@ export default function SettingsScreen() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result); // Show preview
+        setIsImageDeleted(false);
       };
       reader.readAsDataURL(file);
     }
@@ -118,6 +120,22 @@ export default function SettingsScreen() {
   const handleImageDelete = () => {
     setProfileImage(null);
     setSelectedImageFile(null);
+    setIsImageDeleted(true);
+    
+    // Update localStorage immediately so header reflects the change
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+      if (currentUser.profile_image) {
+        const newUser = { ...currentUser, profile_image: null };
+        localStorage.setItem("user", JSON.stringify(newUser));
+        
+        // Dispatch a storage event to notify other components (like Header)
+        // because localStorage updates in the same tab don't trigger 'storage' event
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch (e) {
+      console.error("Error updating localStorage on image delete:", e);
+    }
   };
   const handleSaveChanges = async () => {
     try {
@@ -148,6 +166,10 @@ export default function SettingsScreen() {
 
       if (selectedImageFile) {
         formData.append("profile_image", selectedImageFile);
+      } else if (isImageDeleted) {
+        // Depending on backend, we might need to send an empty string or a null-equivalent
+        // to signify deletion. Common pattern is sending an empty value for the field.
+        formData.append("profile_image", ""); 
       }
 
       const response = await fetch(`${API_AUTH_URL}/complete-profile/`, {
@@ -160,11 +182,20 @@ export default function SettingsScreen() {
       });
 
       if (response.ok) {
+        const updatedData = await response.json();
+        
+        // Update localStorage so other components (like Header) can see changes
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        const newUser = { ...currentUser, ...updatedData };
+        localStorage.setItem("user", JSON.stringify(newUser));
+
         setModalContent({
           title: "Changes Saved Successfully",
           message: "Your profile has been updated successfully.",
         });
         setShowSavedModal(true);
+        setIsImageDeleted(false);
+        setSelectedImageFile(null);
       } else {
         const data = await response.json();
         // Construct a more detailed error message

@@ -1,17 +1,49 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logout from "../../../utils/logout";
-import { getUserProfile } from "../../../services/api";
+import { getUserProfile, API_URL } from "../../../services/api";
 
 const Header2 = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [userInitials, setUserInitials] = useState("U");
+  const [userImage, setUserImage] = useState(null);
   const [selectedTab, setSelectedTab] = useState(() => {
     if (location.pathname === "/amalia-corner") return "Amalia Corner";
     if (location.pathname === "/dashboard") return "Dashboard";
     return null;
   });
+  
+  // Initialize from localStorage for immediate feedback and sync on updates
+  useEffect(() => {
+    const syncProfile = () => {
+      const user = localStorage.getItem("user");
+      if (user) {
+        try {
+          const parsed = JSON.parse(user);
+          if (parsed.first_name && parsed.last_name) {
+            const initials = `${parsed.first_name.charAt(0)}${parsed.last_name.charAt(0)}`.toUpperCase();
+            setUserInitials(initials);
+          }
+          if (parsed.profile_image) {
+            let imageUrl = parsed.profile_image;
+            if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+              imageUrl = `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+            }
+            setUserImage(imageUrl);
+          } else {
+            setUserImage(null);
+          }
+        } catch (e) {
+          console.error("Error parsing stored user:", e);
+        }
+      }
+    };
+
+    syncProfile();
+    window.addEventListener("storage", syncProfile);
+    return () => window.removeEventListener("storage", syncProfile);
+  }, []);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
 
@@ -19,9 +51,20 @@ const Header2 = () => {
     const fetchProfile = async () => {
       try {
         const profile = await getUserProfile();
-        if (profile && profile.first_name && profile.last_name) {
-          const initials = `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
-          setUserInitials(initials);
+        if (profile) {
+          if (profile.first_name && profile.last_name) {
+            const initials = `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
+            setUserInitials(initials);
+          }
+          if (profile.profile_image) {
+            let imageUrl = profile.profile_image;
+            if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+              imageUrl = `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+            }
+            setUserImage(imageUrl);
+          } else {
+            setUserImage(null);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
@@ -116,13 +159,18 @@ const Header2 = () => {
         </nav>
         <div className="flex items-center sm:space-x-4">
           <div className="hidden sm:flex items-center space-x-2 text-white">
-            <div className="flex items-center space-x-2">
+            <div
+              onClick={() => navigate("/amalia-corner")}
+              className="flex items-center space-x-2 cursor-pointer group"
+            >
               <img
                 src="/assets/images/dashboard/starwhite.webp"
                 alt="user icon"
-                className="h-5 w-5 sm:h-6 sm:w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6 transform group-hover:scale-125 transition-transform duration-300"
               />
-              <span className="text-white/70 text-sm sm:text-base">Amalia</span>
+              <span className="text-white/70 text-sm sm:text-base group-hover:text-white transition-colors">
+                Amalia
+              </span>
             </div>
           </div>
           <div className="relative" ref={ltDropdownRef}>
@@ -133,9 +181,23 @@ const Header2 = () => {
               aria-haspopup="true"
               type="button"
             >
-              <span className="text-sm lg:text-lg font-semibold bg-[#7d7cd9] border border-white/20 text-white/70 px-4 py-3 rounded-2xl">
-                {userInitials}
-              </span>
+              <div className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-2xl bg-[#7d7cd9] border border-white/20 overflow-hidden">
+                {userImage ? (
+                  <img
+                    src={userImage}
+                    alt="profile"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      setUserImage(null);
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm lg:text-lg font-semibold text-white/70">
+                    {userInitials}
+                  </span>
+                )}
+              </div>
               <svg
                 className={`w-4 h-4 transition-transform ${isLTDropdownOpen ? "rotate-180" : ""
                   }`}

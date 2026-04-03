@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getUserProfile } from "../../../services/api";
+import { getUserProfile, API_URL } from "../../../services/api";
 import logout from "../../../utils/logout";
 import Hero from "./Hero";
 const PortalDropdown = ({
@@ -80,11 +80,22 @@ const PortalDropdown = ({
 const DashboardHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [userImage, setUserImage] = useState(null);
   const [userInitials, setUserInitials] = useState(() => {
     try {
       const user = localStorage.getItem("user");
       if (user) {
         const parsed = JSON.parse(user);
+        
+        // Handle profile image from localStorage
+        if (parsed.profile_image) {
+          let imageUrl = parsed.profile_image;
+          if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+            imageUrl = `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+          }
+          // Note: we can't call setUserImage here, but we'll do it in a useEffect next
+        }
+
         if (parsed.first_name && parsed.last_name) {
           return `${parsed.first_name.charAt(0)}${parsed.last_name.charAt(0)}`.toUpperCase();
         }
@@ -94,6 +105,34 @@ const DashboardHeader = () => {
     }
     return "U";
   });
+
+  // Load userImage from localStorage on mount and sync on storage events
+  useEffect(() => {
+    const syncProfile = () => {
+      const user = localStorage.getItem("user");
+      if (user) {
+        try {
+          const parsed = JSON.parse(user);
+          if (parsed.profile_image) {
+            let imageUrl = parsed.profile_image;
+            if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+              imageUrl = `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+            }
+            setUserImage(imageUrl);
+          } else {
+            setUserImage(null);
+          }
+          if (parsed.first_name && parsed.last_name) {
+            setUserInitials(`${parsed.first_name.charAt(0)}${parsed.last_name.charAt(0)}`.toUpperCase());
+          }
+        } catch (e) {}
+      }
+    };
+
+    syncProfile();
+    window.addEventListener("storage", syncProfile);
+    return () => window.removeEventListener("storage", syncProfile);
+  }, []);
   const [selectedTab, setSelectedTab] = useState(() => {
     if (location.pathname === "/amalia-corner") return "Amalia Corner";
     if (location.pathname === "/dashboard") return "Dashboard";
@@ -108,9 +147,20 @@ const DashboardHeader = () => {
     const fetchProfile = async () => {
       try {
         const profile = await getUserProfile();
-        if (profile && profile.first_name && profile.last_name) {
-          const initials = `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
-          setUserInitials(initials);
+        if (profile) {
+          if (profile.first_name && profile.last_name) {
+            const initials = `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
+            setUserInitials(initials);
+          }
+          if (profile.profile_image) {
+            let imageUrl = profile.profile_image;
+            if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("data:")) {
+              imageUrl = `${API_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+            }
+            setUserImage(imageUrl);
+          } else {
+            setUserImage(null);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
@@ -209,13 +259,19 @@ const DashboardHeader = () => {
         </nav>
         <div className="flex items-center sm:space-x-4 relative z-[200]">
           <div className="hidden sm:flex items-center space-x-2 text-white">
-            <div className="flex items-center space-x-2">
+            <div
+              onClick={() => navigate("/amalia-corner")}
+              className="flex items-center space-x-2 cursor-pointer group relative z-[220] pointer-events-auto"
+              style={{ cursor: 'pointer' }}
+            >
               <img
                 src="/assets/images/dashboard/starwhite.webp"
                 alt="user icon"
-                className="h-5 w-5 sm:h-6 sm:w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6 transform group-hover:scale-125 transition-all duration-300 pointer-events-none"
               />
-              <span className="text-white/70 text-sm sm:text-base">Amalia</span>
+              <span className="text-white/70 text-sm sm:text-base group-hover:text-white transition-colors pointer-events-none">
+                Amalia
+              </span>
             </div>
           </div>
           <div className="relative z-[200]">
@@ -227,9 +283,23 @@ const DashboardHeader = () => {
               aria-haspopup="true"
               type="button"
             >
-              <span className="text-sm lg:text-lg font-semibold bg-[#7d7cd9] border border-white/20 text-white/70 px-4 py-3 rounded-2xl">
-                {userInitials}
-              </span>
+              <div className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-2xl bg-[#7d7cd9] border border-white/20 overflow-hidden relative z-[210]">
+                {userImage ? (
+                  <img
+                    src={userImage}
+                    alt="profile"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      setUserImage(null);
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm lg:text-lg font-semibold text-white/70">
+                    {userInitials}
+                  </span>
+                )}
+              </div>
               <svg
                 className={`w-4 h-4 transition-transform ${isLTDropdownOpen ? "rotate-180" : ""
                   }`}

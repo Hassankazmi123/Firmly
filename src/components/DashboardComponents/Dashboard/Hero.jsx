@@ -8,6 +8,7 @@ import {
 import { assessmentService } from "../../../services/assessment";
 import DiagnosticDebriefModal from "../AllModals/DiagnosticDebriefModal";
 import RadarChart from "./RadarChart";
+import { API_URL } from "../../../services/api";
 
 const Hero = () => {
   const location = useLocation();
@@ -207,8 +208,7 @@ const Hero = () => {
           </h1>
           <p className="text-base lg:text-lg text-white/70 mb-4  font-inter max-w-2xl ">
             This visual summary displays your scores across six research-backed
-            metrics that impact women's workplace effectiveness and leadership
-            potential.
+            metrics.
           </p>
         </div>
         <div className="relative mt-7">

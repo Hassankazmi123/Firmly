@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import GrowAndGlowSection from "../components/DashboardComponents/Dashboard/GrowAndGlowSection";
 import LeadershipPathwaySection from "../components/DashboardComponents/Dashboard/LeadershipPathwaySection";
 import DashboardHeader from "../components/DashboardComponents/Dashboard/DashboardHeader";
@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasVisitedAmaliaCorner, setHasVisitedAmaliaCorner] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const pathwaySectionRef = useRef(null);
 
   useEffect(() => {
@@ -71,13 +72,14 @@ export default function Dashboard() {
       </div>
       <button
         data-tour="amalia-corner"
-        onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-50 w-12 h-12 sm:w-24 sm:h-24 bg-[#6664D3]  active:scale-95 rounded-full flex items-center justify-center shadow-2xl hover:shadow-[#8A7BBF]/50 transition-all duration-300 flex-shrink-0 group"
+        onClick={() => navigate("/amalia-corner")}
+        className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-50 w-12 h-12 sm:w-24 sm:h-24 bg-[#6664D3]  active:scale-95 rounded-full flex items-center justify-center shadow-2xl hover:shadow-[#8A7BBF]/50 transition-all duration-300 flex-shrink-0 group cursor-pointer"
+        aria-label="Go to Amalia Corner"
       >
         <img
           src="/assets/images/dashboard/helpbtn.webp"
-          alt="action icon"
-          className="h-6 w-6 sm:h-12 sm:w-12 transition-transform duration-300 group-hover:scale-110"
+          alt="Amalia icon"
+          className="h-6 w-6 sm:h-12 sm:w-12 transition-transform duration-300 group-hover:scale-125"
         />
       </button>
       <StartConversationModal
