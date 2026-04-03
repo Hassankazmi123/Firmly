@@ -1,7 +1,7 @@
 import React from "react";
 const SummaryCard = ({ title, subtitle, items, bgColor, iconImage }) => {
   return (
-    <div className={`${bgColor} rounded-2xl p-5 relative overflow-hidden`}>
+    <div className={`${bgColor} rounded-2xl p-5 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-default`}>
       {iconImage && (
         <img
           src={iconImage}
