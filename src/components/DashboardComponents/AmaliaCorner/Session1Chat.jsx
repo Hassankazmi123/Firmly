@@ -299,24 +299,16 @@ const Session1Chat = ({ isSidebarCollapsed = true, onNextSession, userInitials }
         )}
         <div ref={messagesEndRef} />
 
-        <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
-          <button
-            onClick={sessionPhase === "GOODBYE" ? handleNextSession : undefined}
-            className={`flex-1 px-5 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-all text-sm md:text-base ${
-              sessionPhase === "GOODBYE"
-                ? "opacity-100 cursor-pointer hover:bg-[#E5E5E5]"
-                : "opacity-30 cursor-not-allowed pointer-events-none"
-            }`}
-          >
-            Next Session
-          </button>
-          <button
-            onClick={handleGoToDashboard}
-            className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
-          >
-            Go to Dashboard
-          </button>
-        </div>
+        {sessionPhase === "GOODBYE" && (
+          <div className="flex justify-center mt-8 mb-4">
+            <button
+              onClick={handleNextSession}
+              className="px-8 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-all text-sm md:text-base hover:bg-[#E5E5E5] shadow-sm"
+            >
+              Next Session
+            </button>
+          </div>
+        )}
       </div>
       <div
         className={`absolute bottom-0 left-0 right-0 ${

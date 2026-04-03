@@ -867,18 +867,12 @@ const AmaliaCornerLayout = () => {
               </ScrollReveal>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 my-6 md:my-8 max-w-2xl mx-auto">
+            <div className="flex justify-center my-6 md:my-8">
               <button
                 onClick={handleGeneratePathway}
-                className="flex-1 px-5 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5]"
+                className="px-8 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#E5E5E5] shadow-sm"
               >
                 Generate my Leadership Pathway
-              </button>
-              <button
-                onClick={handleGoToDashboard}
-                className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
-              >
-                Go to Dashboard
               </button>
             </div>
 
@@ -1065,18 +1059,12 @@ const AmaliaCornerLayout = () => {
                     </p>
                   </div>
                 </ScrollReveal>
-                <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto mb-8">
+                <div className="flex justify-center mb-8">
                   <button
                     onClick={handleStartSession}
-                    className="flex-1 px-6 py-3 bg-[#F5F5F5] text-[#3D3D3D] rounded-xl font-inter-medium text-base hover:bg-[#E5E5E5] transition-colors"
+                    className="px-8 py-3.5 bg-[#F5F5F5] text-[#3D3D3D] rounded-2xl font-inter-medium text-base hover:bg-[#E5E5E5] transition-colors shadow-sm"
                   >
                     Start Session
-                  </button>
-                  <button
-                    onClick={handleGoToDashboard}
-                    className="flex-1 px-6 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-base hover:bg-[#2D2D2D] transition-colors"
-                  >
-                    Go to Dashboard
                   </button>
                 </div>
               </>

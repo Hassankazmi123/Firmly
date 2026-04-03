@@ -10,6 +10,13 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionPhase, setSessionPhase] = useState("");
+
+  const checkHistoryStatus = useCallback((historyData) => {
+    if (historyData?.status === "COMPLETED") {
+      setSessionPhase("GOODBYE");
+    }
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -139,6 +146,9 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
         historyData = await pathwayService.getEmpathyHistorySession4();
       }
 
+      // Unlock button if session already completed
+      checkHistoryStatus(historyData);
+
       const formatted = processHistoryData(historyData);
 
       if (formatted.length > 0) {
@@ -196,6 +206,9 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
       } else {
         historyData = await pathwayService.getEmpathyHistorySession4();
       }
+
+      // Unlock button if session completed
+      checkHistoryStatus(historyData);
 
       const formatted = processHistoryData(historyData, false);
 
@@ -270,19 +283,20 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
         )}
         <div ref={messagesEndRef} />
 
-        <div className="flex lg:flex-row flex-col gap-4 lg:max-w-sm lg:mx-auto mt-8 mb-4">
-          <button
-            onClick={handleShareFeedback}
-            className="flex-1 py-3.5 px-5 bg-[#3D3D3D] text-[#F5F5F5] rounded-2xl font-medium transition-colors text-sm md:text-base hover:bg-[#2D2D2D]"
-          >
-            Share Feedback
-          </button>
-        </div>
+        {sessionPhase === "GOODBYE" && (
+          <div className="flex justify-center mt-8 mb-4">
+            <button
+              onClick={handleShareFeedback}
+              className="px-8 py-3.5 bg-[#F5F5F5] text-[#578DDD] rounded-2xl font-medium transition-all text-sm md:text-base hover:bg-[#E5E5E5] shadow-sm"
+            >
+              Share Feedback
+            </button>
+          </div>
+        )}
       </div>
       <div
-        className={`absolute bottom-0 left-0 right-0 ${
-          isSidebarCollapsed ? "z-50" : ""
-        } md:z-50`}
+        className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+          } md:z-50`}
       >
         <ChatInputFooter onSend={handleSendMessage} disabled={isTyping} />
       </div>
