@@ -693,9 +693,14 @@ const AmaliaCornerLayout = () => {
 
   const handleStartSession = () => {
     localStorage.setItem("hasStartedDebrief", "true");
-    sessionStorage.setItem("hasVisitedAmaliaCorner", "true");
-    sessionStorage.setItem("fromStartSession", "true");
-    navigate("/dashboard");
+    
+    // Determine the next session to start
+    let nextSession = 1;
+    if (completedSessions.includes(3)) nextSession = 4;
+    else if (completedSessions.includes(2)) nextSession = 3;
+    else if (completedSessions.includes(1)) nextSession = 2;
+    
+    handleConversationSelect(`session${nextSession}`);
   };
 
   const domain = getDomain();
@@ -1061,7 +1066,9 @@ const AmaliaCornerLayout = () => {
                     onClick={handleStartSession}
                     className="px-8 py-3.5 bg-[#F5F5F5] text-[#3D3D3D] rounded-2xl font-inter-medium text-base hover:bg-[#E5E5E5] transition-colors shadow-sm"
                   >
-                    Start Session
+                    {completedSessions.length > 0 || localStorage.getItem("hasStartedSessions") === "true" 
+                      ? "Continue Session" 
+                      : "Start Session"}
                   </button>
                 </div>
               </>
