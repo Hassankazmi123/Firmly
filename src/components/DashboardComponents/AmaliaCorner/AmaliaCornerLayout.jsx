@@ -30,6 +30,17 @@ const AmaliaCornerLayout = () => {
   });
   const [isTyping, setIsTyping] = useState(false);
   const hasHistoryAtMount = useRef(false);
+  const chatScrollRef = useRef(null);
+
+  useEffect(() => {
+    const el = chatScrollRef.current;
+    if (!el) return;
+    const t = setTimeout(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }, 80);
+    return () => clearTimeout(t);
+  }, [messages, isTyping, showPathwayView]);
+
   const [showSession1, setShowSession1] = useState(false);
   const [showSession2, setShowSession2] = useState(false);
   const [showSession3, setShowSession3] = useState(false);
@@ -827,21 +838,47 @@ const AmaliaCornerLayout = () => {
             />
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto max-w-5xl mx-auto px-4 pb-24 relative chat-container-scroll">
-            {(selectedConversation === "diagnostic" || !selectedConversation) && messages.length === 0 && (
-              <ChatMessage
-                message={initialMessage}
-                userInitials={userInitials}
-                disableAnimation={
-                  !location.state?.animateInitial || 
-                  hasHistoryAtMount.current
-                }
-              />
-            )}
-            
+          <div
+            ref={chatScrollRef}
+            className="flex-1 overflow-y-auto max-w-5xl mx-auto px-4 pb-24 relative chat-container-scroll"
+          >
+            {(selectedConversation === "diagnostic" || !selectedConversation) &&
+              !showPathwayView && (
+                <ChatMessage
+                  message={initialMessage}
+                  userInitials={userInitials}
+                  disableAnimation={
+                    !location.state?.animateInitial ||
+                    hasHistoryAtMount.current
+                  }
+                />
+              )}
+
+            <div id="diagnostic-results">
+              <ProgressBarsSection />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <ScrollReveal direction="left">
+                <SummaryCard
+                  title="Doing great"
+                  items={glowItems}
+                  bgColor="bg-[#378C78]"
+                  iconImage="/assets/images/dashboard/doing.webp"
+                />
+              </ScrollReveal>
+              <ScrollReveal direction="right">
+                <SummaryCard
+                  title="Growth areas"
+                  items={growItems}
+                  bgColor="bg-[#C56A55]"
+                  iconImage="/assets/images/dashboard/growth.webp"
+                />
+              </ScrollReveal>
+            </div>
+
             {messages.map((msg, index) => (
               <ChatMessage
-                key={index}
+                key={msg.id ?? index}
                 message={msg}
                 userInitials={userInitials}
                 disableAnimation={msg.isHistory}
@@ -866,28 +903,6 @@ const AmaliaCornerLayout = () => {
                 </div>
               </div>
             )}
-
-            <div id="diagnostic-results">
-              <ProgressBarsSection />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <ScrollReveal direction="left">
-                <SummaryCard
-                  title="Doing great"
-                  items={glowItems}
-                  bgColor="bg-[#378C78]"
-                  iconImage="/assets/images/dashboard/doing.webp"
-                />
-              </ScrollReveal>
-              <ScrollReveal direction="right">
-                <SummaryCard
-                  title="Growth areas"
-                  items={growItems}
-                  bgColor="bg-[#C56A55]"
-                  iconImage="/assets/images/dashboard/growth.webp"
-                />
-              </ScrollReveal>
-            </div>
 
             {!showPathwayView && (
               <div className="flex justify-center my-6 md:my-8">

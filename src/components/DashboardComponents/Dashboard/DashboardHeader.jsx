@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getUserProfile, API_URL } from "../../../services/api";
 import logout from "../../../utils/logout";
+import { useMainNavTransition } from "../../../context/MainNavTransitionContext";
 import Hero from "./Hero";
 const PortalDropdown = ({
   children,
@@ -80,6 +81,7 @@ const PortalDropdown = ({
 const DashboardHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const mainNav = useMainNavTransition();
   const [userImage, setUserImage] = useState(null);
   const [userInitials, setUserInitials] = useState(() => {
     try {
@@ -209,9 +211,12 @@ const DashboardHeader = () => {
   }, [isMobileMenuOpen, isLTDropdownOpen]);
   const goTo = (path, tabName = null) => {
     if (tabName) setSelectedTab(tabName);
-    navigate(path);
+    if (mainNav?.navigateMainView) mainNav.navigateMainView(path);
+    else navigate(path);
     setIsMobileMenuOpen(false);
   };
+  const goMain = (path) =>
+    mainNav?.navigateMainView ? mainNav.navigateMainView(path) : navigate(path);
   return (
     <>
     <header className="bg-[#6664D3] 2xl:px-16 xl:px-12 lg:px-8 md:px-6 sm:px-4 px-4 py-2 rounded-b-3xl relative overflow-visible">
@@ -222,7 +227,7 @@ const DashboardHeader = () => {
       />
       <div className="relative z-20 flex items-center justify-between">
         <button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => goMain("/dashboard")}
           className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
           type="button"
           aria-label="Go to Dashboard"
@@ -260,7 +265,7 @@ const DashboardHeader = () => {
         <div className="flex items-center sm:space-x-4 relative z-[200]">
           <div className="hidden sm:flex items-center space-x-2 text-white">
             <div
-              onClick={() => navigate("/amalia-corner")}
+              onClick={() => goMain("/amalia-corner")}
               className="flex items-center space-x-2 cursor-pointer group relative z-[220] pointer-events-auto"
               style={{ cursor: 'pointer' }}
             >

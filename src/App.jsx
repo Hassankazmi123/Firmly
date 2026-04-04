@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import DiagnosticModal from "./components/DiagnosticComponents/DiagnosticModal";
 import DiagnosticComplete from "./components/DiagnosticComponents/DiagnosticComplete";
+import { MainNavTransitionProvider } from "./context/MainNavTransitionContext";
 
 const PrivateRoute = ({ children }) => {
   const accessToken = localStorage.getItem("accessToken");
@@ -25,6 +26,7 @@ const PrivateRoute = ({ children }) => {
 function App() {
   return (
     <Router>
+      <MainNavTransitionProvider>
       <Routes>
         <Route path="/" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
@@ -104,6 +106,7 @@ function App() {
         <Route path="/not-found" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </MainNavTransitionProvider>
     </Router>
   );
 }
