@@ -211,12 +211,15 @@ const DashboardHeader = () => {
   }, [isMobileMenuOpen, isLTDropdownOpen]);
   const goTo = (path, tabName = null) => {
     if (tabName) setSelectedTab(tabName);
+    window.scrollTo(0, 0);
     if (mainNav?.navigateMainView) mainNav.navigateMainView(path);
     else navigate(path);
     setIsMobileMenuOpen(false);
   };
-  const goMain = (path) =>
+  const goMain = (path) => {
+    window.scrollTo(0, 0);
     mainNav?.navigateMainView ? mainNav.navigateMainView(path) : navigate(path);
+  };
   return (
     <>
     <header className="bg-[#6664D3] 2xl:px-16 xl:px-12 lg:px-8 md:px-6 sm:px-4 px-4 py-2 rounded-b-3xl relative overflow-visible">

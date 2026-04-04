@@ -35,6 +35,8 @@ export default function Dashboard() {
           });
           sessionStorage.removeItem("fromStartSession");
         }, 200);
+      } else {
+        window.scrollTo(0, 0);
       }
     } else {
       // If no local flag, check server for returning users

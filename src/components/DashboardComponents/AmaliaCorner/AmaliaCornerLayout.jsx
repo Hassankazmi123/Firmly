@@ -18,6 +18,8 @@ import { getUserProfile } from "../../../services/api";
 import { chatService } from "../../../services/chat";
 import "./AmaliaCorner.css";
 
+const PATHWAY_INTRO_MESSAGE = `Great! Let's work together to create your personalized Leadership Pathway. Based on your Glow and Grow areas, I'll help you develop a tailored plan to enhance your leadership skills and reach your full potential.\n\nLet's start by discussing your goals and priorities. What would you like to focus on first?`;
+
 const AmaliaCornerLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -584,7 +586,7 @@ const AmaliaCornerLayout = () => {
       return;
     }
 
-    const pathwayMessage = `Great! Let's work together to create your personalized Leadership Pathway. Based on your Glow and Grow areas, I'll help you develop a tailored plan to enhance your leadership skills and reach your full potential.\n\nLet's start by discussing your goals and priorities. What would you like to focus on first?`;
+    const pathwayMessage = PATHWAY_INTRO_MESSAGE;
 
     setIsTyping(true);
     setTimeout(() => {
@@ -840,10 +842,10 @@ const AmaliaCornerLayout = () => {
         ) : (
           <div
             ref={chatScrollRef}
-            className="flex-1 overflow-y-auto max-w-5xl mx-auto px-4 pb-24 relative chat-container-scroll"
+            className="flex-1 overflow-y-auto relative chat-container-scroll"
           >
-            {(selectedConversation === "diagnostic" || !selectedConversation) &&
-              !showPathwayView && (
+            <div className="max-w-5xl mx-auto px-4 pb-24">
+            {(selectedConversation === "diagnostic" || !selectedConversation) && (
                 <ChatMessage
                   message={initialMessage}
                   userInitials={userInitials}
@@ -876,33 +878,14 @@ const AmaliaCornerLayout = () => {
               </ScrollReveal>
             </div>
 
-            {messages.map((msg, index) => (
+            {/* Pathway Intro Message (Middle) */}
+            {messages.filter(msg => msg.content === PATHWAY_INTRO_MESSAGE).map((msg, index) => (
               <ChatMessage
                 key={msg.id ?? index}
                 message={msg}
                 userInitials={userInitials}
-                disableAnimation={msg.isHistory}
               />
             ))}
-
-            {isTyping && (
-              <div className="flex items-center gap-2 px-4 mb-6">
-                <img
-                  src="/assets/images/dashboard/normalstar.webp"
-                  alt="Typing indicator"
-                  className="w-5 h-5 animate-spin"
-                />
-                <div className="flex gap-1">
-                  {[0, 150, 300, 450, 600].map((delay) => (
-                    <div
-                      key={delay}
-                      className="w-2 h-2 bg-[#8A88F3] rounded-full animate-bounce"
-                      style={{ animationDelay: `${delay}ms` }}
-                    ></div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {!showPathwayView && (
               <div className="flex justify-center my-6 md:my-8">
@@ -1113,6 +1096,35 @@ const AmaliaCornerLayout = () => {
                 </div>
               </>
             )}
+
+            {messages.filter(msg => msg.content !== PATHWAY_INTRO_MESSAGE).map((msg, index) => (
+              <ChatMessage
+                key={msg.id ?? index}
+                message={msg}
+                userInitials={userInitials}
+                disableAnimation={msg.isHistory}
+              />
+            ))}
+
+            {isTyping && (
+              <div className="flex items-center gap-2 px-4 mb-6">
+                <img
+                  src="/assets/images/dashboard/normalstar.webp"
+                  alt="Typing indicator"
+                  className="w-5 h-5 animate-spin"
+                />
+                <div className="flex gap-1">
+                  {[0, 150, 300, 450, 600].map((delay) => (
+                    <div
+                      key={delay}
+                      className="w-2 h-2 bg-[#8A88F3] rounded-full animate-bounce"
+                      style={{ animationDelay: `${delay}ms` }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            )}
+            </div>
           </div>
         )}
         {selectedConversation !== "session1" &&
