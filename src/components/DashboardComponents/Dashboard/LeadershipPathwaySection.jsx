@@ -99,16 +99,6 @@ const LeadershipPathwaySection = ({
               localStorage.setItem("amalia_completed_sessions", JSON.stringify(done));
             }
           }
-        } else {
-          // If no session info found, fallback to checking if a pathway technicaly exists 
-          // (used for identifying new vs returning users who haven't started sessions)
-          const response = await pathwayService.startPathway();
-          if (response && response.statusCode === 409) {
-             // Status 409 (Conflict) means it was already generated before!
-             setShowPathwayDesign(true);
-             setIsPathwayGenerated(true);
-             localStorage.setItem("hasGeneratedPathway", "true");
-          }
         }
       } catch (err) {
         console.error("Failed to recover pathway state:", err);

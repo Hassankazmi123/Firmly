@@ -303,36 +303,18 @@ const AmaliaCornerLayout = () => {
         existingDomain === "null" ||
         existingDomain === "undefined"
       ) {
-        try {
-          const response = await pathwayService.startPathway();
-          // Handle both new pathway (200) and existing pathway (409)
-          if (response && response.domain) {
-            sessionStorage.setItem("currentPathwayDomain", response.domain);
-            console.log("Pathway domain set to:", response.domain);
-          } else if (response && response.statusCode === 409) {
-            console.log(
-              "Using existing pathway, attempting to fetch domain info",
-            );
-            // Pathway exists but no domain in response, try to fetch next session info
-            try {
-              const nextSessionInfo = await pathwayService.getNextSessionInfo();
-              if (nextSessionInfo && nextSessionInfo.domain) {
-                sessionStorage.setItem(
-                  "currentPathwayDomain",
-                  nextSessionInfo.domain,
-                );
-              }
-            } catch (infoErr) {
-              console.warn(
-                "Could not fetch next session info:",
-                infoErr.message,
-              );
+          // Only fetch domain from existing info, DO NOT call startPathway here 
+          // because it will generate the pathway if it doesn't exist
+          try {
+            const nextSessionInfo = await pathwayService.getNextSessionInfo();
+            if (nextSessionInfo && nextSessionInfo.domain) {
+              sessionStorage.setItem("currentPathwayDomain", nextSessionInfo.domain);
+              console.log("Pathway domain set from server info to:", nextSessionInfo.domain);
             }
+          } catch (infoErr) {
+            console.warn("Could not fetch next session info to detect domain:", infoErr.message);
           }
-        } catch (e) {
-          console.error("Auto domain detection failed:", e.message);
         }
-      }
     };
     detectDomain();
   }, []);
