@@ -919,7 +919,7 @@ const AmaliaCornerLayout = () => {
                     </p>
                   </div>
                 </ScrollReveal>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                   {/* Expert knowledge card */}
                   <ScrollReveal direction="left" delay={100}>
                     <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full">
@@ -951,10 +951,10 @@ const AmaliaCornerLayout = () => {
                       </p>
                       <button
                         onClick={() => handleConversationSelect("session1")}
-                        className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors"
+                        className={`px-4 py-3 rounded-xl font-inter-medium text-sm transition-colors ${completedSessions.includes(1) ? "bg-[#F5F5F5] text-[#3D3D3D] hover:bg-[#E5E5E5]" : "bg-[#3D3D3D] text-white hover:bg-[#2D2D2D]"}`}
                       >
                         {completedSessions.includes(1) 
-                          ? "Completed" 
+                          ? "View" 
                           : localStorage.getItem("session1_started") === "true" 
                             ? "Continue element" 
                             : "Start element"}
@@ -1001,10 +1001,10 @@ const AmaliaCornerLayout = () => {
                       {completedSessions.includes(1) ? (
                         <button
                           onClick={() => handleConversationSelect("session2")}
-                          className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                          className={`px-4 py-3 rounded-xl font-inter-medium text-sm transition-colors ${completedSessions.includes(2) ? "bg-[#F5F5F5] text-[#3D3D3D] hover:bg-[#E5E5E5]" : "bg-[#3D3D3D] text-white hover:bg-[#2D2D2D]"}`}
                         >
                           {completedSessions.includes(2) 
-                            ? "Completed" 
+                            ? "View" 
                             : localStorage.getItem("session2_started") === "true" 
                               ? "Continue element" 
                               : "Start element"}
@@ -1057,10 +1057,10 @@ const AmaliaCornerLayout = () => {
                       {completedSessions.includes(2) ? (
                         <button
                           onClick={() => handleConversationSelect("session3")}
-                          className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                          className={`px-4 py-3 rounded-xl font-inter-medium text-sm transition-colors ${completedSessions.includes(3) ? "bg-[#F5F5F5] text-[#3D3D3D] hover:bg-[#E5E5E5]" : "bg-[#3D3D3D] text-white hover:bg-[#2D2D2D]"}`}
                         >
                           {completedSessions.includes(3) 
-                            ? "Completed" 
+                            ? "View" 
                             : localStorage.getItem("session3_started") === "true" 
                               ? "Continue element" 
                               : "Start element"}
@@ -1073,71 +1073,16 @@ const AmaliaCornerLayout = () => {
                       )}
                     </div>
                   </ScrollReveal>
-                  {/* Reflection card - Integration */}
-                  <ScrollReveal direction="right" delay={400}>
-                    <div
-                      className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full ${!completedSessions.includes(3) ? "opacity-60" : ""}`}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src="/assets/images/dashboard/expert.webp"
-                            alt="Reflection"
-                            className="w-5 h-5 md:w-6 md:h-6"
-                          />
-                          <div>
-                            <p
-                              className={`text-xs font-inter-medium ${!completedSessions.includes(3) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
-                            >
-                              Reflection
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4 text-[#9CA3AF]" />
-                            <p className="text-xs font-inter text-[#9CA3AF]">
-                              15 min
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <h3
-                        className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(3) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
-                      >
-                        Integration
-                      </h3>
-                      <p
-                        className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(3) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
-                      >
-                        Synthesize your learnings into a sustainable action plan, ensuring your new leadership skills are fully integrated into your daily routine.
-                      </p>
-                      {completedSessions.includes(3) ? (
-                        <button
-                          onClick={() => handleConversationSelect("session4")}
-                          className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
-                        >
-                          {completedSessions.includes(4) 
-                            ? "Completed" 
-                            : localStorage.getItem("session4_started") === "true" 
-                              ? "Continue element" 
-                              : "Start element"}
-                        </button>
-                      ) : (
-                        <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                          <Lock className="w-4 h-4" />
-                          Locked
-                        </button>
-                      )}
-                    </div>
-                  </ScrollReveal>
+
                 </div>
                 <ScrollReveal direction="up" delay={400}>
                   <div className="bg-[#F5F5FF] rounded-xl p-4 md:p-6 mb-4">
                     <p className="text-base text-black font-inter mb-4">
-                      We'll start with {getDomainLabel()}. For that, I've scheduled 4
+                      We'll start with {getDomainLabel()}. For that, I've scheduled 3
                       sessions for you:
                     </p>
                     <ul className="space-y-3 mb-6">
-                      {[1, 2, 3, 4].map((num) => (
+                      {[1, 2, 3].map((num) => (
                         <li key={num} className="flex items-start gap-3">
                           <span className="text-black font-bold">•</span>
                           <span className="text-base text-black font-inter">

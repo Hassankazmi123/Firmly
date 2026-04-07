@@ -383,15 +383,10 @@ const LeadershipPathwaySection = ({
                   {step.status === "completed" ? (
                     <button
                       onClick={() => {
-                        if (step.id === 1) {
-                          setIsSessionModalOpen(true);
-                        } else if (step.id === 2) {
-                          setIsSession2ModalOpen(true);
-                        } else if (step.id === 3) {
-                          setIsSession3ModalOpen(true);
-                        } else if (step.id === 4) {
-                          setIsSession4ModalOpen(true);
-                        }
+                        sessionStorage.setItem(`showSession${step.id}`, "true");
+                        sessionStorage.setItem("selectedConversation", `session${step.id}`);
+                        sessionStorage.setItem("startedFromDashboard", "true");
+                        navigate("/amalia-corner");
                       }}
                       className=" px-4 py-2 bg-[#F5F5F5] text-[#3D3D3D] rounded-xl font-inter-medium text-xs sm:text-sm md:text-base transition-colors hover:bg-[#E5E5E5]"
                     >
