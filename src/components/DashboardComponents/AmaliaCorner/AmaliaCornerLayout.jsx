@@ -855,7 +855,7 @@ const AmaliaCornerLayout = () => {
             ref={chatScrollRef}
             className="flex-1 overflow-y-auto relative chat-container-scroll"
           >
-            <div className="max-w-5xl mx-auto px-4 pb-24">
+            <div className="max-w-5xl mx-auto px-4 pb-4">
             {(selectedConversation === "diagnostic" || !selectedConversation) && (
                 <ChatMessage
                   message={initialMessage}
@@ -1156,7 +1156,7 @@ const AmaliaCornerLayout = () => {
           selectedConversation !== "session3" &&
           selectedConversation !== "session4" && (
             <div
-              className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+              className={`bg-white shrink-0 ${isSidebarCollapsed ? "z-50" : ""
                 } md:z-50`}
             >
               <ChatInputFooter onSend={handleSendMessage} disabled={isTyping} />

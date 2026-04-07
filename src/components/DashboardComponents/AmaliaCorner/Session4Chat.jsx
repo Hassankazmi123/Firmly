@@ -247,7 +247,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto w-full px-4 pb-32 max-w-5xl mx-auto">
+      <div className="flex-1 overflow-y-auto w-full px-4 pb-4 max-w-5xl mx-auto">
         {loading && messages.length === 0 && (
           <div className="p-4 text-center text-gray-500">
             Loading session...
@@ -295,7 +295,7 @@ const Session4Chat = ({ isSidebarCollapsed = true, onComplete, userInitials }) =
         )}
       </div>
       <div
-        className={`absolute bottom-0 left-0 right-0 ${isSidebarCollapsed ? "z-50" : ""
+        className={`bg-white shrink-0 ${isSidebarCollapsed ? "z-50" : ""
           } md:z-50`}
       >
         <ChatInputFooter onSend={handleSendMessage} disabled={isTyping} />
