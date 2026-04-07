@@ -953,7 +953,11 @@ const AmaliaCornerLayout = () => {
                         onClick={() => handleConversationSelect("session1")}
                         className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm  transition-colors"
                       >
-                        {localStorage.getItem("session1_started") === "true" && !completedSessions.includes(1) ? "Continue element" : "Start element"}
+                        {completedSessions.includes(1) 
+                          ? "Completed" 
+                          : localStorage.getItem("session1_started") === "true" 
+                            ? "Continue element" 
+                            : "Start element"}
                       </button>
                     </div>
                   </ScrollReveal>
@@ -999,7 +1003,11 @@ const AmaliaCornerLayout = () => {
                           onClick={() => handleConversationSelect("session2")}
                           className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
                         >
-                          {localStorage.getItem("session2_started") === "true" && !completedSessions.includes(2) ? "Continue element" : "Start element"}
+                          {completedSessions.includes(2) 
+                            ? "Completed" 
+                            : localStorage.getItem("session2_started") === "true" 
+                              ? "Continue element" 
+                              : "Start element"}
                         </button>
                       ) : (
                         <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
@@ -1051,7 +1059,11 @@ const AmaliaCornerLayout = () => {
                           onClick={() => handleConversationSelect("session3")}
                           className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
                         >
-                          {localStorage.getItem("session3_started") === "true" && !completedSessions.includes(3) ? "Continue element" : "Start element"}
+                          {completedSessions.includes(3) 
+                            ? "Completed" 
+                            : localStorage.getItem("session3_started") === "true" 
+                              ? "Continue element" 
+                              : "Start element"}
                         </button>
                       ) : (
                         <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
@@ -1103,7 +1115,11 @@ const AmaliaCornerLayout = () => {
                           onClick={() => handleConversationSelect("session4")}
                           className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
                         >
-                          {localStorage.getItem("session4_started") === "true" && !completedSessions.includes(4) ? "Continue element" : "Start element"}
+                          {completedSessions.includes(4) 
+                            ? "Completed" 
+                            : localStorage.getItem("session4_started") === "true" 
+                              ? "Continue element" 
+                              : "Start element"}
                         </button>
                       ) : (
                         <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
