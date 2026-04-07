@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Clock, Lock, Check } from "lucide-react";
 import LeadershipPathwayModal from "../AllModals/LeadershipPathwayModal";
 import SessionModal from "../AllModals/SessionModal";
@@ -11,6 +12,7 @@ const LeadershipPathwaySection = ({
   hasVisitedAmaliaCorner = false,
   onGenerated,
 }) => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isSession2ModalOpen, setIsSession2ModalOpen] = useState(false);
@@ -191,12 +193,15 @@ const LeadershipPathwaySection = ({
       
       const status = summary.sessions[domainKey]?.[stepId];
       if (status === "COMPLETED") return "completed";
-      if (status === "IN_PROGRESS") return "active";
+      if (status === "IN_PROGRESS") return "in_progress";
     }
     
-    // Fallback to legacy logic
+    // Fallback to legacy logic/local state
     const done = completedSessions.includes(stepId);
     if (done) return "completed";
+
+    const localStarted = localStorage.getItem(`session${stepId}_started`) === "true";
+    if (localStarted) return "in_progress";
     
     if (stepId === 1) return "active";
     if (stepId === 2) return completedSessions.includes(1) ? "active" : "locked";
@@ -216,7 +221,7 @@ const LeadershipPathwaySection = ({
       description:
         "Explore research-based leadership concepts and identify how specialized workplace insights can accelerate your professional growth.",
       status: getSessionStatus(1),
-      buttonText: getSessionStatus(1) === "completed" ? "View" : "Start element",
+      buttonText: getSessionStatus(1) === "completed" ? "View" : getSessionStatus(1) === "in_progress" ? "Continue element" : "Start element",
     },
     {
       id: 2,
@@ -227,7 +232,7 @@ const LeadershipPathwaySection = ({
       description:
         "Engage in reflective exercises to analyze your current leadership style and identify specific areas for behavioral improvement.",
       status: getSessionStatus(2),
-      buttonText: getSessionStatus(2) === "completed" ? "View" : "Start element",
+      buttonText: getSessionStatus(2) === "completed" ? "View" : getSessionStatus(2) === "in_progress" ? "Continue element" : "Start element",
     },
     {
       id: 3,
@@ -238,7 +243,7 @@ const LeadershipPathwaySection = ({
       description:
         "Practice implementing core leadership strategies through interactive scenarios designed to build confidence in real-world situations.",
       status: getSessionStatus(3),
-      buttonText: getSessionStatus(3) === "completed" ? "View" : "Start element",
+      buttonText: getSessionStatus(3) === "completed" ? "View" : getSessionStatus(3) === "in_progress" ? "Continue element" : "Start element",
     },
     {
       id: 4,
@@ -249,7 +254,7 @@ const LeadershipPathwaySection = ({
       description:
         "Synthesize your learnings into a sustainable action plan, ensuring your new leadership skills are fully integrated into your daily routine.",
       status: getSessionStatus(4),
-      buttonText: getSessionStatus(4) === "completed" ? "View" : "Start element",
+      buttonText: getSessionStatus(4) === "completed" ? "View" : getSessionStatus(4) === "in_progress" ? "Continue element" : "Start element",
     },
   ];
 
@@ -392,17 +397,24 @@ const LeadershipPathwaySection = ({
                     >
                       {step.buttonText}
                     </button>
-                  ) : step.status === "active" ? (
+                  ) : (step.status === "active" || step.status === "in_progress") ? (
                     <button
                       onClick={() => {
-                        if (step.id === 2) {
-                          setIsSession2ModalOpen(true);
-                        } else if (step.id === 3) {
-                          setIsSession3ModalOpen(true);
-                        } else if (step.id === 4) {
-                          setIsSession4ModalOpen(true);
+                        if (step.status === "in_progress") {
+                          sessionStorage.setItem(`showSession${step.id}`, "true");
+                          sessionStorage.setItem("selectedConversation", `session${step.id}`);
+                          sessionStorage.setItem("startedFromDashboard", "true");
+                          navigate("/amalia-corner");
                         } else {
-                          setIsSessionModalOpen(true);
+                          if (step.id === 2) {
+                            setIsSession2ModalOpen(true);
+                          } else if (step.id === 3) {
+                            setIsSession3ModalOpen(true);
+                          } else if (step.id === 4) {
+                            setIsSession4ModalOpen(true);
+                          } else {
+                            setIsSessionModalOpen(true);
+                          }
                         }
                       }}
                       className=" px-4 py-2 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-xs sm:text-sm md:text-base transition-colors hover:bg-[#2D2D2D]"
