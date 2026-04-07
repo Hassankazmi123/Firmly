@@ -611,6 +611,13 @@ const AmaliaCornerLayout = () => {
     navigate("/dashboard", { state: { fromAmaliaCorner: true } });
   };
 
+  useEffect(() => {
+    if (selectedConversation && selectedConversation.startsWith("session")) {
+      const num = selectedConversation.replace("session", "");
+      localStorage.setItem(`session${num}_started`, "true");
+    }
+  }, [selectedConversation]);
+
   const [diagnosticThreadId, setDiagnosticThreadId] = useState(() => {
     return localStorage.getItem("amalia_diagnostic_thread_id");
   });
@@ -912,7 +919,7 @@ const AmaliaCornerLayout = () => {
                     </p>
                   </div>
                 </ScrollReveal>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                   {/* Expert knowledge card */}
                   <ScrollReveal direction="left" delay={100}>
                     <div className="bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full">
@@ -1045,6 +1052,58 @@ const AmaliaCornerLayout = () => {
                           className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
                         >
                           {localStorage.getItem("session3_started") === "true" && !completedSessions.includes(3) ? "Continue element" : "Start element"}
+                        </button>
+                      ) : (
+                        <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                          <Lock className="w-4 h-4" />
+                          Locked
+                        </button>
+                      )}
+                    </div>
+                  </ScrollReveal>
+                  {/* Reflection card - Integration */}
+                  <ScrollReveal direction="right" delay={400}>
+                    <div
+                      className={`bg-white border-2 border-[#f7f7f7] rounded-2xl p-5 h-full ${!completedSessions.includes(3) ? "opacity-60" : ""}`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src="/assets/images/dashboard/expert.webp"
+                            alt="Reflection"
+                            className="w-5 h-5 md:w-6 md:h-6"
+                          />
+                          <div>
+                            <p
+                              className={`text-xs font-inter-medium ${!completedSessions.includes(3) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                            >
+                              Reflection
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-[#9CA3AF]" />
+                            <p className="text-xs font-inter text-[#9CA3AF]">
+                              15 min
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <h3
+                        className={`text-lg md:text-xl font-cormorant font-bold mb-3 ${!completedSessions.includes(3) ? "text-[#9CA3AF]" : "text-[#3D3D3D]"}`}
+                      >
+                        Integration
+                      </h3>
+                      <p
+                        className={`text-sm font-inter mb-6 leading-relaxed ${!completedSessions.includes(3) ? "text-[#9CA3AF]" : "text-[#3D3D3D]/70"}`}
+                      >
+                        Synthesize your learnings into a sustainable action plan, ensuring your new leadership skills are fully integrated into your daily routine.
+                      </p>
+                      {completedSessions.includes(3) ? (
+                        <button
+                          onClick={() => handleConversationSelect("session4")}
+                          className=" px-4 py-3 bg-[#3D3D3D] text-white rounded-xl font-inter-medium text-sm transition-colors"
+                        >
+                          {localStorage.getItem("session4_started") === "true" && !completedSessions.includes(4) ? "Continue element" : "Start element"}
                         </button>
                       ) : (
                         <button className=" px-4 py-3 bg-[#F5F5F5] text-[#9CA3AF] rounded-xl font-inter-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed">
