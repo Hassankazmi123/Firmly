@@ -4,6 +4,7 @@ import SettingsHeader from "./SettingsHeader";
 import PersonalInformationSection from "./PersonalInformationSection";
 import ChangePasswordSection from "./ChangePasswordSection";
 import { changePassword } from "../../../services/api";
+import { AlertCircle } from "lucide-react";
 // API Configuration
 const API_BASE_URL =
   process.env.REACT_APP_API_URL || "http://16.16.141.229:8000";
@@ -31,6 +32,7 @@ export default function SettingsScreen() {
   const [modalContent, setModalContent] = useState({
     title: "Changes Saved Successfully",
     message: "Your profile has been updated successfully.",
+    isError: false,
   });
   const [isImageDeleted, setIsImageDeleted] = useState(false);
   useEffect(() => {
@@ -149,7 +151,12 @@ export default function SettingsScreen() {
         !personalInfo.age ||
         !personalInfo.currentJobRole
       ) {
-        alert("Please fill in all required fields (Name, Age, Job Role)");
+        setModalContent({
+          title: "Error",
+          message: "Please fill in all required fields (Name, Age, Job Role)",
+          isError: true,
+        });
+        setShowSavedModal(true);
         return;
       }
 
@@ -192,6 +199,7 @@ export default function SettingsScreen() {
         setModalContent({
           title: "Changes Saved Successfully",
           message: "Your profile has been updated successfully.",
+          isError: false,
         });
         setShowSavedModal(true);
         setIsImageDeleted(false);
@@ -210,12 +218,22 @@ export default function SettingsScreen() {
           });
           if (fieldErrors.length > 0) errorMessage = fieldErrors.join("\n");
         }
-        alert(errorMessage);
+        setModalContent({
+          title: "Error",
+          message: errorMessage,
+          isError: true,
+        });
+        setShowSavedModal(true);
         console.error("Save error details:", data);
       }
     } catch (error) {
       console.error("Error saving profile:", error);
-      alert("An error occurred while saving: " + error.message);
+      setModalContent({
+        title: "Error",
+        message: "An error occurred while saving: " + error.message,
+        isError: true,
+      });
+      setShowSavedModal(true);
     }
   };
   const handleChangePassword = async () => {
@@ -225,17 +243,32 @@ export default function SettingsScreen() {
       !passwordInfo.newPassword ||
       !passwordInfo.confirmPassword
     ) {
-      alert("Please fill in all password fields.");
+      setModalContent({
+        title: "Error",
+        message: "Please fill in all password fields.",
+        isError: true,
+      });
+      setShowSavedModal(true);
       return;
     }
 
     if (passwordInfo.newPassword !== passwordInfo.confirmPassword) {
-      alert("New password and confirm password do not match.");
+      setModalContent({
+        title: "Error",
+        message: "New password and confirm password do not match.",
+        isError: true,
+      });
+      setShowSavedModal(true);
       return;
     }
 
     if (passwordInfo.newPassword.length < 8) {
-      alert("New password must be at least 8 characters long.");
+      setModalContent({
+        title: "Error",
+        message: "New password must be at least 8 characters long.",
+        isError: true,
+      });
+      setShowSavedModal(true);
       return;
     }
 
@@ -255,11 +288,17 @@ export default function SettingsScreen() {
       setModalContent({
         title: "Password Changed Successfully",
         message: "Your password has been updated successfully.",
+        isError: false,
       });
       setShowSavedModal(true);
     } catch (error) {
       console.error("Error changing password:", error);
-      alert(error.message || "Failed to change password. Please check your current password.");
+      setModalContent({
+        title: "Error",
+        message: error.message || "Failed to change password. Please check your current password.",
+        isError: true,
+      });
+      setShowSavedModal(true);
     }
   };
 
@@ -300,11 +339,17 @@ export default function SettingsScreen() {
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowSavedModal(false)} />
           <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full mx-auto p-6 sm:p-8 md:p-10 text-center">
             <div className="flex justify-center mb-4 sm:mb-6">
-              <img
-                src="/assets/images/onboarding/Swal_Icon.webp"
-                alt="Success"
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
-              />
+              {modalContent.isError ? (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-full bg-red-50">
+                  <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-500" strokeWidth={1.5} />
+                </div>
+              ) : (
+                <img
+                  src="/assets/images/onboarding/Swal_Icon.webp"
+                  alt="Success"
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+                />
+              )}
             </div>
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4 font-cormorant px-2">
               {modalContent.title}
@@ -314,9 +359,13 @@ export default function SettingsScreen() {
             </p>
             <button
               onClick={() => setShowSavedModal(false)}
-              className="w-full sm:w-auto bg-[#374151] text-white px-8 py-3 rounded-full font-medium hover:bg-[#4B5563] active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[48px]"
+              className={`w-full sm:w-auto text-white px-8 py-3 rounded-full font-medium active:scale-95 transition-all font-inter text-sm sm:text-base min-h-[48px] ${
+                modalContent.isError 
+                  ? "bg-red-500 hover:bg-red-600" 
+                  : "bg-[#374151] hover:bg-[#4B5563]"
+              }`}
             >
-              Done
+              {modalContent.isError ? "Try Again" : "Done"}
             </button>
           </div>
         </div>

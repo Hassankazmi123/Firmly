@@ -585,7 +585,6 @@ const AmaliaCornerLayout = () => {
       sessionStorage.setItem("fromStartSession", "true");
       sessionStorage.setItem("showSession1", "true");
       localStorage.setItem("hasGeneratedPathway", "true");
-      localStorage.setItem("hasStartedSessions", "true");
     }, 1500);
   };
   const handleGoToDashboard = () => {
@@ -1095,7 +1094,7 @@ const AmaliaCornerLayout = () => {
                     onClick={handleStartSession}
                     className="px-8 py-3.5 bg-[#F5F5F5] text-[#3D3D3D] rounded-2xl font-inter-medium text-base hover:bg-[#E5E5E5] transition-colors shadow-sm"
                   >
-                    {completedSessions.length > 0 || localStorage.getItem("hasStartedSessions") === "true" 
+                    {completedSessions.length > 0 || localStorage.getItem("session1_started") === "true" 
                       ? "Continue Session" 
                       : "Start Session"}
                   </button>

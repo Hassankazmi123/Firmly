@@ -117,7 +117,7 @@ export default function PersonalInformationSection({
       </div>
       <button
         onClick={onSaveChanges}
-        className="lg:px-6 px-4 lg:py-3 py-2 bg-[#b0b0b0] text-[#F5F5F5] lg:rounded-2xl rounded-md transition-colors font-medium text-sm sm:text-base"
+        className="lg:px-6 px-4 lg:py-3 py-2 bg-[#3D3D3D] hover:bg-[#2D2D2D] text-white lg:rounded-2xl rounded-md transition-colors font-medium text-sm sm:text-base"
         type="button"
       >
         Save changes

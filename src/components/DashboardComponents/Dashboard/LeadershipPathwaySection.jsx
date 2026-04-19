@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, Lock, Check } from "lucide-react";
+import { Clock, Lock, Check, Unlock } from "lucide-react";
 import LeadershipPathwayModal from "../AllModals/LeadershipPathwayModal";
 import SessionModal from "../AllModals/SessionModal";
 import Session2Modal from "../AllModals/Session2Modal";
@@ -291,7 +291,7 @@ const LeadershipPathwaySection = ({
                   >
                     <div
                       className={`lg:w-10 lg:h-10 w-7 h-7   rounded-full flex items-center justify-center border-2 transition-all ${
-                        step.status === "active" || step.status === "completed"
+                        step.status === "active" || step.status === "completed" || step.status === "in_progress"
                           ? "bg-white border-none  shadow-sm"
                           : "bg-white border-[#E5E5E5]"
                       }`}
@@ -301,8 +301,8 @@ const LeadershipPathwaySection = ({
                           className="lg:w-5 lg:h-5 w-4 h-4   text-[#5C91E0]"
                           strokeWidth={3}
                         />
-                      ) : step.status === "active" ? (
-                        <div className="lg:w-3 lg:h-3 w-2 h-2 rounded-full bg-[#5C91E0]"></div>
+                      ) : step.status === "active" || step.status === "in_progress" ? (
+                        <Unlock className="lg:w-4 lg:h-4 w-3 h-3 text-[#5C91E0]" />
                       ) : (
                         <Lock className="lg:w-5 lg:h-5 w-3 h-3  text-[#9CA3AF]" />
                       )}
@@ -315,7 +315,7 @@ const LeadershipPathwaySection = ({
               {pathwaySteps.map((step) => (
                 <div
                   key={step.id}
-                  className={`bg-white border-2 rounded-2xl p-4 md:p-5 lg:p-6 transition-all ${step.status === "active" || step.status === "completed"
+                  className={`bg-white border-2 rounded-2xl p-4 md:p-5 lg:p-6 transition-all ${step.status === "active" || step.status === "completed" || step.status === "in_progress"
                     ? "border-none shadow-sm"
                     : "border-none opacity-40"
                     }`}
@@ -329,7 +329,7 @@ const LeadershipPathwaySection = ({
                       />
                       <p
                         className={`text-xs sm:text-sm font-inter-medium truncate ${step.status === "active" ||
-                          step.status === "completed"
+                          step.status === "completed" || step.status === "in_progress"
                           ? "text-[#3D3D3D]"
                           : "text-[#9CA3AF]"
                           }`}
@@ -355,7 +355,7 @@ const LeadershipPathwaySection = ({
                     </div>
                   </div>
                   <h3
-                    className={`text-base sm:text-lg md:text-xl font-cormorant font-bold mb-2 md:mb-3 ${step.status === "active" || step.status === "completed"
+                    className={`text-base sm:text-lg md:text-xl font-cormorant font-bold mb-2 md:mb-3 ${step.status === "active" || step.status === "completed" || step.status === "in_progress"
                       ? "text-[#3D3D3D]"
                       : "text-[#9CA3AF]"
                       }`}
@@ -363,7 +363,7 @@ const LeadershipPathwaySection = ({
                     {step.title}
                   </h3>
                   <p
-                    className={`text-xs sm:text-sm md:text-base font-inter mb-4 md:mb-6 leading-relaxed ${step.status === "active" || step.status === "completed"
+                    className={`text-xs sm:text-sm md:text-base font-inter mb-4 md:mb-6 leading-relaxed ${step.status === "active" || step.status === "completed" || step.status === "in_progress"
                       ? "text-[#3D3D3D]/70"
                       : "text-[#9CA3AF]"
                       }`}
