@@ -20,12 +20,14 @@ export default function SettingsScreen() {
     yearsOfExperience: "",
     organization: "",
   });
+  const [initialPersonalInfo, setInitialPersonalInfo] = useState(null);
   const [passwordInfo, setPasswordInfo] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
   const [profileImage, setProfileImage] = useState(null);
+  const [initialProfileImage, setInitialProfileImage] = useState(null);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showSavedModal, setShowSavedModal] = useState(false);
@@ -56,7 +58,7 @@ export default function SettingsScreen() {
 
         if (response.ok) {
           const data = await response.json();
-          setPersonalInfo({
+          const info = {
             firstName: data.first_name || "",
             lastName: data.last_name || "",
             age: data.age || "",
@@ -64,7 +66,9 @@ export default function SettingsScreen() {
             currentJobRole: data.job_role || "",
             yearsOfExperience: data.years_of_experience || "",
             organization: data.organization || "",
-          });
+          };
+          setPersonalInfo(info);
+          setInitialPersonalInfo(info);
 
           if (data.profile_image) {
             // Check if it's a relative path and prepend API URL if needed
@@ -79,6 +83,7 @@ export default function SettingsScreen() {
               imageUrl = `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
             }
             setProfileImage(imageUrl);
+            setInitialProfileImage(imageUrl);
           }
         } else {
           console.error("Failed to fetch profile");
@@ -195,6 +200,9 @@ export default function SettingsScreen() {
         const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
         const newUser = { ...currentUser, ...updatedData };
         localStorage.setItem("user", JSON.stringify(newUser));
+
+        setInitialPersonalInfo({ ...personalInfo });
+        setInitialProfileImage(profileImage);
 
         setModalContent({
           title: "Changes Saved Successfully",
@@ -324,11 +332,30 @@ export default function SettingsScreen() {
             onImageUpload={handleImageUpload}
             onImageDelete={handleImageDelete}
             onSaveChanges={handleSaveChanges}
+            isDirty={
+              initialPersonalInfo ? (
+                personalInfo.firstName !== initialPersonalInfo.firstName ||
+                personalInfo.lastName !== initialPersonalInfo.lastName ||
+                String(personalInfo.age) !== String(initialPersonalInfo.age) ||
+                personalInfo.email !== initialPersonalInfo.email ||
+                personalInfo.currentJobRole !== initialPersonalInfo.currentJobRole ||
+                String(personalInfo.yearsOfExperience) !== String(initialPersonalInfo.yearsOfExperience) ||
+                personalInfo.organization !== initialPersonalInfo.organization ||
+                profileImage !== initialProfileImage ||
+                selectedImageFile !== null ||
+                isImageDeleted
+              ) : false
+            }
           />
           <ChangePasswordSection
             passwordInfo={passwordInfo}
             onPasswordChange={handlePasswordChange}
             onChangePassword={handleChangePassword}
+            isPasswordValid={
+              passwordInfo.newPassword !== "" &&
+              passwordInfo.confirmPassword !== "" &&
+              passwordInfo.newPassword === passwordInfo.confirmPassword
+            }
           />
         </div>
       </main>

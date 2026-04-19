@@ -3,6 +3,7 @@ export default function ChangePasswordSection({
   passwordInfo,
   onPasswordChange,
   onChangePassword,
+  isPasswordValid,
 }) {
   return (
     <div className="shadow-sm p-4 lg:p-6 bg-[#fafafa] border-[#f2f2f2] border lg:rounded-3xl rounded-2xl">
@@ -57,7 +58,12 @@ export default function ChangePasswordSection({
       </div>
       <button
         onClick={onChangePassword}
-        className="lg:px-6 px-4 lg:py-3 py-2 bg-[#3D3D3D] hover:bg-[#2D2D2D] text-white lg:rounded-2xl rounded-md transition-colors font-medium text-sm sm:text-base"
+        disabled={!isPasswordValid}
+        className={`lg:px-6 px-4 lg:py-3 py-2 lg:rounded-2xl rounded-md transition-colors font-medium text-sm sm:text-base ${
+          isPasswordValid 
+            ? "bg-[#3D3D3D] hover:bg-[#2D2D2D] text-white" 
+            : "bg-[#b0b0b0] text-[#F5F5F5] cursor-not-allowed opacity-70"
+        }`}
         type="button"
       >
         Change password
