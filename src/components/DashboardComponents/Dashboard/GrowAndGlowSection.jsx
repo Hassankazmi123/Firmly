@@ -97,19 +97,8 @@ const GrowAndGlowSection = ({
           "Failed to fetch assessment data for GrowAndGlow:",
           error,
         );
-        // Only show fallbacks if we explicitly fail or have NO data
-        if (hasVisitedAmaliaCorner) {
-          setDoingGreatItems([
-            { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
-            { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
-            { abbreviation: "RES", label: "Resilience", score: 87 },
-          ]);
-          setGrowthAreasItems([
-            { abbreviation: "EMP", label: "Empathy", score: 32 },
-            { abbreviation: "ENG", label: "Engagement", score: 24 },
-            { abbreviation: "SEL", label: "Self-belief", score: 22 },
-          ]);
-        }
+        // Force user to diagnostic if data is missing or failed
+        navigate("/diagnostic");
       } finally {
         setLoading(false);
       }

@@ -15,6 +15,7 @@ const Header2 = () => {
     if (location.pathname === "/dashboard") return "Dashboard";
     return null;
   });
+  const isChatPage = location.pathname.includes("chat") || location.pathname.includes("amalia-corner");
   
   // Initialize from localStorage for immediate feedback and sync on updates
   useEffect(() => {
@@ -138,45 +139,49 @@ const Header2 = () => {
             className="h-7 w-auto"
           />
         </button>
-        <nav className="hidden md:flex items-center space-x-4">
-          <button
-            onClick={() => goTo("/dashboard", "Dashboard")}
-            className={`px-5 py-2 rounded-xl transition-colors ${selectedTab === "Dashboard"
-              ? "bg-[#7d7cd9] border border-white/20 text-white"
-              : "text-white/70 hover:text-white"
-              }`}
-            type="button"
-            aria-current={selectedTab === "Dashboard" ? "page" : undefined}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => goTo("/amalia-corner", "Amalia Corner")}
-            className={`px-5 py-2 rounded-xl transition-colors ${selectedTab === "Amalia Corner"
-              ? "bg-[#7d7cd9] border border-white/20 text-white"
-              : "text-white/70 hover:text-white"
-              }`}
-            type="button"
-            aria-current={selectedTab === "Amalia Corner" ? "page" : undefined}
-          >
-            Amalia Corner
-          </button>
-        </nav>
+        {!isChatPage && (
+          <nav className="hidden md:flex items-center space-x-4">
+            <button
+              onClick={() => goTo("/dashboard", "Dashboard")}
+              className={`px-5 py-2 rounded-xl transition-colors ${selectedTab === "Dashboard"
+                ? "bg-[#7d7cd9] border border-white/20 text-white"
+                : "text-white/70 hover:text-white"
+                }`}
+              type="button"
+              aria-current={selectedTab === "Dashboard" ? "page" : undefined}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => goTo("/amalia-corner", "Amalia Corner")}
+              className={`px-5 py-2 rounded-xl transition-colors ${selectedTab === "Amalia Corner"
+                ? "bg-[#7d7cd9] border border-white/20 text-white"
+                : "text-white/70 hover:text-white"
+                }`}
+              type="button"
+              aria-current={selectedTab === "Amalia Corner" ? "page" : undefined}
+            >
+              Amalia Corner
+            </button>
+          </nav>
+        )}
         <div className="flex items-center sm:space-x-4">
           <div className="hidden sm:flex items-center space-x-2 text-white">
-            <div
-              onClick={() => goMain("/amalia-corner")}
-              className="flex items-center space-x-2 cursor-pointer group"
-            >
-              <img
-                src="/assets/images/dashboard/starwhite.webp"
-                alt="user icon"
-                className="h-5 w-5 sm:h-6 sm:w-6 transform group-hover:scale-125 transition-transform duration-300"
-              />
-              <span className="text-white/70 text-sm sm:text-base group-hover:text-white transition-colors">
-                Amalia
-              </span>
-            </div>
+            {!isChatPage && (
+              <div
+                onClick={() => goMain("/dashboard/normal-chat")}
+                className="flex items-center space-x-2 cursor-pointer group"
+              >
+                <img
+                  src="/assets/images/dashboard/starwhite.webp"
+                  alt="user icon"
+                  className="h-5 w-5 sm:h-6 sm:w-6 transform group-hover:scale-125 transition-transform duration-300"
+                />
+                <span className="text-white/70 text-sm sm:text-base group-hover:text-white transition-colors">
+                  Amalia
+                </span>
+              </div>
+            )}
           </div>
           <div className="relative" ref={ltDropdownRef}>
             <button

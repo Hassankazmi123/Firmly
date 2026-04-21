@@ -268,7 +268,7 @@ const DashboardHeader = () => {
         <div className="flex items-center sm:space-x-4 relative z-[200]">
           <div className="hidden sm:flex items-center space-x-2 text-white">
             <div
-              onClick={() => goMain("/amalia-corner")}
+              onClick={() => goMain("/dashboard/normal-chat")}
               className="flex items-center space-x-2 cursor-pointer group relative z-[220] pointer-events-auto"
               style={{ cursor: 'pointer' }}
             >

@@ -445,17 +445,7 @@ const AmaliaCornerLayout = () => {
         }
       } catch (error) {
         console.error("Failed to fetch assessment data for glow/grow:", error);
-        // Fallback to default data
-        setGlowItems([
-          { abbreviation: "GOA", label: "Goal Orientation", score: 96 },
-          { abbreviation: "WOR", label: "Workplace Belonging", score: 89 },
-          { abbreviation: "RES", label: "Resilience", score: 87 },
-        ]);
-        setGrowItems([
-          { abbreviation: "EMP", label: "Empathy", score: 32 },
-          { abbreviation: "ENG", label: "Engagement", score: 24 },
-          { abbreviation: "SEL", label: "Self-belief", score: 22 },
-        ]);
+        navigate("/diagnostic");
       }
     };
 
