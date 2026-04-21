@@ -8,7 +8,7 @@ const SafeSpaceChatHeader = ({ onMenuClick, hasMessages = false }) => {
       </h1>
       <p className="text-sm text-[#3D3D3D]/60 font-inter font-medium max-w-md">
         {hasMessages
-          ? "Incognito mode for sensitive topics. A darker theme with clear privacy indicators."
+          ? "Incognito mode for sensitive topics."
           : ""}
       </p>
     </div>
