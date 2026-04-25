@@ -158,8 +158,7 @@ const StartConversationModal = ({ isOpen, onClose, onStartChat }) => {
                         Safe Space (Incognito mode){" "}
                       </h3>
                       <p className="text-xs text-[#3D3D3D]/60 mb-3 font-inter font-regular leading-relaxed">
-                        Incognito mode for sensitive topics. A darker theme with
-                        clear privacy indicators.
+                        Incognito mode for sensitive topics.
                       </p>
                       <p className="text-xs text-[#3D3D3D]/60 mb-5 font-inter font-regular">
                         No history will be saved .

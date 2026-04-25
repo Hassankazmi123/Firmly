@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { getUserProfile, API_URL } from "../../../services/api";
 import logout from "../../../utils/logout";
 import { useMainNavTransition } from "../../../context/MainNavTransitionContext";
+import DiagnosticWarningModal from "../AllModals/DiagnosticWarningModal";
 import Hero from "./Hero";
 const PortalDropdown = ({
   children,
@@ -142,6 +143,7 @@ const DashboardHeader = () => {
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
+  const [showDiagWarning, setShowDiagWarning] = useState(false);
   const mobileToggleRef = useRef(null);
   const ltToggleRef = useRef(null);
 
@@ -338,7 +340,12 @@ const DashboardHeader = () => {
                 <button
                   onClick={() => {
                     setIsLTDropdownOpen(false);
-                    navigate("/dashboard/account-settings");
+                    const isDiagComplete = localStorage.getItem("hasStartedDebrief") === "true";
+                    if (isDiagComplete) {
+                      navigate("/dashboard/account-settings");
+                    } else {
+                      setShowDiagWarning(true);
+                    }
                   }}
                   className="flex items-center gap-2 w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                   type="button"
@@ -453,6 +460,10 @@ const DashboardHeader = () => {
         className="absolute bottom-0 right-0 w-[613px] z-0 h-[515px] object-cover object-bottom pointer-events-none"
       />
     </header>
+    <DiagnosticWarningModal 
+      isOpen={showDiagWarning} 
+      onClose={() => setShowDiagWarning(false)} 
+    />
     </>
   );
 };

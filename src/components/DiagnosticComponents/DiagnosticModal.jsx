@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getUserProfile } from "../../services/api";
+import DiagnosticWarningModal from "../DashboardComponents/AllModals/DiagnosticWarningModal";
 
 const DiagnosticModal = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const DiagnosticModal = () => {
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
+  const [showDiagWarning, setShowDiagWarning] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -156,7 +158,12 @@ const DiagnosticModal = () => {
                   <button
                     onClick={() => {
                       setIsLTDropdownOpen(false);
-                      navigate("/dashboard/account-settings");
+                      const isDiagComplete = localStorage.getItem("hasStartedDebrief") === "true";
+                      if (isDiagComplete) {
+                        navigate("/dashboard/account-settings");
+                      } else {
+                        setShowDiagWarning(true);
+                      }
                     }}
                     className="flex items-center gap-2 w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                     type="button"
@@ -246,6 +253,10 @@ const DiagnosticModal = () => {
           </div>
         </div>
       </header>
+      <DiagnosticWarningModal 
+        isOpen={showDiagWarning} 
+        onClose={() => setShowDiagWarning(false)} 
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center border-[8px] sm:border-[12px] md:border-[16px] border-[#f5f5f5] relative overflow-hidden bg-[#ebebeb] rounded-2xl sm:rounded-3xl">

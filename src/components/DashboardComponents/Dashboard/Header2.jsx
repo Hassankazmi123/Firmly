@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import logout from "../../../utils/logout";
 import { getUserProfile, API_URL } from "../../../services/api";
 import { useMainNavTransition } from "../../../context/MainNavTransitionContext";
+import DiagnosticWarningModal from "../AllModals/DiagnosticWarningModal";
 
 const Header2 = () => {
   const location = useLocation();
@@ -49,6 +50,7 @@ const Header2 = () => {
   }, []);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLTDropdownOpen, setIsLTDropdownOpen] = useState(false);
+  const [showDiagWarning, setShowDiagWarning] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -139,7 +141,6 @@ const Header2 = () => {
             className="h-7 w-auto"
           />
         </button>
-        {!isChatPage && (
           <nav className="hidden md:flex items-center space-x-4">
             <button
               onClick={() => goTo("/dashboard", "Dashboard")}
@@ -164,11 +165,9 @@ const Header2 = () => {
               Amalia Corner
             </button>
           </nav>
-        )}
         <div className="flex items-center sm:space-x-4">
           <div className="hidden sm:flex items-center space-x-2 text-white">
-            {!isChatPage && (
-              <div
+            <div
                 onClick={() => goMain("/dashboard/normal-chat")}
                 className="flex items-center space-x-2 cursor-pointer group"
               >
@@ -181,7 +180,6 @@ const Header2 = () => {
                   Amalia
                 </span>
               </div>
-            )}
           </div>
           <div className="relative" ref={ltDropdownRef}>
             <button
@@ -229,7 +227,12 @@ const Header2 = () => {
                 <button
                   onClick={() => {
                     setIsLTDropdownOpen(false);
-                    navigate("/dashboard/account-settings");
+                    const isDiagComplete = localStorage.getItem("hasStartedDebrief") === "true";
+                    if (isDiagComplete) {
+                      navigate("/dashboard/account-settings");
+                    } else {
+                      setShowDiagWarning(true);
+                    }
                   }}
                   className="flex items-center gap-2 w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                   type="button"
@@ -329,7 +332,11 @@ const Header2 = () => {
           </div>
         </div>
       </div>
-    </header>
+  </header>
+  <DiagnosticWarningModal 
+    isOpen={showDiagWarning} 
+    onClose={() => setShowDiagWarning(false)} 
+  />
   </>
   );
 };

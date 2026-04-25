@@ -57,8 +57,7 @@ const SpaceChatContent = ({
           Safe Space (Incognito mode){" "}
         </h2>
         <p className="text-sm md:text-base text-[#3D3D3D]/60 font-inter font-medium mb-4 max-w-md mx-auto">
-          Incognito mode for sensitive topics. A darker theme with clear privacy
-          indicators.
+          Incognito mode for sensitive topics.
         </p>
       </div>
     </div>
