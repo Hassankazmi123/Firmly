@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import clearAppCache from "../../utils/cache";
 import { pathwayService } from "../../services/pathway";
+import { assessmentService } from "../../services/assessment";
 
 const Screen4Card = ({ onBack }) => {
   const [email, setEmail] = useState("");
@@ -90,6 +91,29 @@ const Screen4Card = ({ onBack }) => {
           console.warn("Failed to sync session history on login:", historyErr);
         }
 
+        // [Diagnostic Resume Logic] Check if user has incomplete assessment
+        try {
+          const startData = await assessmentService.startAssessment("v1");
+          const rId =
+            startData?.id ||
+            startData?.run_id ||
+            startData?.assessment_id ||
+            startData?.assessmentId ||
+            startData?.assessment?.id;
+
+          if (rId) {
+            const nextQ = await assessmentService.getNextQuestion(rId);
+            if (nextQ) {
+              console.log("Incomplete assessment found, redirecting to diagnostic steps");
+              navigate("/diagnostic/steps");
+              return;
+            }
+          }
+        } catch (diagError) {
+          console.warn("Assessment check failed during login redirection:", diagError);
+          // Fallback to dashboard if diagnostic check fails
+        }
+
         navigate("/dashboard");
       } else {
         throw new Error("Invalid server response: missing access token");
@@ -103,6 +127,10 @@ const Screen4Card = ({ onBack }) => {
       ) {
         // Mock token for demo
         console.warn("Using fallback demo login");
+        
+        // Even for demo, try to check assessment status if possible, 
+        // but demo logic usually bypasses real backend checks.
+        // For now, keep it simple for demo.
         navigate("/dashboard");
         return;
       }
