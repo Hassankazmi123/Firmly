@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_AUTH_URL, authenticatedFetch } from "../../../services/api";
+import { useMainNavTransition } from "../../../context/MainNavTransitionContext";
 
 const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
   const modalRef = useRef(null);
   const navigate = useNavigate();
+  const mainNav = useMainNavTransition();
   const [isUpdatingDebrief, setIsUpdatingDebrief] = useState(false);
   const [updateError, setUpdateError] = useState(null);
 
@@ -57,21 +59,33 @@ const DiagnosticDebriefModal = ({ isOpen, onClose, onGetDebrief }) => {
     setUpdateError(null);
 
     try {
-      // Update server flag so dashboard can show "Amalia Debrief" next load.
-      await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
+      // Attempt to update server flag, but don't block navigation if it fails
+      authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
         method: "PUT",
         body: JSON.stringify({ debrief_complete: true }),
-      });
+      }).catch(err => console.warn("Failed to update debrief flag:", err));
 
-      localStorage.setItem("hasStartedDebrief", "true"); // fallback for current session
+      localStorage.setItem("hasStartedDebrief", "true");
       if (onGetDebrief) onGetDebrief();
 
       onClose();
-      navigate("/amalia-corner", { state: { animateInitial: true } });
+      const path = "/amalia-corner";
+      const state = { animateInitial: true };
+      if (mainNav?.navigateMainView) {
+        mainNav.navigateMainView(path, { state });
+      } else {
+        navigate(path, { state });
+      }
     } catch (e) {
-      console.error("Failed to update debrief flag:", e);
-      setUpdateError("Could not start debrief. Please try again.");
-      setIsUpdatingDebrief(false);
+      console.error("Critical error starting debrief:", e);
+      // Fallback: navigate anyway if possible
+      const path = "/amalia-corner";
+      const state = { animateInitial: true };
+      if (mainNav?.navigateMainView) {
+        mainNav.navigateMainView(path, { state });
+      } else {
+        navigate(path, { state });
+      }
     }
   };
 

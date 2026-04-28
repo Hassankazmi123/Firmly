@@ -42,17 +42,29 @@ export default function Dashboard() {
       // If no local flag, check server for returning users
       const fetchDebriefStatus = async () => {
         try {
-          const data = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
+          let response = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
             method: "GET",
+            returnRawResponse: true
           });
-          if (data && data.debrief_complete === true) {
-            setHasVisitedAmaliaCorner(true);
-            localStorage.setItem("hasStartedDebrief", "true");
-          } else {
-            setHasVisitedAmaliaCorner(false);
+          
+          if (response.status === 404) {
+            response = await authenticatedFetch(`${API_AUTH_URL}/debrief`, {
+              method: "GET",
+              returnRawResponse: true
+            });
+          }
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.debrief_complete === true) {
+              setHasVisitedAmaliaCorner(true);
+              localStorage.setItem("hasStartedDebrief", "true");
+            } else {
+              setHasVisitedAmaliaCorner(false);
+            }
           }
         } catch (err) {
-          console.warn("Failed to fetch debrief status in Dashboard:", err);
+          console.warn("Debrief status API failed:", err);
           setHasVisitedAmaliaCorner(false);
         }
       };

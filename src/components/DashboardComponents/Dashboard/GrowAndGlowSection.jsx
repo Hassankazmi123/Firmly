@@ -97,8 +97,8 @@ const GrowAndGlowSection = ({
           "Failed to fetch assessment data for GrowAndGlow:",
           error,
         );
-        // Force user to diagnostic if data is missing or failed
-        navigate("/diagnostic");
+        // Do NOT force navigate to diagnostic. Instead, let the component stay in loading/placeholder state
+        // or show a local error message if needed.
       } finally {
         setLoading(false);
       }

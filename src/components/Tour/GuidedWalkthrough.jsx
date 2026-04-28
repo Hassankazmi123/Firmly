@@ -91,9 +91,20 @@ const GuidedWalkthrough = ({ onComplete }) => {
   };
 
   const getOnboardingCompleteFromServer = async () => {
-    const data = await authenticatedFetch(`${API_AUTH_URL}/onboarding/`, {
+    let response = await authenticatedFetch(`${API_AUTH_URL}/onboarding/`, {
       method: "GET",
+      returnRawResponse: true,
     });
+    
+    if (response.status === 404) {
+      response = await authenticatedFetch(`${API_AUTH_URL}/onboarding`, {
+        method: "GET",
+        returnRawResponse: true,
+      });
+    }
+    
+    if (!response.ok) return false;
+    const data = await response.json();
     return data?.onboarding_complete === true;
   };
 
@@ -123,19 +134,37 @@ const GuidedWalkthrough = ({ onComplete }) => {
 
     const init = async () => {
       let serverComplete = false;
+      let hasDebriefed = false;
+
       if (shouldCallOnboardingApi()) {
         try {
-          serverComplete = await getOnboardingCompleteFromServer();
+          const onboardingPromise = getOnboardingCompleteFromServer();
+            
+          const debriefPromise = (async () => {
+            let res = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, { method: "GET", returnRawResponse: true });
+            if (res.status === 404) {
+              res = await authenticatedFetch(`${API_AUTH_URL}/debrief`, { method: "GET", returnRawResponse: true });
+            }
+            return res.ok ? res.json() : {};
+          })();
+
+          const [onboardingData, debriefData] = await Promise.all([onboardingPromise, debriefPromise]);
+          
+          serverComplete = onboardingData === true || onboardingData?.onboarding_complete === true;
+          hasDebriefed = debriefData?.debrief_complete === true;
         } catch (e) {
-          console.warn("Failed to fetch onboarding flag:", e);
+          console.warn("Unexpected error fetching user status flags:", e);
         }
       }
 
       if (cancelled) return;
 
-      // If server says onboarding is complete, don't show walkthrough again.
-      // Also respect the local flag as a fallback.
-      if (serverComplete || hasSeenWalkthroughLocal()) {
+      // 1. Check if it has already been shown in this session or completed permanently
+      // Also skip if the user has already completed their diagnostic (strong signal of a returning user)
+      const hasCompletedDiagnosticLocal = localStorage.getItem("hasStartedDebrief") === "true";
+      const hasSeenInSession = sessionStorage.getItem("walkthrough_shown_session") === "true";
+      
+      if (hasSeenInSession || serverComplete || hasSeenWalkthroughLocal() || hasCompletedDiagnosticLocal || hasDebriefed) {
         setIsActive(false);
         setCurrentStep(-1);
         return;
@@ -149,11 +178,14 @@ const GuidedWalkthrough = ({ onComplete }) => {
         return;
       }
 
-      const delay = 1000;
+      const delay = 5000;
       setTimeout(() => {
         if (cancelled) return;
+
         setIsActive(true);
         setCurrentStep(0);
+        // Mark as shown in this session immediately when it starts
+        sessionStorage.setItem("walkthrough_shown_session", "true");
       }, delay);
     };
 

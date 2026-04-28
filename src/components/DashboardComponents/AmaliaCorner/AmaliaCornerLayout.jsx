@@ -445,7 +445,7 @@ const AmaliaCornerLayout = () => {
         }
       } catch (error) {
         console.error("Failed to fetch assessment data for glow/grow:", error);
-        navigate("/diagnostic");
+        // Do NOT force navigate to diagnostic.
       }
     };
 

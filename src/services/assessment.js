@@ -188,4 +188,14 @@ export const assessmentService = {
       throw error;
     }
   },
+
+  // Get overall score directly
+  getOverallScore: async (runId) => {
+    return await authenticatedFetch(
+      `${API_URL}/api/auth/assessment/${runId}/overalll-score/`,
+      {
+        method: "GET",
+      },
+    );
+  },
 };

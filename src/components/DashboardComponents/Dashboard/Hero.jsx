@@ -5,6 +5,7 @@ import {
   authenticatedFetch,
   getUserProfile,
 } from "../../../services/api";
+import { useMainNavTransition } from "../../../context/MainNavTransitionContext";
 import { assessmentService } from "../../../services/assessment";
 import DiagnosticDebriefModal from "../AllModals/DiagnosticDebriefModal";
 import RadarChart from "./RadarChart";
@@ -13,6 +14,7 @@ import { API_URL } from "../../../services/api";
 const Hero = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const mainNav = useMainNavTransition();
   const [currentMetric, setCurrentMetric] = useState(0);
   const [firstName, setFirstName] = useState(() => {
     try {
@@ -89,20 +91,41 @@ const Hero = () => {
         const data = await assessmentService.getResults(assessmentId);
         const domains = data?.domains || [];
 
-        if (domains.length > 0) {
-          // Calculate overall score
-          const avg = Math.round(
-            domains.reduce(
-              (acc, d) => acc + parseFloat(d.percent_0_100 || 0),
-              0,
-            ) / domains.length,
-          );
-          setOverallScore(avg);
-          if (avg >= 75) setScoreLabel("Excellent");
-          else if (avg >= 50) setScoreLabel("Balanced");
-          else if (avg >= 30) setScoreLabel("Growing");
-          else setScoreLabel("Developing");
+        // Fetch overall score from the new API endpoint
+        try {
+          const overallData = await assessmentService.getOverallScore(assessmentId);
+          if (overallData) {
+            // Use the specific variable name overall_score_0_100 from the API
+            const score = Math.round(overallData.overall_score_0_100 || overallData.overall_score || 0);
+            setOverallScore(score);
+            if (overallData.label) {
+              setScoreLabel(overallData.label);
+            } else {
+              // Fallback label logic if API doesn't provide it
+              if (score >= 75) setScoreLabel("Excellent");
+              else if (score >= 50) setScoreLabel("Balanced");
+              else if (score >= 30) setScoreLabel("Growing");
+              else setScoreLabel("Developing");
+            }
+          }
+        } catch (overallErr) {
+          console.warn("Could not fetch overall score from dedicated API, falling back to calculation:", overallErr);
+          if (domains.length > 0) {
+            const avg = Math.round(
+              domains.reduce(
+                (acc, d) => acc + parseFloat(d.percent_0_100 || 0),
+                0,
+              ) / domains.length,
+            );
+            setOverallScore(avg);
+            if (avg >= 75) setScoreLabel("Excellent");
+            else if (avg >= 50) setScoreLabel("Balanced");
+            else if (avg >= 30) setScoreLabel("Growing");
+            else setScoreLabel("Developing");
+          }
+        }
 
+        if (domains.length > 0) {
           // Map domain scores for radar chart
           const newRadarData = {};
           const newPeerData = {};
@@ -131,13 +154,31 @@ const Hero = () => {
 
     const fetchDebriefFlag = async () => {
       try {
-        const data = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
+        let response = await authenticatedFetch(`${API_AUTH_URL}/debrief/`, {
           method: "GET",
+          returnRawResponse: true
         });
-        if (cancelled) return;
-        setDebriefComplete(data?.debrief_complete === true);
+
+        if (response.status === 404) {
+          response = await authenticatedFetch(`${API_AUTH_URL}/debrief`, {
+            method: "GET",
+            returnRawResponse: true
+          });
+        }
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.debrief_complete === true) {
+            setDebriefComplete(true);
+            localStorage.setItem("hasStartedDebrief", "true");
+          }
+        }
       } catch (err) {
-        console.warn("Failed to fetch debrief flag:", err);
+        console.warn("Debrief completion API failed:", err);
+        // Fallback: if we have local storage flag, use it
+        if (localStorage.getItem("hasStartedDebrief") === "true") {
+          setDebriefComplete(true);
+        }
       }
     };
 
@@ -265,14 +306,18 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      if (isFromAmalia) {
-                        navigate("/amalia-corner", {
-                          state: { showResults: true },
-                        });
-                        return;
+                      if (debriefComplete) {
+                        const path = "/amalia-corner";
+                        const state = { showResults: true };
+                        if (mainNav?.navigateMainView) {
+                          mainNav.navigateMainView(path, { state });
+                        } else {
+                          navigate(path, { state });
+                        }
+                      } else {
+                        setIsDebriefModalOpen(true);
+                        sessionStorage.setItem("debrief_auto_shown", "true");
                       }
-                      setIsDebriefModalOpen(true);
-                      sessionStorage.setItem("debrief_auto_shown", "true");
                     }}
                     className=" bg-white  font-medium py-3 px-6 rounded-xl flex items-center justify-center space-x-2 transition-colors mb-4 hover:bg-white/90 active:scale-95"
                   >
@@ -282,7 +327,7 @@ const Hero = () => {
                       className="h-5 w-5"
                     />
                     <span className="text-[#6664D3]">
-                      {debriefComplete ? "Amalia Debrief" : "Start a Debrief"}
+                      {debriefComplete ? "Amalia Debrief" : "Start Debrief"}
                     </span>
                   </button>
                 </div>
